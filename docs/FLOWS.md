@@ -83,13 +83,21 @@ sincronizaciones lleguen exactamente a la vez existe una ventana de
 carrera teórica. No se ha resuelto porque Pau pidió no tocar el script;
 queda anotado por si en algún momento se decide lo contrario.
 
-## 3. Estadísticas — pendiente de decidir la fuente de datos (D21)
+## 3. Estadísticas (polling contra un Web App aparte, D22)
 
-El script original no tiene ninguna acción de lectura (el Atajo no tenía
-pantalla de estadísticas). Sin tocarlo, la pantalla no tiene de dónde
-sacar los números. Ver las 3 opciones en `docs/SHEET_SCHEMA.md`
-("Pregunta abierta"). Hasta que Pau elija una, esta pantalla no tiene un
-flujo de datos definido — no inventar uno.
+```mermaid
+flowchart TD
+    A[Abrir pantalla Estadísticas] --> B[GET url-stats/exec]
+    B --> C[Mostrar sesión activa, registrados/total, %]
+    C --> D[Esperar 5-10s]
+    D --> B
+    A --> E[Cerrar pantalla]
+    E --> F[Parar el polling]
+```
+
+`url-stats` es la URL del Web App **separado** de solo lectura
+(`apps-script/stats-readonly/`), distinta de la de check-in. No lleva
+parámetros — siempre devuelve el estado de la sesión activa actual.
 
 ## 4. Activar/cerrar sesión (fuera de la app — D15)
 

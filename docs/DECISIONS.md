@@ -260,6 +260,23 @@ Atajo de iPhone). Sin tocar `Code.gs`, no hay forma de que la pantalla
 Estadísticas obtenga datos reales. Pendiente de que Pau diga cómo lo
 quiere resolver — ver `docs/SHEET_SCHEMA.md`.
 
+## 2026-07-15 (quinta vuelta — Estadísticas resuelto)
+
+**D22. Pau elige la opción 3 para Estadísticas: función de lectura en un
+proyecto de Apps Script separado, no dentro de `Code.gs`.** Detalle
+técnico importante: un Web App de Apps Script solo puede exponer un
+`doGet` por proyecto (no hay rutas tipo Express), así que "archivo
+separado" en la práctica es un **proyecto de Apps Script standalone
+aparte** (`apps-script/stats-readonly/`), con su propio `doGet`, su
+propio deploy y su propia URL `.../exec` — completamente independiente
+del de check-in. Abre la misma hoja por `SpreadsheetApp.openById(...)` en
+vez de estar vinculado a ella, y **solo lee**, nunca escribe. Cero
+cambios sobre `apps-script/Code.gs`.
+
+La PWA acaba llamando a **dos URLs distintas**: una para `?num=X`
+(check-in, `apps-script/Code.gs`) y otra para las estadísticas
+(`apps-script/stats-readonly/Code.gs`, sin parámetros, siempre GET).
+
 ## Pendiente de decidir (no bloqueante para empezar)
 
 - Nombre definitivo del proyecto Firebase nuevo (propuesta en

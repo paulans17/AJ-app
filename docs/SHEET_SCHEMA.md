@@ -66,24 +66,23 @@ asistentes". No hay un campo `status` estructurado; hay que parsear texto.
 Es así a propósito (D21) — si en algún momento se necesita algo más
 robusto, se decide explícitamente, no se añade por iniciativa propia.
 
-## Pregunta abierta: ¿de dónde saca datos la pantalla Estadísticas?
+## Estadísticas — resuelto (D22)
 
-El script no tiene ninguna acción de lectura/estadísticas — el Atajo de
-iPhone no tenía pantalla de estadísticas, solo registraba. Sin tocar
-`Code.gs`, no hay forma de que la PWA sepa cuántos han registrado
-asistencia en la sesión activa. Opciones, todas pendientes de que Pau
-elija (ver `DECISIONS.md` D21):
+Pau eligió la opción 3: una función de lectura nueva, en un **proyecto de
+Apps Script separado** (`apps-script/stats-readonly/Code.gs`) — nunca
+dentro de `Code.gs`. Un Web App de Apps Script solo expone un `doGet` por
+proyecto, así que "archivo separado" es, en la práctica, un proyecto
+standalone aparte: se crea en script.google.com como proyecto nuevo (no
+vinculado a la hoja), abre la hoja por ID con
+`SpreadsheetApp.openById(...)`, y se despliega con su propia URL,
+distinta de la de check-in. Es de solo lectura — no escribe nada en
+ninguna pestaña.
 
-1. **No tocar nada, dejar Estadísticas sin datos reales por ahora**
-   (pantalla estática o deshabilitada) hasta que se decida algo.
-2. **Leer la hoja directamente en modo solo-lectura**, sin pasar por
-   `Code.gs` — Google Sheets permite exportar una hoja pública como JSON
-   (`.../gviz/tq?tqx=out:json&sheet=asistencias`) si la hoja está
-   compartida como "cualquiera con el enlace puede ver". No modifica el
-   script de check-in para nada, es una vía totalmente aparte.
-3. **Añadir una función de lectura nueva**, en otro archivo `.gs` dentro
-   del mismo proyecto de Apps Script (no dentro de `Code.gs`), para no
-   tocar el script que ya funciona.
+Devuelve JSON: `{"session": "...", "total": N, "registrados": N, "tasa": N}`.
+`total` = filas de `asistentes` (menos la cabecera). `registrados` =
+filas de `asistencias` cuya columna B coincide con la sesión activa
+(`Config!B2`). La PWA hace *polling* a esta URL cada 5-10s mientras la
+pantalla Estadísticas está abierta.
 
 ## Qué NO se hace (revertido en D21)
 

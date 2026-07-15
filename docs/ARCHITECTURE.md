@@ -35,9 +35,11 @@ Excel/scripts que Pau ya usa; fuera de alcance de este repo, D20)
 │  │ tabla │  (informe, contenido por confirmar) │
 │  └───────┘                                    │
 │                                               │
-│  Apps Script (container-bound, Code.gs) — Web App │
-│  GET .../exec?num=...   ← único endpoint, tal cual │
-│  (sin action=stats — pendiente de decidir, D21)   │
+│  Apps Script #1 (container-bound, Code.gs)    │
+│  GET .../exec?num=...  ← check-in, tal cual (D21) │
+│                                               │
+│  Apps Script #2 (standalone, stats-readonly/) │
+│  GET .../exec  ← solo lectura, stats (D22)    │
 └──────────────────────▲────────────────────────┘
                         │ fetch (GET, sin headers custom)
                         │

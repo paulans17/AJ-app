@@ -84,13 +84,16 @@ así al principio. No leas esos archivos para entender el sistema actual.
    `.../exec?num=` + codigo, y parsea el HTML de respuesta como se
    describe arriba. Mantener la cola offline existente, cambiando el
    destino de la sincronización.
-4. Pantalla Estadísticas: **sin fuente de datos definida todavía** (D21 —
-   el script no tiene ninguna acción de lectura). No inventes una acción
-   nueva en `Code.gs` para esto — pregúntale a Pau cuál de las opciones de
-   `docs/SHEET_SCHEMA.md` prefiere (no tocar nada por ahora / leer la hoja
-   en modo público-solo-lectura sin pasar por el script / una función de
-   lectura en un archivo `.gs` nuevo y separado). Mientras tanto, la
-   pantalla puede quedarse sin datos reales.
+4. Pantalla Estadísticas (D22, ya resuelto): hace `fetch` a la URL del
+   Web App **separado** `apps-script/stats-readonly/Code.gs` (sin
+   parámetros), no a la de check-in. Devuelve JSON
+   `{session, total, registrados, tasa}` — a diferencia del check-in, este
+   sí es JSON, se puede usar directo sin parsear texto. Polling cada
+   5-10s mientras la pantalla está abierta, parar el intervalo al salir
+   (ya había un patrón parecido en `Views.stopLive()` de la demo).
+   Necesitas la URL `.../exec` de este segundo script desplegado — pide
+   a Pau que lo despliegue si no está hecho, es un proyecto de Apps
+   Script nuevo y aparte, no toca el de check-in.
 5. Login: lista de staff puede quedarse como constante en el propio
    código — no hay ninguna fuente de esto en el script real ni en la
    hoja (`asistentes` es la lista de asistentes al curso, no del staff).
