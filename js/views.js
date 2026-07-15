@@ -1,14 +1,15 @@
 /* ============================================================
    Staff AJapp — VISTAS
-   2 pantallas (D14): Escanear · Estadísticas. Sin Login/Sesiones/Admin —
-   la sesión activa y el roster se gestionan a mano en la hoja (D15).
-   Réplica visual de ScanView.swift / DashboardView.swift.
+   Login (sin contraseña) + 2 pantallas (D14): Escanear · Estadísticas.
+   Sin Sesiones/Admin — la sesión activa y el roster se gestionan a mano
+   en la hoja (D15). Réplica visual de ScanView.swift / DashboardView.swift.
    ============================================================ */
 
 const Views = (() => {
   const $ = (sel) => document.querySelector(sel);
   const view = () => $('#view');
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const iniciales = (n) => n.split(' ').map((x) => x[0]).slice(0, 2).join('').toUpperCase();
 
   // Iconos inline estilo SF Symbols
   const ICO = {
@@ -22,6 +23,30 @@ const Views = (() => {
     t.className = 'show' + (isErr ? ' err' : '');
     clearTimeout(t._h);
     t._h = setTimeout(() => (t.className = ''), 2600);
+  }
+
+  /* ============================================================
+     LOGIN — sin contraseña, lista fija en el código (ver js/store.js)
+     ============================================================ */
+  function vLogin() {
+    view().innerHTML = `
+      <div class="login-wrap">
+        <div class="login-logo">♗</div>
+        <h1>Staff AJapp</h1>
+        <p class="login-sub">Curso de Protocolo<br>Elige tu nombre — sin contraseña</p>
+        ${Store.staff().map((nombre) => `
+          <button class="staff-item" data-login="${esc(nombre)}">
+            <span class="avatar">${iniciales(nombre)}</span>
+            <span class="meta">${esc(nombre)}</span>
+          </button>`).join('')}
+        <p class="muted" style="margin-top:12px">Solo identifica quién ha abierto la app en este móvil.</p>
+      </div>`;
+    view().querySelectorAll('[data-login]').forEach((b) =>
+      b.addEventListener('click', () => {
+        const nombre = Store.login(b.dataset.login);
+        if (nombre) { toast(`Hola, ${nombre}`); App.go('escanear'); }
+      })
+    );
   }
 
   /* ============================================================
@@ -93,8 +118,8 @@ const Views = (() => {
         </div>
       </div>`;
 
-    const procesa = async (codigo, metodo) => {
-      const r = await Store.checkin(codigo, metodo);
+    const procesa = async (codigo) => {
+      const r = await Store.checkin(codigo);
       mostrarResultado(r);
       if (r.status === 'offline_ok') setTimeout(() => vEscanear(), 1550);
     };
@@ -103,7 +128,7 @@ const Views = (() => {
 
     $('#btn-sim').addEventListener('click', () => {
       const num = String(1 + Math.floor(Math.random() * 50));
-      procesa(num, 'qr');
+      procesa(num);
     });
 
     $('#btn-manual-sheet').addEventListener('click', () => abrirSheetManual(procesa));
@@ -140,7 +165,7 @@ const Views = (() => {
     $('#cam-close').addEventListener('click', cerrarCamara);
     const res = await Scanner.start($('#cam'), (code) => {
       cerrarCamara();
-      onCode(code, 'qr');
+      onCode(code);
     });
     if (!res.ok) {
       cerrarCamara();
@@ -179,7 +204,7 @@ const Views = (() => {
       const v = inp.value.trim();
       if (!v) { $('#manual-err').textContent = 'Introduce un número válido'; return; }
       cerrarSheet();
-      onCode(v, 'manual');
+      onCode(v);
     };
     $('#manual-ok').addEventListener('click', confirmar);
     inp.addEventListener('keydown', (e) => { if (e.key === 'Enter') confirmar(); });
@@ -189,8 +214,9 @@ const Views = (() => {
   function cerrarSheet() { const s = $('#sheet-bg'); if (s) s.remove(); }
 
   /* ============================================================
-     ESTADÍSTICAS — réplica de DashboardView.swift, ahora por polling
-     (Sheets no empuja cambios en vivo — ver docs/FLOWS.md §3)
+     ESTADÍSTICAS — réplica de DashboardView.swift, por polling (D22)
+     contra el Web App de solo lectura separado — Sheets no empuja
+     cambios en vivo (ver docs/FLOWS.md §3)
      ============================================================ */
   let pollTimer = null;
   function pararPolling() { if (pollTimer) { clearInterval(pollTimer); pollTimer = null; } }
@@ -234,5 +260,5 @@ const Views = (() => {
     pollTimer = setInterval(cargar, 7000);
   }
 
-  return { vEscanear, vEstadisticas, toast, pararPolling, cerrarCamara, cerrarSheet, quitarResultado };
+  return { vLogin, vEscanear, vEstadisticas, toast, pararPolling, cerrarCamara, cerrarSheet, quitarResultado };
 })();

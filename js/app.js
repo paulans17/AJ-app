@@ -1,14 +1,16 @@
 /* ============================================================
    Staff AJapp — ARRANQUE Y NAVEGACIÓN
-   2 rutas (D14): escanear (por defecto) · estadisticas. Sin login.
+   Login (sin contraseña) + 2 rutas (D14): escanear (por defecto) ·
+   estadisticas.
    ============================================================ */
 
 const App = (() => {
   const routes = {
+    login: Views.vLogin,
     escanear: Views.vEscanear,
     estadisticas: Views.vEstadisticas
   };
-  let current = 'escanear';
+  let current = 'login';
 
   function go(route) {
     if (!routes[route]) route = 'escanear';
@@ -19,9 +21,14 @@ const App = (() => {
     Views.cerrarSheet();
     Views.quitarResultado();
 
+    const logged = !!Store.currentUser();
+    if (!logged) route = 'login';
+    if (route === 'login' && logged) route = 'escanear';
     current = route;
     location.hash = route;
 
+    document.getElementById('topbar').classList.toggle('hidden', route === 'login');
+    document.getElementById('tabbar').classList.toggle('hidden', route === 'login');
     document.querySelectorAll('#tabbar button').forEach((b) => b.classList.toggle('on', b.dataset.route === route));
 
     routes[route]();
@@ -50,7 +57,7 @@ const App = (() => {
     Store.onChange(actualizarChips);
 
     const hash = location.hash.replace('#', '');
-    go(hash === 'estadisticas' ? 'estadisticas' : 'escanear');
+    go(Store.currentUser() ? (hash || 'escanear') : 'login');
   }
 
   return { go, init };
