@@ -38,8 +38,11 @@
 
   <div id="toast"></div>
 
-  <!-- Lector QR de respaldo (BarcodeDetector nativo cubre la mayoría de Android/Chrome) -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.min.js" defer></script>
+  <!-- Lector QR de respaldo (BarcodeDetector nativo cubre la mayoría de Android/Chrome).
+       Vendorizado en js/vendor/ en vez de CDN externo -- la URL de cdnjs
+       para esta versión daba 404, por eso nunca detectaba nada en Safari/iOS
+       (sin BarcodeDetector, dependía al 100% de esta librería). -->
+  <script src="js/vendor/jsQR.min.js" defer></script>
 
   <script src="js/store.js"></script>
   <script src="js/scanner.js"></script>
