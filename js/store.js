@@ -9,11 +9,11 @@
    ============================================================ */
 
 const Store = (() => {
-  // TODO(Pau): sustituye por las URLs `.../exec` reales en cuanto despliegues
-  // los dos scripts (ver docs/PROJECT_SETUP.md). Hasta entonces la app corre
-  // contra un mock local para poder probar la interfaz.
-  const CHECKIN_URL = 'URL_CHECKIN_PENDIENTE';
-  const STATS_URL = 'URL_STATS_PENDIENTE';
+  // URLs reales, desplegadas sobre "MIEMBROS CURSO PROTOCOLO XXI" — ver
+  // docs/DEPLOY_URLS.md (fuente de verdad, no las cambies aquí sin actualizar
+  // también ese archivo).
+  const CHECKIN_URL = 'https://script.google.com/macros/s/AKfycbz3sICmCU9bvVtYH0ocQVVOpRDTdDq0IiMOtSbwy62tvtHw_4ZDQ97u3F8A3qlQwDoi/exec';
+  const STATS_URL = 'https://script.google.com/macros/s/AKfycbz7gRYm8EKaGoKgcpXRB94A63wHpGefMU1aFzfPxqU2MuCHf-ODdy-xuHaswtXjKxL6/exec';
   const MOCK_CHECKIN = !CHECKIN_URL || CHECKIN_URL === 'URL_CHECKIN_PENDIENTE';
   const MOCK_STATS = !STATS_URL || STATS_URL === 'URL_STATS_PENDIENTE';
 
