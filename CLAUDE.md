@@ -72,10 +72,8 @@ así al principio. No leas esos archivos para entender el sistema actual.
 
 ## Tareas concretas
 
-1. Confirma con Pau la URL `.../exec` del Web App ya desplegado sobre la
-   hoja real (["MIEMBROS CURSO PROTOCOLO XXI"](https://docs.google.com/spreadsheets/d/1YDADLLWwA92Gm-_WYPYY4qGxTt5Wx-RIjM7Ju8z9FHE/edit?usp=sharing),
-   que se usa tal cual para las pruebas, no una copia). Sin esa URL no se
-   puede probar nada real.
+1. Las dos URLs ya están desplegadas y confirmadas — ver
+   `docs/DEPLOY_URLS.md`. No hace falta pedírselas a Pau.
 2. Recortar `js/views.js` y `js/app.js`: solo Login, Escanear,
    Estadísticas. Quitar todo rastro de Sesiones/Admin (tabs, rutas,
    funciones de `store.js` que ya no se usan como `setEstadoSesion`,

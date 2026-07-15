@@ -9,24 +9,24 @@
 
 ## 0. Lo que hace falta de verdad ahora (Sheets + Apps Script)
 
-**Check-in (script sin tocar, D21):**
-- [ ] Confirmar que la hoja real ("MIEMBROS CURSO PROTOCOLO XXI",
-      usada tal cual para las pruebas) tiene las pestañas `asistentes`,
-      `Config`, `asistencias` con la estructura de `docs/SHEET_SCHEMA.md`.
-- [ ] Abrir esa hoja → Extensiones → Apps Script → pegar
+**Check-in (script sin tocar, D21):** ✅ desplegado 2026-07-15
+- [x] Abrir esa hoja → Extensiones → Apps Script → pegar
       `apps-script/Code.gs` y `apps-script/appsscript.json` (tal cual,
       sin editar nada).
-- [ ] Implementar → Nueva implementación → Aplicación web → ejecutar como
-      "Yo", acceso "Cualquier usuario" → copiar la URL `.../exec`
-      resultante y pasársela a Claude Code.
+- [x] Implementar → Nueva implementación → Aplicación web → URL obtenida
+      y guardada en `docs/DEPLOY_URLS.md`.
 
-**Estadísticas (proyecto aparte, solo lectura, D22):**
-- [ ] script.google.com → Nuevo proyecto (standalone, NO vinculado a la
+**Estadísticas (proyecto aparte, solo lectura, D22):** ✅ desplegado 2026-07-15
+- [x] script.google.com → Nuevo proyecto (standalone, NO vinculado a la
       hoja) → pegar `apps-script/stats-readonly/Code.gs` y su
       `appsscript.json`.
-- [ ] Implementar → Nueva implementación → Aplicación web → misma
-      configuración → copiar esta **segunda** URL `.../exec` (distinta de
-      la de check-in) y pasársela también a Claude Code.
+- [x] Implementar → Nueva implementación → Aplicación web → segunda URL
+      obtenida y guardada en `docs/DEPLOY_URLS.md`.
+
+**Pendiente ahora:** `js/store.js` sigue siendo la versión demo original
+(Firestore/localStorage puro) — todavía no está reescrito para hablar con
+estas dos URLs. Es la siguiente tarea de Claude Code (ver `CLAUDE.md`
+tareas 3-4).
 
 **Pendiente de confirmar (no bloqueante):**
 - [ ] Si los números de `asistentes!A` de la XXII llevan ceros a la

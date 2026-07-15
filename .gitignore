@@ -19,3 +19,8 @@ package-lock.json
 # Sistema
 .DS_Store
 Thumbs.db
+
+# graphify — se versiona el resultado (graph.html, GRAPH_REPORT.md, graph.json),
+# no la caché interna de re-extracción
+graphify-out/cache/
+graphify-out/.graphify_*
