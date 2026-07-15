@@ -51,7 +51,12 @@ function doGet(e) {
 
 /***** ========================== HTML HELP ========================== *****/
 function _html(msg){
-  return HtmlService.createHtmlOutput(
+  // ContentService en vez de HtmlService (2026-07-15): HtmlService no manda
+  // cabecera CORS y el fetch() de la PWA lo bloquea desde el navegador
+  // (curl no lo detecta porque CORS solo lo aplican los navegadores).
+  // ContentService sí la manda -- mismo texto, misma logica, no cambia nada
+  // para el Atajo de iOS.
+  return ContentService.createTextOutput(
     `<html><body style="font-family:system-ui;padding:12px;font-size:16px"><b>${msg}</b></body></html>`
-  );
+  ).setMimeType(ContentService.MimeType.HTML);
 }

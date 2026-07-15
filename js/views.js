@@ -170,6 +170,11 @@ const Views = (() => {
     if (!res.ok) {
       cerrarCamara();
       toast(res.error, true);
+    } else {
+      // Diagnóstico visible: qué motor de escaneo se está usando de verdad
+      // en este móvil, sin necesitar consola remota.
+      const lbl = $('.cam-label');
+      if (lbl) lbl.textContent = `Apunta al QR de la acreditación · ${res.motor}`;
     }
   }
   function cerrarCamara() {

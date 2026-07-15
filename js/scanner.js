@@ -40,10 +40,18 @@ const Scanner = (() => {
   async function loop() {
     if (!running || !video) return;
     try {
+      let found = null;
+      // Safari en iOS a veces expone BarcodeDetector pero no detecta nada
+      // nunca (soporte experimental/incompleto) — en vez de confiar en que
+      // "si existe, funciona", se prueban los dos motores cada frame: si
+      // el nativo no encuentra nada, se cae a jsQR igualmente.
       if (detector) {
-        const codes = await detector.detect(video);
-        if (codes.length) emit(codes[0].rawValue);
-      } else if (window.jsQR && video.videoWidth) {
+        try {
+          const codes = await detector.detect(video);
+          if (codes.length) found = codes[0].rawValue;
+        } catch (e) { /* detector presente pero falla -> seguimos a jsQR */ }
+      }
+      if (!found && window.jsQR && video.videoWidth) {
         const canvas = document.createElement('canvas');
         // reduce resolución para no fundir la CPU del móvil
         const w = 480, h = Math.round((video.videoHeight / video.videoWidth) * 480) || 640;
@@ -52,8 +60,9 @@ const Scanner = (() => {
         ctx.drawImage(video, 0, 0, w, h);
         const img = ctx.getImageData(0, 0, w, h);
         const code = window.jsQR(img.data, w, h, { inversionAttempts: 'dontInvert' });
-        if (code && code.data) emit(code.data);
+        if (code && code.data) found = code.data;
       }
+      if (found) emit(found);
     } catch (e) { /* frame perdido, seguimos */ }
     if (running) setTimeout(() => requestAnimationFrame(loop), 180);
   }

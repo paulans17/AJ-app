@@ -23,10 +23,20 @@
 - [x] Implementar → Nueva implementación → Aplicación web → segunda URL
       obtenida y guardada en `docs/DEPLOY_URLS.md`.
 
-**Pendiente ahora:** `js/store.js` sigue siendo la versión demo original
-(Firestore/localStorage puro) — todavía no está reescrito para hablar con
-estas dos URLs. Es la siguiente tarea de Claude Code (ver `CLAUDE.md`
-tareas 3-4).
+**Hecho (D23, 2026-07-15):** `js/store.js`/`views.js`/`app.js`/
+`index.html`/`css/app.css`/`sw.js` ya están conectados a las dos URLs y
+recortados a Login+Escanear+Estadísticas. Para probar en local sin
+esperar al hosting: `node .claude/static-server.js` (puerto 8420) desde
+el repo, y en el móvil (misma Wi-Fi) abrir `http://<IP-portátil>:8420`.
+
+**Pendiente ahora:**
+- [ ] Sustituir el roster placeholder (`STAFF` en `js/store.js`, 10
+      nombres de ejemplo) por los ~20 nombres reales del equipo.
+- [ ] Probar un check-in real contra la hoja (escanear o escribir un
+      número de `asistentes!A`) y confirmar que aparece en `asistencias`.
+- [ ] Resolver hosting público (GitHub Pages / Firebase Hosting) para
+      poder instalar la PWA en el móvil desde una URL fija, no solo en
+      local.
 
 **Pendiente de confirmar (no bloqueante):**
 - [ ] Si los números de `asistentes!A` de la XXII llevan ceros a la

@@ -277,12 +277,80 @@ La PWA acaba llamando a **dos URLs distintas**: una para `?num=X`
 (check-in, `apps-script/Code.gs`) y otra para las estadísticas
 (`apps-script/stats-readonly/Code.gs`, sin parámetros, siempre GET).
 
+## 2026-07-15 (sexta vuelta — desplegado y conectado)
+
+**D23. Las 2 URLs de Apps Script se despliegan y `js/store.js` se conecta
+a ellas.** Pau despliega `apps-script/Code.gs` sobre la hoja real (Web
+App, "Yo" / "Cualquier usuario") y `apps-script/stats-readonly/Code.gs`
+como proyecto standalone aparte — URLs guardadas en `docs/DEPLOY_URLS.md`
+(fuente de verdad). Claude Code hace el trabajo en una rama
+(`claude/busy-sinoussi-065fb3`): reescribe `js/store.js` (fetch real a
+las 2 URLs, parseo del HTML de check-in per D21, `stats()` async por
+polling), recorta `js/views.js`/`js/app.js`/`index.html`/`css/app.css` a
+Login+Escanear+Estadísticas (sin Sesiones/Admin/demo-banner/SheetJS), y
+añade un server estático de desarrollo (`.claude/static-server.js` +
+`launch.json`, puerto 8420) para probar sin hosting.
+
+Esa misma rama arrastraba también cambios sobre `firebase/firestore.rules`
+y un `scripts/set-claim.js` nuevo — restos de una versión anterior de la
+rama, de antes de que D13 (abandono de Firebase) terminara de aplicarse
+ahí. **No se traen a `master`**: Firebase sigue fuera de alcance para
+este repo, y esos archivos ya estaban marcados superseded. Solo se
+fusionan a `master` los 8 archivos relevantes (`js/store.js`,
+`js/views.js`, `js/app.js`, `index.html`, `css/app.css`, `sw.js`,
+`.claude/launch.json`, `.claude/static-server.js`) — commit `525e223`.
+
+`apps-script/Code.gs` se verifica sin ninguna diferencia respecto al
+commit anterior — sigue exactamente igual que en D21.
+
+**Nota dejada en el propio código:** la lista `STAFF` de `js/store.js` es
+un placeholder de 10 nombres de ejemplo (`TODO(Pau)`) — hace falta el
+roster real de ~20 personas antes de usarlo en el curso de verdad.
+
+## 2026-07-15 (séptima vuelta — probado en el móvil real, dos bugs encontrados)
+
+Repo subido a GitHub (`https://github.com/paulans17/AJ-app`) y publicado
+con GitHub Pages (`https://paulans17.github.io/AJ-app/`) — instalado en
+el iPhone de Pau con "Añadir a pantalla de inicio". Al probarlo de
+verdad aparecen dos fallos que ni `curl` ni el servidor local habían
+revelado:
+
+**D24. El check-in fallaba siempre con "sin cobertura" aunque hubiera
+red — causa: CORS, no conexión.** `apps-script/Code.gs` usa
+`HtmlService.createHtmlOutput()`, cuyas respuestas no llevan la cabecera
+`Access-Control-Allow-Origin` — comprobado comparando cabeceras: la URL
+de Estadísticas (`ContentService`) sí la lleva, la de check-in no. Un
+navegador real bloquea leer esa respuesta entre dominios (`fetch()` desde
+`paulans17.github.io` hacia `script.google.com`), aunque el registro sí
+llega a escribirse en `asistencias` — por eso `curl` nunca lo detectó
+(CORS es una restricción exclusiva del navegador). La PWA lo interpretaba
+como fallo de red y lo mandaba a la cola offline.
+
+**Se rompe la regla de D21 con permiso explícito de Pau**: se cambia
+`_html()` en `apps-script/Code.gs` de `HtmlService.createHtmlOutput()` a
+`ContentService.createTextOutput().setMimeType(HTML)` — mismo texto de
+salida, misma lógica de negocio (nada más de `doGet()` cambia), solo
+cambia cómo lo sirve Google por dentro. `ContentService` ya manda la
+cabecera CORS (lo prueba que Estadísticas funciona). No debería notarse
+ninguna diferencia desde el Atajo de iPhone. **Pendiente**: Pau tiene que
+copiar el `Code.gs` actualizado al editor de Apps Script real (vinculado
+a la hoja) y redesplegar — el cambio en el repo no toca el script en
+producción por sí solo.
+
+**D25. La cámara no detectaba ningún QR en Safari/iOS.** Causa probable:
+soporte experimental/incompleto de `BarcodeDetector` en versiones
+recientes de Safari — el código asumía "si existe, funciona" y nunca
+caía a `jsQR` cuando el nativo estaba presente pero no detectaba nada.
+Arreglado en `js/scanner.js` (no toca Apps Script): cada frame prueba
+`BarcodeDetector` primero y, si no encuentra nada, prueba `jsQR` también
+en el mismo frame, en vez de ser mutuamente excluyentes.
+
 ## Pendiente de decidir (no bloqueante para empezar)
 
 - Nombre definitivo del proyecto Firebase nuevo (propuesta en
-  `PROJECT_SETUP.md`, a confirmar por Pau).
-- Roster real de ~20 miembros de staff (nombres + username + departamento)
-  — sigue pendiente desde el 03/07.
-- Dominio/hosting final de la PWA (Firebase Hosting cubre esto gratis en
-  Spark; falta decidir si se usa un subdominio de alfiljuvenil.es o el
-  dominio `.web.app` por defecto).
+  `PROJECT_SETUP.md`, a confirmar por Pau) — nota: ya no bloquea Staff
+  AJapp (D13), solo relevante si `alfil-statics` lo reutiliza.
+- Roster real de ~20 miembros de staff (nombres) para sustituir el
+  placeholder de `js/store.js` (D23).
+- Confirmar en el móvil que D24 (CORS) y D25 (cámara) quedan resueltos
+  tras redesplegar `Code.gs` y publicar el nuevo `js/scanner.js`.
