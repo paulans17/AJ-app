@@ -24,7 +24,7 @@
  *    La URL resultante es el enlace de confirmación del email.
  */
 
-const PROJECT_ID = 'CAMBIAR-POR-EL-PROJECT-ID-REAL'; // ver docs/PROJECT_SETUP.md
+const PROJECT_ID = 'alfiljuvenil-protocolo';
 const FIRESTORE_BASE = 'https://firestore.googleapis.com/v1/projects/' + PROJECT_ID + '/databases/(default)/documents';
 
 function authHeaders_() {
