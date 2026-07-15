@@ -1,0 +1,20 @@
+# Credenciales — nunca se suben
+scripts/serviceAccountKey.json
+**/serviceAccountKey.json
+.env
+.env.*
+secure/config.php
+
+# Firebase
+.firebase/
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+
+# Node
+node_modules/
+package-lock.json
+
+# Sistema
+.DS_Store
+Thumbs.db

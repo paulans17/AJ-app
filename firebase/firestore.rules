@@ -1,0 +1,79 @@
+rules_version = '2';
+
+// Reglas de seguridad Firestore — Curso de Protocolo XXII (proyecto Alfil Juvenil)
+//
+// Modelo de dos niveles (ver docs/DECISIONS.md D4 y docs/ARCHITECTURE.md):
+// - Staff general: Firebase Anonymous Auth. Mismo nivel de confianza para todos,
+//   sirve solo para poder leer datos y crear checkins. No es identidad verificada.
+// - Informática (modo admin dentro de la PWA, o panel /admin de la web): cuenta
+//   real (email/password) con custom claim `departamento`. Es lo único que estas
+//   reglas usan para distinguir permisos de escritura.
+//
+// Sin Cloud Functions (plan Spark, sin Blaze — D3): todo lo que antes iba a vivir
+// en una Cloud Function con Admin SDK se resuelve aquí, comprobando el custom claim
+// directamente en la regla.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // Admin = Informática o Presidencia (igual que en la demo, js/store.js
+    // Store.isInformatica(), y que el mapeo de roles del panel web /admin).
+    function isStaffAdmin() {
+      return isSignedIn()
+             && request.auth.token.departamento in ['informatica', 'presidencia'];
+    }
+
+    // staff: lectura para el desplegable de nombres en el login. Escritura
+    // (altas/bajas) solo Informática/Presidencia, con cuenta real.
+    match /staff/{staffId} {
+      allow read: if isSignedIn();
+      allow write: if isStaffAdmin();
+    }
+
+    // sesiones: lectura para todos los autenticados. El campo `estado` (activar/
+    // cerrar sesión) solo lo cambia Informática/Presidencia desde el modo admin
+    // de la PWA.
+    match /sesiones/{sesionId} {
+      allow read: if isSignedIn();
+      allow write: if isStaffAdmin();
+    }
+
+    // inscripciones: la app necesita LEER para validar un QR escaneado y mostrar
+    // el nombre del asistente, pero nunca crea/edita/borra inscripciones -- eso lo
+    // hace el puente Apps Script -> Firestore REST API (autenticado con el token
+    // OAuth de la cuenta de Alfil Juvenil, fuera del alcance de estas reglas).
+    match /inscripciones/{inscripcionId} {
+      allow read: if isSignedIn();
+      allow write: if false;
+    }
+
+    // checkins: cualquier cliente autenticado (anónimo o real) puede crear un
+    // check-in con los campos esperados. Inmutable una vez creado -- si se
+    // registró un error, se corrige con un registro nuevo, nunca reescribiendo
+    // el histórico (ver docs/FIRESTORE_SCHEMA.md).
+    match /checkins/{checkinId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn()
+                    && request.resource.data.keys().hasAll(
+                         ['sesionId', 'asistenteId', 'staffUsername', 'metodo', 'timestamp']
+                       )
+                    && request.resource.data.metodo in ['qr', 'manual'];
+      allow update, delete: if false;
+    }
+
+    // config: lectura para todos (maxPlazas, prefijoId, timezone, etc.).
+    // Escritura solo Informática/Presidencia, salvo `contadorId`, que en la
+    // práctica solo lo toca el puente Apps Script vía field transform
+    // (increment) -- no hay forma de restringir por campo en rules v2 sin
+    // duplicar la regla, así que se confía en que el modo admin de la PWA
+    // nunca ofrezca editar ese campo.
+    match /config/{doc} {
+      allow read: if isSignedIn();
+      allow write: if isStaffAdmin();
+    }
+  }
+}

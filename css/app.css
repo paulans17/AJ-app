@@ -1,0 +1,380 @@
+/* ============================================================
+   Staff AJapp (DEMO) — réplica exacta del tema de la app iOS
+   Portado de Components/Theme.swift:
+     background #0B0B0B · card #1A1A1A · gold #C6A75E
+     tab bar #111111 · success green · warning orange · error red
+   ============================================================ */
+:root {
+  --background: #0B0B0B;
+  --card: #1A1A1A;
+  --gold: #C6A75E;
+  --tabbar-bg: #111111;
+  --text-primary: #ffffff;
+  --text-secondary: #8E8E93;   /* Color.gray de SwiftUI */
+  --success: #34C759;          /* Color.green iOS */
+  --warning: #FF9500;          /* Color.orange iOS */
+  --error: #FF3B30;            /* Color.red iOS */
+  --radius-card: 20px;
+  --radius-btn: 18px;
+  --tabbar-h: 64px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; }
+body {
+  background: var(--background);
+  color: var(--text-primary);
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+  font-size: 16px;
+  padding-bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom));
+}
+.hidden { display: none !important; }
+
+/* ---- banner demo ---- */
+#demo-banner {
+  background: #1c1607;
+  color: var(--gold);
+  text-align: center;
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  padding: 4px 8px;
+  text-transform: uppercase;
+  border-bottom: 1px solid rgba(198,167,94,0.25);
+}
+
+/* ---- topbar (estado conexión / usuario) ---- */
+#topbar { position: sticky; top: 0; z-index: 20; background: var(--background); }
+.topbar-inner { display: flex; align-items: center; gap: 8px; padding: 8px 16px 0; max-width: 760px; margin: 0 auto; }
+.brand { color: var(--gold); font-size: 15px; margin-right: auto; }
+.brand strong { color: var(--text-primary); font-weight: 600; }
+.user-chip { font-size: 12px; color: var(--gold); background: var(--card); border: 1px solid rgba(198,167,94,0.25); padding: 3px 10px; border-radius: 999px; }
+
+.pill { font-size: 11px; padding: 3px 8px; border-radius: 999px; border: 1px solid transparent; }
+.pill-ok { color: var(--success); border-color: rgba(52,199,89,0.5); }
+.pill-off { color: var(--error); border-color: rgba(255,59,48,0.5); }
+.pill-warn { color: var(--warning); border-color: rgba(255,149,0,0.5); }
+
+/* ---- layout ---- */
+main { max-width: 760px; margin: 0 auto; padding: 20px 16px 28px; }
+
+/* Cabecera de página — réplica del prototipo Figma:
+   kicker dorado con tracking + título 34px bold + barra dorada degradada */
+.title-kicker { font-size: 11px; font-weight: 600; color: rgba(198,167,94,0.75); letter-spacing: 2.5px; text-transform: uppercase; margin-bottom: 10px; }
+.big-title { font-size: 34px; font-weight: 700; color: var(--text-primary); line-height: 1.12; }
+.gold-bar { width: 56px; height: 4px; border-radius: 2px; background: linear-gradient(90deg, var(--gold), rgba(198,167,94,0.15)); margin: 14px 0 22px; }
+
+/* Caption dorada con tracking (SESIÓN ACTIVA / EN CURSO) */
+.gold-caption { font-size: 12px; font-weight: 600; color: var(--gold); letter-spacing: 1.2px; text-transform: uppercase; }
+
+/* ---- tarjetas (cornerRadius 20 + borde dorado con opacidad) ---- */
+.card {
+  background: var(--card);
+  border: 1px solid rgba(198,167,94,0.15);
+  border-radius: var(--radius-card);
+  padding: 16px;
+  margin-bottom: 16px;
+}
+.card.border-soft { border-color: rgba(198,167,94,0.12); }
+.card.border-mid { border-color: rgba(198,167,94,0.18); }
+.card.border-active { border-color: rgba(198,167,94,0.55); }
+
+/* Tarjeta dorada grande del dashboard (TOTAL REGISTRADOS) */
+.gold-card {
+  background: var(--gold);
+  border-radius: 24px;
+  padding: 28px 16px;
+  text-align: center;
+  margin-bottom: 16px;
+}
+.gold-card .gc-title { font-size: 17px; font-weight: 600; color: rgba(0,0,0,0.7); }
+.gold-card .gc-num { font-size: 54px; font-weight: 700; color: #000; line-height: 1.15; }
+.gold-card .gc-sub { font-size: 15px; color: rgba(0,0,0,0.8); }
+
+/* ---- botones ---- */
+button, .btn {
+  font: inherit; cursor: pointer; border: none;
+  border-radius: var(--radius-btn);
+  background: var(--card); color: var(--text-primary); padding: 14px 16px;
+}
+.btn-gold { background: var(--gold); color: #000; font-weight: 600; }
+.btn-gold:active { filter: brightness(1.08); }
+.btn-outline {
+  background: var(--card); color: var(--text-primary); font-weight: 600;
+  border: 1px solid rgba(198,167,94,0.25);
+}
+.btn-plain { background: transparent; color: var(--text-secondary); }
+.btn-block { display: block; width: 100%; text-align: center; }
+.btn-sm { padding: 7px 12px; font-size: 13px; border-radius: 10px; }
+.btn-danger-outline { background: transparent; border: 1px solid var(--error); color: var(--error); }
+button:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ---- formularios ---- */
+input, select, textarea {
+  font: inherit; width: 100%; background: var(--card); border: 1px solid rgba(198,167,94,0.2);
+  color: var(--text-primary); border-radius: var(--radius-btn); padding: 13px 14px; margin-bottom: 10px;
+}
+input:focus, select:focus { outline: none; border-color: var(--gold); }
+label { font-size: 12px; color: var(--text-secondary); display: block; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+/* ============================================================
+   ESCANEAR — réplica de ScanView.swift
+   ============================================================ */
+.scan-screen { display: flex; flex-direction: column; align-items: center; gap: 28px; padding-top: 8px; min-height: calc(100vh - var(--tabbar-h) - 120px); }
+.scan-header { text-align: center; }
+.scan-header .session-name { font-size: 22px; font-weight: 700; color: var(--text-primary); margin-top: 10px; }
+
+/* Círculo grande: fill card + anillo exterior dorado 35% (10px) + anillo interior dorado (4px) */
+.scan-circle {
+  width: 250px; height: 250px; border-radius: 50%;
+  background: var(--card);
+  box-shadow: 0 0 0 10px rgba(198,167,94,0.35);
+  display: flex; align-items: center; justify-content: center;
+  position: relative; cursor: pointer; border: none; margin: 10px 0 6px;
+}
+.scan-circle::after {
+  content: ''; position: absolute; inset: 16px;
+  border: 4px solid var(--gold); border-radius: 50%;
+}
+.scan-circle .inner { display: flex; flex-direction: column; align-items: center; gap: 14px; z-index: 1; }
+.scan-circle .inner svg { width: 56px; height: 56px; stroke: var(--gold); }
+.scan-circle .inner span { font-size: 22px; font-weight: 700; color: var(--text-primary); }
+.scan-circle:active { filter: brightness(1.15); }
+
+.scan-hint { text-align: center; }
+.scan-hint .h1 { font-size: 17px; font-weight: 600; color: var(--text-primary); }
+.scan-hint .h2 { font-size: 15px; color: var(--text-secondary); margin-top: 6px; }
+
+.scan-bottom { width: 100%; margin-top: auto; }
+.scan-bottom .btn-outline svg { width: 18px; height: 18px; vertical-align: -3px; margin-right: 8px; stroke: var(--text-primary); }
+
+/* Cámara a pantalla completa (fullScreenCover) */
+#cam-cover {
+  position: fixed; inset: 0; z-index: 60; background: #000;
+  display: flex; flex-direction: column;
+}
+#cam-cover video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.cam-frame {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  width: min(64vw, 300px); aspect-ratio: 1; border-radius: 24px;
+  border: 3px solid var(--gold);
+  box-shadow: 0 0 0 100vmax rgba(0,0,0,0.5);
+}
+.cam-close {
+  position: absolute; top: calc(16px + env(safe-area-inset-top)); right: 16px; z-index: 2;
+  width: 42px; height: 42px; border-radius: 50%; background: rgba(26,26,26,0.9);
+  color: var(--text-secondary); font-size: 18px; padding: 0;
+}
+.cam-label { position: absolute; bottom: 60px; left: 0; right: 0; text-align: center; color: #fff; font-weight: 600; text-shadow: 0 1px 4px #000; }
+
+/* Resultado a pantalla completa (CheckinResultView): fondo de color, autocierre */
+#result-cover {
+  position: fixed; inset: 0; z-index: 70;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 28px; padding: 24px; text-align: center;
+  animation: fadein 0.15s ease;
+}
+#result-cover.success { background: var(--success); }
+#result-cover.duplicate { background: var(--warning); }
+#result-cover.error { background: var(--error); }
+#result-cover .r-icon {
+  width: 120px; height: 120px; border-radius: 50%;
+  background: rgba(255,255,255,0.18);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 52px; font-weight: 700; color: #fff;
+}
+#result-cover .r-num { font-size: 96px; font-weight: 900; color: #fff; font-variant-numeric: tabular-nums; line-height: 1; }
+#result-cover .r-title { font-size: 22px; font-weight: 700; color: #fff; }
+#result-cover .r-sub { font-size: 15px; color: rgba(255,255,255,0.85); }
+@keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
+
+/* Hoja inferior (sheet) del registro manual */
+.sheet-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 50; display: flex; align-items: flex-end; }
+.sheet {
+  background: var(--background); width: 100%; border-radius: 22px 22px 0 0;
+  padding: 12px 20px calc(24px + env(safe-area-inset-bottom));
+  max-width: 560px; margin: 0 auto;
+  animation: slideup 0.22s ease;
+}
+@keyframes slideup { from { transform: translateY(40%); opacity: 0.6; } to { transform: none; opacity: 1; } }
+.sheet .grabber { width: 38px; height: 5px; border-radius: 3px; background: #3a3a3c; margin: 0 auto 10px; }
+.sheet .sheet-close {
+  float: right; width: 38px; height: 38px; border-radius: 50%;
+  background: var(--card); color: var(--text-secondary); padding: 0; font-size: 15px;
+}
+.sheet h2 { font-size: 22px; font-weight: 700; text-align: center; margin: 8px 0 6px; color: var(--text-primary); }
+.sheet .sheet-sub { text-align: center; color: var(--text-secondary); font-size: 15px; margin-bottom: 18px; }
+.sheet input.big-num {
+  height: 92px; font-size: 42px; font-weight: 700; text-align: center;
+  background: var(--card); border: 1px solid rgba(198,167,94,0.35); border-radius: var(--radius-btn);
+}
+.sheet .err-msg { color: var(--error); font-size: 15px; text-align: center; margin: 4px 0 8px; min-height: 20px; }
+
+/* ============================================================
+   INICIO — réplica del prototipo Figma (/inicio)
+   ============================================================ */
+.hero-card { position: relative; }
+.hero-card .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--gold); margin-right: 7px; vertical-align: 1px; }
+.hero-card .hc-name { font-size: 22px; font-weight: 700; margin: 10px 0 16px; line-height: 1.25; }
+.info-chips { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.info-chip { background: #111111; border: 1px solid rgba(255,255,255,0.06); border-radius: 14px; padding: 12px 14px; }
+.info-chip .ic-label { display: flex; align-items: center; gap: 6px; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 6px; }
+.info-chip .ic-label svg { width: 13px; height: 13px; stroke: var(--gold); }
+.info-chip .ic-value { font-size: 22px; font-weight: 700; color: var(--text-primary); }
+.hero-reg { display: flex; align-items: center; gap: 8px; border-top: 1px solid rgba(255,255,255,0.07); margin-top: 16px; padding-top: 14px; font-size: 13px; color: var(--text-secondary); }
+.hero-reg svg { width: 16px; height: 16px; stroke: var(--text-secondary); }
+.hero-reg .hr-num { margin-left: auto; font-size: 18px; font-weight: 700; color: var(--gold); }
+.cta-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+.cta-row .btn-outline { font-size: 14px; padding: 12px 8px; }
+
+/* ============================================================
+   SESIONES — réplica del prototipo Figma (/sessions)
+   Agrupadas por día, tarjeta con hora + candado + progreso + estado
+   ============================================================ */
+.day-header { display: flex; align-items: center; gap: 12px; margin: 22px 0 12px; }
+.day-header:first-of-type { margin-top: 0; }
+.day-chip { background: #241d0d; color: var(--gold); font-size: 12px; font-weight: 700; padding: 5px 12px; border-radius: 999px; flex: none; }
+.day-header .line { flex: 1; height: 1px; background: linear-gradient(90deg, rgba(198,167,94,0.35), transparent); }
+
+.session-card {
+  position: relative;
+  background: var(--card);
+  border-radius: var(--radius-card);
+  border: 1px solid rgba(255,255,255,0.06);
+  padding: 14px 16px;
+  margin-bottom: 14px;
+}
+.session-card.active { border-color: rgba(198,167,94,0.6); }
+.session-card .sc-top { display: flex; align-items: center; gap: 7px; margin-bottom: 8px; color: var(--gold); }
+.session-card .sc-top svg { width: 14px; height: 14px; stroke: currentColor; flex: none; }
+.session-card .sc-time { font-size: 14px; font-weight: 700; color: var(--gold); }
+.session-card .sc-top .lock { color: var(--text-secondary); }
+.session-card .sc-top .chev { margin-left: auto; color: var(--text-secondary); }
+.session-card .sc-name { font-size: 16px; font-weight: 700; color: var(--text-primary); line-height: 1.3; }
+.session-card .sc-id { font-size: 11px; color: #5c5c5f; margin: 3px 0 10px; }
+.sc-att { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-secondary); margin-bottom: 7px; }
+.sc-att svg { width: 14px; height: 14px; stroke: var(--success); flex: none; }
+.sc-att .sa-nums { margin-left: auto; font-size: 13px; color: var(--text-secondary); }
+.sc-att .sa-nums b { color: var(--text-primary); font-size: 15px; }
+.sc-progress { height: 5px; border-radius: 3px; background: #2c2c2e; overflow: hidden; margin-bottom: 10px; }
+.sc-progress > div { height: 100%; border-radius: 3px; background: linear-gradient(90deg, #8a733d, var(--gold)); }
+.sc-foot { display: flex; align-items: center; gap: 8px; }
+.state-pill { margin-left: auto; font-size: 11px; font-weight: 600; padding: 4px 12px; border-radius: 999px; }
+.state-pill.finalizada { background: #2c2c2e; color: var(--text-secondary); }
+.state-pill.programada { background: transparent; border: 1px solid #3a3a3c; color: var(--text-secondary); }
+.encurso-badge {
+  position: absolute; top: -9px; right: 14px;
+  background: var(--gold); color: #000; font-size: 10px; font-weight: 800;
+  letter-spacing: 0.8px; padding: 4px 10px; border-radius: 999px;
+}
+.encurso-badge::before { content: '●'; font-size: 8px; margin-right: 5px; }
+
+/* ============================================================
+   DASHBOARD — réplica del prototipo Figma (/dashboard)
+   ============================================================ */
+.gold-card { background: linear-gradient(180deg, #E4C77F, #C6A75E); }
+.gold-card .gc-title { letter-spacing: 1.5px; font-size: 12px; }
+.gold-card .gc-num { font-size: 58px; font-weight: 800; }
+.rate-row { display: flex; align-items: center; margin-bottom: 16px; }
+.rate-row .trend { width: 16px; height: 16px; stroke: var(--gold); margin-right: 5px; vertical-align: -2px; }
+.progress-ends { display: flex; justify-content: space-between; font-size: 11px; color: #5c5c5f; margin-top: 6px; }
+.rate-row .rt { font-size: 17px; font-weight: 600; color: var(--text-primary); }
+.rate-row .rv { margin-left: auto; font-size: 22px; font-weight: 700; color: var(--gold); }
+.progress { height: 4px; border-radius: 2px; background: #3a3a3c; overflow: hidden; }
+.progress > div { height: 100%; background: var(--gold); border-radius: 2px; transition: width 0.4s ease; }
+
+.mini-grid { display: flex; gap: 16px; margin-bottom: 16px; }
+.mini-card {
+  flex: 1; background: var(--card); border-radius: var(--radius-card);
+  border: 1px solid rgba(198,167,94,0.12); padding: 16px;
+}
+.mini-card .mc-title { font-size: 12px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+.mini-card .mc-num { font-size: 26px; font-weight: 700; }
+.mini-card .mc-num.green { color: var(--success); }
+.mini-card .mc-num.white { color: var(--text-primary); }
+.mini-card .mc-num.orange { color: var(--warning); }
+
+.risk-item { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.06); font-size: 14px; }
+.risk-item:last-child { border-bottom: none; }
+.risk-badge { margin-left: auto; font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 999px; flex: none; }
+.risk-badge.riesgo { color: var(--warning); border: 1px solid var(--warning); }
+.risk-badge.critico { color: var(--error); border: 1px solid var(--error); }
+
+/* ---- login ---- */
+.login-wrap { max-width: 380px; margin: 6vh auto 0; text-align: center; }
+.login-logo { font-size: 60px; color: var(--gold); }
+.login-wrap h1 { font-size: 28px; font-weight: 700; margin: 6px 0 4px; }
+.login-sub { color: var(--text-secondary); font-size: 14px; margin-bottom: 18px; }
+.staff-item {
+  display: flex; align-items: center; gap: 12px; width: 100%;
+  background: var(--card); border: 1px solid rgba(198,167,94,0.15);
+  padding: 12px 14px; margin-bottom: 10px; border-radius: var(--radius-card); text-align: left;
+}
+.staff-item:active { border-color: rgba(198,167,94,0.55); }
+.avatar {
+  width: 38px; height: 38px; border-radius: 50%; flex: none;
+  background: rgba(198,167,94,0.2); color: var(--gold);
+  display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px;
+}
+.staff-item .meta { flex: 1; }
+.staff-item .meta small { color: var(--text-secondary); display: block; font-size: 12px; }
+.dep-tag { font-size: 10px; color: var(--gold); border: 1px solid rgba(198,167,94,0.4); border-radius: 6px; padding: 2px 6px; text-transform: uppercase; }
+
+/* ---- tablas / admin ---- */
+.tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
+.tbl th { text-align: left; color: var(--text-secondary); font-weight: 500; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; padding: 8px 6px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+.tbl td { padding: 9px 6px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+.tbl tr:last-child td { border-bottom: none; }
+.tbl-scroll { overflow-x: auto; }
+
+.tag { font-size: 11px; padding: 2px 8px; border-radius: 999px; }
+.tag.confirmado { color: var(--success); border: 1px solid var(--success); }
+.tag.pendiente { color: var(--warning); border: 1px solid var(--warning); }
+
+.subtabs { display: flex; gap: 6px; margin-bottom: 16px; overflow-x: auto; padding-bottom: 2px; }
+.subtabs button { white-space: nowrap; font-size: 13px; padding: 8px 14px; border-radius: 999px; background: var(--card); }
+.subtabs button.on { background: var(--gold); color: #000; font-weight: 600; }
+
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.import-preview { max-height: 260px; overflow: auto; }
+.muted { color: var(--text-secondary); font-size: 13px; }
+.gold-txt { color: var(--gold); }
+hr.sep { border: none; border-top: 1px solid rgba(255,255,255,0.08); margin: 14px 0; }
+
+/* cola offline dentro de Escanear */
+.queue-row { display: flex; align-items: center; gap: 10px; }
+.queue-row .btn-sm { margin-left: auto; }
+
+/* ---- tab bar (réplica UITabBar #111111) ---- */
+#tabbar {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 30;
+  display: flex; background: var(--tabbar-bg); border-top: 1px solid rgba(255,255,255,0.08);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+#tabbar button {
+  flex: 1; background: none; border-radius: 0; color: var(--text-secondary);
+  font-size: 10px; padding: 7px 2px 6px;
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+}
+#tabbar button svg { width: 24px; height: 24px; stroke: currentColor; fill: none; }
+#tabbar button.on { color: var(--gold); }
+
+/* ---- toast ---- */
+#toast {
+  position: fixed; left: 50%; bottom: calc(var(--tabbar-h) + 18px); transform: translateX(-50%) translateY(20px);
+  background: var(--card); color: var(--text-primary); border: 1px solid rgba(198,167,94,0.4);
+  font-weight: 600; font-size: 14px;
+  padding: 10px 20px; border-radius: 999px; opacity: 0; pointer-events: none;
+  transition: all 0.25s ease; z-index: 80; max-width: 90vw; text-align: center;
+}
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+#toast.err { border-color: var(--error); color: var(--error); }
+
+/* ---- modal QR / alta ---- */
+.modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.65); z-index: 40; display: flex; align-items: center; justify-content: center; padding: 20px; }
+.modal { background: var(--card); border: 1px solid rgba(198,167,94,0.3); border-radius: var(--radius-card); padding: 22px; max-width: 340px; width: 100%; text-align: center; max-height: 86vh; overflow-y: auto; }
+.modal img.qr { width: 200px; height: 200px; background: #fff; border-radius: 12px; padding: 8px; }
+.modal h2 { font-size: 20px; margin-bottom: 4px; }
+
+@media (min-width: 600px) {
+  .scan-circle { margin-top: 20px; }
+}
