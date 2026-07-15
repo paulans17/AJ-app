@@ -20,6 +20,7 @@ const App = (() => {
     Views.cerrarCamara();
     Views.cerrarSheet();
     Views.quitarResultado();
+    Views.quitarCargando();
 
     const logged = !!Store.currentUser();
     if (!logged) route = 'login';
@@ -49,10 +50,19 @@ const App = (() => {
     window.addEventListener('online', async () => {
       actualizarChips();
       const r = await Store.syncQueue();
-      if (r.synced) Views.toast(`⇅ Conexión recuperada — ${r.synced} check-ins sincronizados`);
+      if (r.synced || r.failed) Views.toastSync(r);
       if (current === 'escanear') Views.vEscanear();
     });
     window.addEventListener('offline', actualizarChips);
+
+    document.getElementById('user-chip').addEventListener('click', () => {
+      const u = Store.currentUser();
+      if (!u) return;
+      if (confirm(`¿Cerrar sesión de ${u}?`)) {
+        Store.logout();
+        go('login');
+      }
+    });
 
     Store.onChange(actualizarChips);
 
@@ -63,10 +73,11 @@ const App = (() => {
   return { go, init };
 })();
 
-/** Actualiza los indicadores de la barra superior (conexión, cola) */
+/** Actualiza los indicadores de la barra superior (conexión, cola, usuario) */
 function actualizarChips() {
   const net = document.getElementById('net-status');
   const qb = document.getElementById('queue-badge');
+  const uc = document.getElementById('user-chip');
   if (!net) return;
   const online = Store.isOnline();
   net.textContent = online ? '● en línea' : '○ sin conexión';
@@ -74,6 +85,9 @@ function actualizarChips() {
   const q = Store.getQueue().length;
   qb.textContent = '⇅ ' + q;
   qb.classList.toggle('hidden', q === 0);
+  const u = Store.currentUser();
+  uc.textContent = u ? u + ' · Salir' : '';
+  uc.classList.toggle('hidden', !u);
 }
 
 document.addEventListener('DOMContentLoaded', App.init);

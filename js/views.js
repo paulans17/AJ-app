@@ -25,6 +25,14 @@ const Views = (() => {
     t._h = setTimeout(() => (t.className = ''), 2600);
   }
 
+  /** Mensaje consistente tras sincronizar la cola offline (ver Store.syncQueue). */
+  function toastSync(r) {
+    if (r.synced && r.failed) toast(`⇅ ${r.synced} sincronizados, ${r.failed} no se pudieron registrar — revisa la hoja`, true);
+    else if (r.synced) toast(`⇅ ${r.synced} check-ins sincronizados`);
+    else if (r.failed) toast(`⚠ ${r.failed} check-ins no se pudieron registrar — revisa la hoja`, true);
+    else toast('Nada que sincronizar');
+  }
+
   /* ============================================================
      LOGIN — sin contraseña, lista fija en el código (ver js/store.js)
      ============================================================ */
@@ -47,6 +55,26 @@ const Views = (() => {
         if (nombre) { toast(`Hola, ${nombre}`); App.go('escanear'); }
       })
     );
+  }
+
+  /* ============================================================
+     CARGANDO — overlay bloqueante mientras se resuelve el check-in
+     (fetch al Web App). Sin él, la app parecía "no estática": el
+     usuario podía tocar otra vez el círculo, la cámara o la tab bar
+     mientras la petición seguía en vuelo.
+     ============================================================ */
+  function mostrarCargando() {
+    quitarCargando();
+    const div = document.createElement('div');
+    div.id = 'loading-cover';
+    div.setAttribute('role', 'status');
+    div.setAttribute('aria-live', 'polite');
+    div.innerHTML = `<div class="spinner" aria-hidden="true"></div><span class="loading-label">Registrando…</span>`;
+    document.body.appendChild(div);
+  }
+  function quitarCargando() {
+    const d = $('#loading-cover');
+    if (d) d.remove();
   }
 
   /* ============================================================
@@ -102,7 +130,6 @@ const Views = (() => {
         <div class="scan-hint">
           <div class="h1">Escanea el QR de la acreditación</div>
           <div class="h2">Pulsa el círculo para abrir la cámara</div>
-          <button class="btn-plain btn-sm" id="btn-sim" style="margin-top:6px">Simular escaneo (dev)</button>
         </div>
 
         <div class="scan-bottom">
@@ -119,17 +146,14 @@ const Views = (() => {
       </div>`;
 
     const procesa = async (codigo) => {
+      mostrarCargando();
       const r = await Store.checkin(codigo);
+      quitarCargando();
       mostrarResultado(r);
       if (r.status === 'offline_ok') setTimeout(() => vEscanear(), 1550);
     };
 
     $('#btn-cam').addEventListener('click', () => abrirCamara(procesa));
-
-    $('#btn-sim').addEventListener('click', () => {
-      const num = String(1 + Math.floor(Math.random() * 50));
-      procesa(num);
-    });
 
     $('#btn-manual-sheet').addEventListener('click', () => abrirSheetManual(procesa));
 
@@ -137,7 +161,7 @@ const Views = (() => {
       Store.setSimOffline(!Store.isSimOffline());
       if (!Store.isSimOffline() && Store.getQueue().length) {
         const r = await Store.syncQueue();
-        if (r.synced) toast(`⇅ ${r.synced} check-ins sincronizados`);
+        toastSync(r);
       } else {
         toast(Store.isSimOffline() ? 'Modo sin cobertura activado' : 'Cobertura recuperada');
       }
@@ -146,7 +170,7 @@ const Views = (() => {
     const bs = $('#btn-sync');
     if (bs) bs.addEventListener('click', async () => {
       const r = await Store.syncQueue();
-      toast(r.synced ? `⇅ ${r.synced} check-ins sincronizados` : 'Nada que sincronizar');
+      toastSync(r);
       vEscanear();
     });
   }
@@ -160,7 +184,7 @@ const Views = (() => {
       <video id="cam" muted playsinline></video>
       <div class="cam-frame"></div>
       <div class="cam-label">Apunta al QR de la acreditación</div>
-      <button class="cam-close" id="cam-close">✕</button>`;
+      <button class="cam-close" id="cam-close" aria-label="Cerrar cámara">✕</button>`;
     document.body.appendChild(div);
     $('#cam-close').addEventListener('click', cerrarCamara);
     const res = await Scanner.start($('#cam'), (code) => {
@@ -192,11 +216,11 @@ const Views = (() => {
     bg.innerHTML = `
       <div class="sheet">
         <div class="grabber"></div>
-        <button class="sheet-close" id="sheet-close">✕</button>
+        <button class="sheet-close" id="sheet-close" aria-label="Cerrar">✕</button>
         <h2>Registro Manual</h2>
-        <p class="sheet-sub">Introduce el número del asistente</p>
-        <input class="big-num" id="manual-num" placeholder="0" inputmode="numeric" autocomplete="off" maxlength="6">
-        <div class="err-msg" id="manual-err"></div>
+        <label for="manual-num" class="sheet-sub" style="text-transform:none;font-size:15px">Introduce el número del asistente</label>
+        <input class="big-num" id="manual-num" placeholder="0" inputmode="numeric" autocomplete="off" maxlength="6" aria-describedby="manual-err">
+        <div class="err-msg" id="manual-err" role="alert" aria-live="assertive"></div>
         <button class="btn-gold btn-block" id="manual-ok">Confirmar Registro</button>
         <button class="btn-plain btn-block" id="manual-cancel">Cancelar</button>
       </div>`;
@@ -239,6 +263,7 @@ const Views = (() => {
       try {
         const s = await Store.stats();
         const tasa = Number(s.tasa) || 0;
+        const anchoBarra = Math.max(0, Math.min(100, tasa)); // la tasa real puede salirse de 0-100 si la hoja tiene datos inconsistentes; el ancho visual no
         body.innerHTML = `
           <div class="card border-mid">
             <div class="gold-caption" style="margin-bottom:8px">Sesión en curso</div>
@@ -254,7 +279,7 @@ const Views = (() => {
               <span class="rt">Tasa de Asistencia</span>
               <span class="rv">${tasa.toFixed(1)}%</span>
             </div>
-            <div class="progress"><div style="width:${tasa}%"></div></div>
+            <div class="progress"><div style="width:${anchoBarra}%"></div></div>
           </div>`;
       } catch (e) {
         body.innerHTML = `<p class="muted">No se pudo conectar con la hoja. Reintentando…</p>`;
@@ -265,5 +290,5 @@ const Views = (() => {
     pollTimer = setInterval(cargar, 7000);
   }
 
-  return { vLogin, vEscanear, vEstadisticas, toast, pararPolling, cerrarCamara, cerrarSheet, quitarResultado };
+  return { vLogin, vEscanear, vEstadisticas, toast, toastSync, pararPolling, cerrarCamara, cerrarSheet, quitarResultado, quitarCargando };
 })();
