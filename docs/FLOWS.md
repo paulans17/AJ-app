@@ -76,7 +76,7 @@ flowchart TD
     D -- no --> E[Acceso denegado<br/>vuelve a modo staff normal]
     D -- sí --> F[Panel admin: lista de 14 sesiones]
     F --> G[Elegir sesión y pulsar<br/>Activar / Cerrar]
-    G --> H[Escritura directa a sesiones/estado<br/>permitida por firestore.rules isInformatica]
+    G --> H[Escritura directa a sesiones/estado<br/>permitida por firestore.rules isStaffAdmin]
     H --> I[Dashboard en vivo se actualiza<br/>para todo el staff]
     F --> J[Salir de modo admin]
     J --> K[Vuelve a Anonymous Auth<br/>staffUsername de antes]
