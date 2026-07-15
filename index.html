@@ -6,11 +6,12 @@
   <meta name="theme-color" content="#0B0B0B">
   <title>Staff AJapp — Curso de Protocolo</title>
   <meta name="description" content="App del staff de Alfil Juvenil para el control de asistencia del Curso de Protocolo.">
-  <!-- CSP: sin 'unsafe-inline' en script-src (no hay <script> inline ni onclick=), pero
-       style-src sí lo necesita porque las vistas generan estilos inline dinámicos
-       (barras de progreso, etc). connect-src incluye script.googleusercontent.com
-       porque los Web Apps de Apps Script responden con un 302 a ese dominio. -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://script.google.com https://script.googleusercontent.com; media-src 'self' blob:; base-uri 'self'; form-action 'self'; frame-ancestors 'none'">
+  <!-- CSP: script-src es solo 'self' (jsQR va vendorizado en js/vendor/, sin CDN externo
+       -- ver más abajo). style-src sí necesita 'unsafe-inline' porque las vistas generan
+       estilos inline dinámicos (barras de progreso, etc). connect-src incluye
+       script.googleusercontent.com porque los Web Apps de Apps Script responden con un
+       302 a ese dominio. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://script.google.com https://script.googleusercontent.com; media-src 'self' blob:; base-uri 'self'; form-action 'self'; frame-ancestors 'none'">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
@@ -45,12 +46,10 @@
   <div id="toast" role="status" aria-live="polite"></div>
 
   <!-- Lector QR de respaldo (BarcodeDetector nativo cubre la mayoría de Android/Chrome).
-       OJO: la URL de cdnjs para jsQR 1.4.0 devuelve 404 (verificado) -- jsdelivr sirve el
-       mismo paquete de npm correctamente. integrity calculado a mano (sha384) sobre el
-       archivo real descargado, no copiado de una fuente de terceros sin comprobar. -->
-  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"
-          integrity="sha384-b5Ya4Bq3qCyz39m2ISh+4DxjAIljdeFwK/BsXLuj9gugaNwAcj/ia15fxNZL9Nlx"
-          crossorigin="anonymous" defer></script>
+       Vendorizado en js/vendor/ en vez de CDN externo -- la URL de cdnjs
+       para esta versión daba 404, por eso nunca detectaba nada en Safari/iOS
+       (sin BarcodeDetector, dependía al 100% de esta librería). -->
+  <script src="js/vendor/jsQR.min.js" defer></script>
 
   <script src="js/store.js"></script>
   <script src="js/scanner.js"></script>
