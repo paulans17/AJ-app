@@ -337,13 +337,38 @@ copiar el `Code.gs` actualizado al editor de Apps Script real (vinculado
 a la hoja) y redesplegar — el cambio en el repo no toca el script en
 producción por sí solo.
 
-**D25. La cámara no detectaba ningún QR en Safari/iOS.** Causa probable:
-soporte experimental/incompleto de `BarcodeDetector` en versiones
-recientes de Safari — el código asumía "si existe, funciona" y nunca
-caía a `jsQR` cuando el nativo estaba presente pero no detectaba nada.
-Arreglado en `js/scanner.js` (no toca Apps Script): cada frame prueba
-`BarcodeDetector` primero y, si no encuentra nada, prueba `jsQR` también
-en el mismo frame, en vez de ser mutuamente excluyentes.
+**D25. La cámara no detectaba ningún QR en Safari/iOS — primer intento
+(insuficiente).** Hipótesis inicial: soporte experimental/incompleto de
+`BarcodeDetector` en Safari, el código asumía "si existe, funciona" y
+nunca caía a `jsQR` cuando el nativo estaba presente pero no detectaba
+nada. Se cambia `js/scanner.js` para probar los dos motores cada frame.
+No arregla el problema — ver D26, la causa real era otra.
+
+## 2026-07-15 (octava vuelta — causa real del fallo de cámara)
+
+Se añade una etiqueta de diagnóstico visible en la pantalla de cámara
+(qué motor está activo: `BarcodeDetector`/`jsQR`/`ninguno`) para dejar de
+adivinar. En el iPhone de Pau aparece **"ninguno"**.
+
+**D26. La URL del CDN de jsQR (`cdnjs.cloudflare.com/.../1.4.0/jsQR.min.js`)
+da 404 — muerta, no es un problema de Safari ni de iOS.** Comprobado con
+`curl`: la propia URL no existe. Android nunca lo notó porque Chrome trae
+`BarcodeDetector` nativo y no necesita el fallback; Safari no tiene
+`BarcodeDetector`, así que dependía al 100% de una librería que nunca
+llegaba a cargar. Se vendoriza `jsQR` dentro del propio repo
+(`js/vendor/jsQR.min.js`, descargado de jsDelivr) en vez de depender de
+ningún CDN externo — elimina esta clase entera de fallo y mejora también
+el cacheo offline (todo el código de la app vive en el mismo origen).
+
+**D27. El Service Worker servía código viejo indefinidamente — los
+arreglos no llegaban al móvil aunque ya estuvieran en GitHub Pages.**
+`sw.js` usaba estrategia *cache-first* para los archivos propios, y como
+el propio `sw.js` no cambiaba de bytes entre despliegues, el navegador
+nunca detectaba que había una versión nueva que instalar (el mecanismo de
+actualización de Service Workers se basa en comparar bytes del script
+registrado). Se cambia a *network-first* con caché solo como respaldo sin
+conexión (`CACHE` sube a `v4`), y se deja anotado en el propio `sw.js`
+que hay que subir el número de versión en cada cambio de JS/CSS/HTML.
 
 ## Pendiente de decidir (no bloqueante para empezar)
 
@@ -352,5 +377,5 @@ en el mismo frame, en vez de ser mutuamente excluyentes.
   AJapp (D13), solo relevante si `alfil-statics` lo reutiliza.
 - Roster real de ~20 miembros de staff (nombres) para sustituir el
   placeholder de `js/store.js` (D23).
-- Confirmar en el móvil que D24 (CORS) y D25 (cámara) quedan resueltos
-  tras redesplegar `Code.gs` y publicar el nuevo `js/scanner.js`.
+- Confirmar en el móvil que D24 (CORS), D26 (jsQR vendorizado) y D27
+  (service worker) quedan resueltos tras la reinstalación limpia.
