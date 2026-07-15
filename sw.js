@@ -1,13 +1,12 @@
-/* Service worker — Staff AJapp (DEMO)
+/* Service worker — Staff AJapp
    Cachea el shell de la app para que funcione sin conexión.
    Estrategia: cache-first para archivos propios, network-first con fallback para CDN. */
-const CACHE = 'ajapp-demo-v1';
+const CACHE = 'ajapp-v2';
 const SHELL = [
   './',
   './index.html',
   './manifest.webmanifest',
   './css/app.css',
-  './js/demo-data.js',
   './js/store.js',
   './js/scanner.js',
   './js/views.js',
