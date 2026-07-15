@@ -1,3 +1,7 @@
+// ⚠️ SUPERSEDED (2026-07-15, D13) — el evento ya no usa Firestore, se
+// pivotó a Google Sheets + Apps Script. Ver docs/SHEET_SCHEMA.md.
+// Se deja este archivo como referencia histórica; no se despliega.
+
 rules_version = '2';
 
 // Reglas de seguridad Firestore — Curso de Protocolo XXII (proyecto Alfil Juvenil)

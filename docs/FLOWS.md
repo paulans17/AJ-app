@@ -1,170 +1,113 @@
+> ⚠️ Reescrito 2026-07-15 (pivote D13-D18): sustituye los flujos basados
+> en Firestore por los basados en Google Sheets + Apps Script, extendiendo
+> el flujo real que Pau ya usaba en Atajos de iPhone la edición pasada.
+
 # Flujos — Staff AJapp (PWA)
 
-Diagramas en Mermaid (se ven en GitHub, GitLab, VS Code y en Claude Code).
-Basados en la lógica ya construida en Swift (`CheckinManager`,
-`QRScannerManager`, `SessionManager`, `AttendeeManager` — carpeta antigua
-`Staff AJapp/`, que queda como referencia funcional, no como código a
-reutilizar) y en el prototipo Figma Make `dQjrZnwka2UzPESvIG5Gl3` (D9).
+Diagramas en Mermaid. Base: `apps-script/Code.gs` (extensión del script
+real `NO-PIN vFinal`) y `docs/SHEET_SCHEMA.md`.
 
-## 1. Login de staff (general)
+## 1. Login (staff general)
+
+Sin cambios de fondo respecto a lo decidido antes del pivote: sin
+contraseña, se elige el nombre de una lista. Lo único que cambia es de
+dónde sale esa lista — antes de una colección Firestore, ahora puede ser
+tan simple como una lista fija en el propio código de la PWA (no hace
+falta una llamada al Web App solo para esto, ~20 nombres no cambian cada
+día). Si se prefiere que salga de la hoja, se puede añadir un
+`action=staff` al Web App más adelante — no es necesario para el primer
+lanzamiento.
 
 ```mermaid
 flowchart TD
-    A[Abrir PWA] --> B{Ya hay sesión<br/>anónima guardada?}
-    B -- sí --> C[Ir a pantalla Inicio]
-    B -- no --> D[Firebase Anonymous Auth<br/>signInAnonymously]
-    D --> E[Mostrar lista de nombres<br/>leída de staff/]
-    E --> F[Elegir mi nombre]
-    F --> G[Guardar staffUsername<br/>en almacenamiento local]
-    G --> C
+    A[Abrir PWA] --> B{Nombre guardado<br/>en local?}
+    B -- sí --> C[Ir a Escanear]
+    B -- no --> D[Elegir nombre de una lista]
+    D --> E[Guardar staffUsername en local]
+    E --> C
 ```
 
-No hay contraseña ni verificación de identidad — es atribución para saber
-quién escaneó, no seguridad (ver `DECISIONS.md` D4). Cualquiera con el
-enlace de la PWA podría, en teoría, elegir el nombre de otra persona; se
-acepta porque es una herramienta interna de confianza entre ~20 compañeros.
-
-## 2. Escaneo / check-in (con offline)
+## 2. Escanear / check-in (con offline)
 
 ```mermaid
 sequenceDiagram
     participant U as Staff (móvil)
     participant App as PWA
-    participant Cache as Firestore local cache
-    participant FS as Firestore (servidor)
+    participant Q as Cola local (localStorage)
+    participant WA as Web App Apps Script
 
-    U->>App: Abre Escanear
-    App->>App: Lee sesión activa (sesiones donde estado == activa)
-    U->>App: Escanea QR (o introduce número manual)
-    App->>Cache: Busca inscripciones por qrCode
-    alt QR no encontrado
-        App-->>U: Error "asistente no encontrado"
-    else QR encontrado
-        App->>Cache: Consulta checkins (sesionId, asistenteId)
-        alt Ya existe checkin
-            App-->>U: Aviso "ya registrado" (duplicado)
-        else No existe
-            App->>Cache: Escribe checkin (optimista, local)
-            Cache-->>U: Confirmación inmediata en pantalla
-            Note over Cache,FS: Si hay red, sync automático.<br/>Si no, queda en cola (hasPendingWrites=true)
-            Cache->>FS: Sync cuando vuelve la conexión
+    U->>App: Escanea QR (o número manual)
+    App->>App: ¿navigator.onLine?
+    alt Sin conexión
+        App->>Q: Guarda {num, staff, ts} en cola
+        Q-->>U: "Guardado sin conexión — se sincronizará"
+    else Con conexión
+        App->>WA: GET .../exec?num=X&staff=Y&format=json
+        WA->>WA: Busca sesión activa (Config!B2)
+        WA->>WA: Comprueba num en "asistentes"
+        WA->>WA: LockService + comprueba duplicado en "asistencias"
+        alt Nuevo
+            WA->>WA: appendRow en "asistencias"
+            WA-->>App: {status: "ok", ...}
+        else Ya registrado
+            WA-->>App: {status: "duplicado", ...}
+        else No encontrado / sin sesión
+            WA-->>App: {status: "no_encontrado" | "sin_sesion", ...}
         end
+        App-->>U: Pantalla verde/naranja/roja según status
     end
 ```
 
-Registro manual (fallback si el QR no se puede leer): mismo flujo pero
-introduciendo el ID `AJ2026-XXXX` a mano en vez de escanear.
-
-**Duplicados offline:** si dos móviles hacen check-in de la misma persona
-sin red antes de sincronizar, ambos lo aceptan (no pueden verse entre sí).
-Al sincronizar, quedan dos documentos en `checkins` para el mismo
-`(sesionId, asistenteId)`. El dashboard (flujo 4) los marca para revisión,
-no se borran automáticamente.
-
-## 3. Modo admin (Informática / Presidencia) — activar/cerrar sesión
-
-En la demo actual (D10) esta pestaña se muestra solo si el nombre elegido
-en el login tiene `departamento` informática/presidencia, sin más
-verificación. El flujo de abajo es el cambio confirmado en D12: añade un
-login real solo para estas ~4-5 personas, sin tocar el login del resto.
+**Sincronización al volver la conexión:**
 
 ```mermaid
 flowchart TD
-    A[Staff con departamento=informatica<br/>o presidencia pulsa la pestaña Admin] --> B[Pantalla pide<br/>email + contraseña]
-    B --> C[signInWithEmailAndPassword<br/>sustituye la sesión anónima]
-    C --> D{Token tiene custom claim<br/>departamento in informatica,presidencia?}
-    D -- no --> E[Acceso denegado<br/>vuelve a modo staff normal]
-    D -- sí --> F[Panel admin: lista de 14 sesiones]
-    F --> G[Elegir sesión y pulsar<br/>Activar / Cerrar]
-    G --> H[Escritura directa a sesiones/estado<br/>permitida por firestore.rules isStaffAdmin]
-    H --> I[Dashboard en vivo se actualiza<br/>para todo el staff]
-    F --> J[Salir de modo admin]
-    J --> K[Vuelve a Anonymous Auth<br/>staffUsername de antes]
+    A[window online event] --> B[Leer cola local]
+    B --> C{Cola vacía?}
+    C -- sí --> Z[Nada que hacer]
+    C -- no --> D[Por cada elemento, en orden:<br/>GET .../exec?num=X&staff=Y&format=json]
+    D --> E[Quitar de la cola si status != error]
+    E --> F{Quedan elementos?}
+    F -- sí --> D
+    F -- no --> G[Toast: 'N check-ins sincronizados']
 ```
 
-Solo puede haber una sesión `activa` a la vez (regla de negocio de la app,
-no de Firestore — al activar una, la que estaba activa pasa a `cerrada`).
+Duplicados entre dos móviles distintos sin red: si ambos escanean al
+mismo asistente offline, los dos lo aceptan localmente (no pueden verse
+entre sí). Al sincronizar, el primero que llegue al Web App se registra
+(`ok`); el segundo recibe `duplicado` gracias al `LockService` — se
+resuelve solo, sin intervención manual.
 
-## 4. Dashboard (todos, en vivo)
+## 3. Estadísticas (polling)
+
+```mermaid
+flowchart TD
+    A[Abrir pantalla Estadísticas] --> B[GET .../exec?action=stats&format=json]
+    B --> C[Mostrar sesión activa, registrados/total, %]
+    C --> D[Esperar 5-10s]
+    D --> B
+    A --> E[Cerrar pantalla]
+    E --> F[Parar el polling]
+```
+
+## 4. Activar/cerrar sesión (fuera de la app — D15)
 
 ```mermaid
 flowchart LR
-    A[sesiones donde estado==activa] --> B[Mostrar nombre, hora, aforo]
-    C[checkins donde sesionId==activa] --> D[Contar asistentesRegistrados]
-    D --> E[% asistencia = registrados / capacidad]
-    C --> F{Mismo asistenteId<br/>más de un checkin?}
-    F -- sí --> G[Marcar como posible duplicado<br/>solo visible para Informática/Presidencia]
+    A[Informática/Presidencia] --> B[Abre la hoja de cálculo directamente]
+    B --> C[Edita Config!B2<br/>con el nombre de la nueva sesión]
+    C --> D[Todo el staff que escanee a partir<br/>de ahora registra contra esa sesión]
 ```
 
-**Riesgo de pérdida de título (D11, ya implementado en la demo como
-`asistentesEnRiesgo`):** para cada inscrito confirmado, se cuentan las
-faltas solo sobre sesiones ya `cerrada` y se compara con el máximo permitido
-(`Math.floor(14 * (1 - porcentajeMinimo))` = 2 faltas):
+No hay ninguna pantalla ni login especial para esto en la app — es
+exactamente como funcionaba con el Atajo de iPhone, solo que ahora varias
+personas leen el mismo `Config!B2` en vez de una sola.
 
-```mermaid
-flowchart TD
-    A[Por cada inscrito confirmado] --> B[faltas = sesiones cerradas<br/>sin checkin de esa persona]
-    B --> C{faltas > 2?}
-    C -- sí --> D[Crítico: título ya perdido]
-    C -- no --> E{faltas == 2?}
-    E -- sí --> F[En riesgo: una falta más<br/>y pierde el título]
-    E -- no --> G[OK]
-    D --> H[Visible en Dashboard/Admin<br/>para avisar a la persona]
-    F --> H
-```
+## 5. Inscripción / roster — fuera de alcance de este repo
 
-## 5. Inscripción — Google Form → Firestore (D5)
-
-```mermaid
-sequenceDiagram
-    participant P as Persona interesada
-    participant GF as Google Form
-    participant AS as Apps Script (Code.gs)
-    participant FS as Firestore REST API
-    participant Mail as Gmail (MailApp)
-
-    P->>GF: Rellena formulario (nombre, DNI, menú...)
-    GF->>AS: Trigger onFormSubmit
-    AS->>FS: commit increment(contadorId) [atómico]
-    FS-->>AS: nuevo contadorId
-    AS->>AS: Compone ID AJ2026-XXXX,<br/>calcula modalidad/precio por menú
-    AS->>FS: PATCH inscripciones/{id} (estado=pendiente)
-    AS->>Mail: Envía email con QR (QuickChart) + enlace de confirmación
-    Mail-->>P: Email recibido
-```
-
-## 6. Confirmación de inscripción
-
-```mermaid
-sequenceDiagram
-    participant P as Persona interesada
-    participant AS as Apps Script (doGet, Web App)
-    participant FS as Firestore REST API
-
-    P->>AS: Clic en enlace de confirmación del email
-    AS->>FS: GET inscripciones/{id}
-    alt ya confirmado
-        AS-->>P: "Ya estaba confirmada"
-    else pendiente
-        AS->>FS: PATCH estado=confirmado, tsConfirmacion=now
-        AS-->>P: "Confirmada, gracias"
-    end
-```
-
-## 7. Alta de nuevo miembro de staff
-
-```mermaid
-flowchart TD
-    A[Informática/Presidencia decide dar de alta<br/>a un nuevo miembro] --> B[Crear documento en staff/<br/>desde modo admin PWA o panel web /admin]
-    B --> C{Necesita también<br/>modo admin?}
-    C -- no --> D[Fin — ya puede loguearse<br/>como staff general]
-    C -- sí --> E{Ya tiene cuenta real<br/>del panel web /admin?}
-    E -- sí --> F[Ejecutar scripts/set-claim.js<br/>con su email existente]
-    E -- no --> G[Crear cuenta email/password<br/>en Firebase Auth]
-    G --> F
-    F --> H[Custom claim departamento asignado]
-    H --> D
-```
-
-`scripts/set-claim.js` se ejecuta localmente (Node + `firebase-admin`),
-nunca desde la app ni desplegado — ver `PROJECT_SETUP.md`.
+La construcción de la lista `asistentes` (números + nombres) y cualquier
+proceso de inscripción/registro con datos completos (DNI, menú, email...)
+es un proceso aparte que Pau ya gestiona con el Excel/scripts de años
+anteriores — **no es parte de lo que construye Claude Code en este repo**.
+Si en el futuro se decide automatizar esa parte también, se documenta
+aquí como una fase nueva.
