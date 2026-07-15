@@ -1,200 +1,159 @@
 /**
- * Apps Script vinculado al Google Form real de inscripción al Curso de Protocolo.
+ * Web App de la hoja "MIEMBROS CURSO PROTOCOLO XXI/XXII".
  *
- * Adaptado de Staff AJappBd/apps-script/Code.gs (proyecto de pruebas
- * prueba-protocolo2627) al proyecto Firebase definitivo de Alfil Juvenil.
- * Ver docs/DECISIONS.md (D1, D3, D5) y docs/ARCHITECTURE.md.
+ * Base: el script real que Pau ya usaba con el Atajo de iPhone en la
+ * edición pasada (comentarios "NO-PIN vFinal" = su versión probada).
+ * NO se ha reescrito desde cero — se ha extendido con 4 cosas, marcadas
+ * con "// AÑADIDO" para que se distinga claramente de lo original:
  *
- * NO usa Cloud Functions (exige plan Blaze, descartado en D3). Llama
- * directamente a la API REST de Firestore usando el token OAuth de la
- * cuenta de Google que ejecuta el script -- debe ser una cuenta con acceso
- * de editor/propietario al proyecto Firebase (la cuenta de Alfil Juvenil).
- * Esto es gratis en el plan Spark.
+ *   1. LockService alrededor de la comprobación de duplicado + el
+ *      appendRow. La versión de Atajos no lo necesitaba (un solo usuario,
+ *      nunca dos peticiones a la vez); con ~20 personas escaneando en
+ *      paralelo desde la PWA, dos escaneos casi simultáneos del mismo
+ *      número sí pueden colarse los dos sin lock.
+ *   2. Parámetro opcional `staff` -> columna D nueva en `asistencias`
+ *      (quién escaneó). Aditivo: si no se manda, se deja vacío.
+ *   3. `action=stats` -> nueva acción para la pantalla Estadísticas.
+ *   4. `format=json` -> si la petición lo incluye, responde JSON en vez
+ *      de HTML. Si no se manda (como en el Atajo original), el
+ *      comportamiento es exactamente el de antes.
  *
- * INSTALACIÓN:
- * 1. Abre el formulario -> menú de tres puntos -> Editor de secuencia de
- *    comandos (o Extensiones > Apps Script).
- * 2. Pega este archivo como Code.gs, y copia appsscript.json tal cual.
- * 3. Cambia PROJECT_ID más abajo por el ID real del proyecto Firebase
- *    (ver docs/PROJECT_SETUP.md paso 1).
- * 4. Activadores (icono del reloj) -> Añadir activador -> función:
- *    onFormSubmit, evento: Al enviarse el formulario.
- * 5. Para la confirmación: Implementar -> Nueva implementación ->
- *    Aplicación web -> ejecutar como "Yo", acceso "Cualquier usuario".
- *    La URL resultante es el enlace de confirmación del email.
+ * Ver docs/SHEET_SCHEMA.md para el detalle de cada pestaña.
+ *
+ * INSTALACIÓN: Extensiones > Apps Script desde la propia hoja de cálculo
+ * (script container-bound, no hace falta vincularlo a ningún Form aparte
+ * para esta parte). Implementar > Nueva implementación > Aplicación web >
+ * ejecutar como "Yo", acceso "Cualquier usuario". La URL resultante
+ * (.../exec) es la que usa la PWA.
  */
 
-const PROJECT_ID = 'alfiljuvenil-protocolo';
-const FIRESTORE_BASE = 'https://firestore.googleapis.com/v1/projects/' + PROJECT_ID + '/databases/(default)/documents';
+/***** ========================= CONFIG ========================= *****/
+const SHEET_ASISTENTES = 'asistentes'; // Nombre de la hoja con la lista numerada
+const SHEET_ASISTENCIAS = 'asistencias'; // Hoja donde se registran los escaneos reales
+const SHEET_CONFIG = 'Config';
+const COL_NUMERO = 1; // Columna A = número de acreditación
+const CELL_CURRENT_SESSION = 'B2'; // Sesión activa
 
-function authHeaders_() {
-  return {
-    Authorization: 'Bearer ' + ScriptApp.getOAuthToken(),
-  };
-}
-
-/**
- * Se dispara al enviar el Form. Genera el ID atómicamente, calcula
- * modalidad/precio, escribe la inscripción en Firestore y manda el email
- * de preinscripción con QR.
- */
-function onFormSubmit(e) {
-  const r = e.namedValues;
-  const val = (campo) => (r[campo] && r[campo][0]) ? r[campo][0] : '';
-
-  const nombre = val('Nombre');
-  const apellidos = val('Apellidos');
-  const fechaNacimiento = val('FechaNacimiento');
-  const gradoActividades = val('Grado o Actividades');
-  const menuCena = val('MenuCena');
-  const dni = val('DNI');
-  const email = val('Email');
-  const alergias = val('Alergias');
-
-  const id = generarSiguienteId_();
-  const tieneMenu = menuCena.trim().length > 0;
-  const modalidad = tieneMenu ? 'curso_cena' : 'solo_curso';
-  const precio = tieneMenu ? 90 : 65;
-  const apellidoOrden = apellidos
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '');
-
-  const doc = {
-    fields: {
-      nombre: { stringValue: nombre },
-      apellidos: { stringValue: apellidos },
-      apellidoOrden: { stringValue: apellidoOrden },
-      fechaNacimiento: { stringValue: fechaNacimiento },
-      gradoActividades: { stringValue: gradoActividades },
-      alergias: { stringValue: alergias },
-      menuCena: { stringValue: menuCena },
-      dni: { stringValue: dni },
-      email: { stringValue: email },
-      modalidad: { stringValue: modalidad },
-      precio: { integerValue: precio },
-      estado: { stringValue: 'pendiente' },
-      tsInscripcion: { timestampValue: new Date().toISOString() },
-      tsConfirmacion: { nullValue: null },
-      qrCode: { stringValue: id },
-    },
-  };
-
-  UrlFetchApp.fetch(FIRESTORE_BASE + '/inscripciones/' + id, {
-    method: 'patch',
-    headers: authHeaders_(),
-    contentType: 'application/json',
-    payload: JSON.stringify(doc),
-  });
-
-  enviarEmailPreinscripcion_(email, nombre, id);
-}
-
-/**
- * Incrementa contadorId de forma atómica usando un "field transform" de
- * Firestore (increment), serializado por el propio servidor aunque lleguen
- * varias inscripciones a la vez.
- */
-function generarSiguienteId_() {
-  const commitUrl = FIRESTORE_BASE + ':commit';
-  const body = {
-    writes: [
-      {
-        transform: {
-          document: 'projects/' + PROJECT_ID + '/databases/(default)/documents/config/general',
-          fieldTransforms: [
-            { fieldPath: 'contadorId', increment: { integerValue: '1' } },
-          ],
-        },
-      },
-    ],
-  };
-
-  const resp = UrlFetchApp.fetch(commitUrl, {
-    method: 'post',
-    headers: authHeaders_(),
-    contentType: 'application/json',
-    payload: JSON.stringify(body),
-  });
-
-  const json = JSON.parse(resp.getContentText());
-  const nuevoContador = parseInt(json.writeResults[0].transformResults[0].integerValue, 10);
-
-  const config = leerConfig_();
-  const prefijo = config.prefijoId || 'AJ2026-';
-  return prefijo + String(nuevoContador).padStart(4, '0');
-}
-
-function leerConfig_() {
-  try {
-    const resp = UrlFetchApp.fetch(FIRESTORE_BASE + '/config/general', {
-      headers: authHeaders_(),
-      muteHttpExceptions: true,
-    });
-    const json = JSON.parse(resp.getContentText());
-    if (!json.fields) return {};
-    return {
-      prefijoId: json.fields.prefijoId ? json.fields.prefijoId.stringValue : 'AJ2026-',
-    };
-  } catch (err) {
-    return { prefijoId: 'AJ2026-' };
-  }
-}
-
-function enviarEmailPreinscripcion_(email, nombre, id) {
-  const qrUrl = 'https://quickchart.io/qr?text=' + encodeURIComponent(id) + '&size=300';
-  const confirmUrl = ScriptApp.getService().getUrl() + '?id=' + encodeURIComponent(id);
-
-  MailApp.sendEmail({
-    to: email,
-    subject: 'Inscripción recibida · ' + id,
-    htmlBody:
-      '<p>Hola ' + nombre + ',</p>' +
-      '<p>Hemos recibido tu inscripción al Curso de Protocolo. Tu número de inscripción es <b>' + id + '</b>.</p>' +
-      '<p><img src="' + qrUrl + '" alt="QR ' + id + '"></p>' +
-      '<p>Para confirmar tu plaza, haz clic aquí: <a href="' + confirmUrl + '">Confirmar inscripción</a></p>',
-  });
-}
-
-/**
- * Web App (doGet) -- URL pública de confirmación enlazada desde el email.
- */
+/***** ========================== ENDPOINT ========================== *****/
+// Ejemplo URL (compatible con el Atajo original):
+//   https://script.google.com/macros/s/ID_DEL_SCRIPT/exec?num=0034
+// Ejemplo URL (PWA, con las 4 extensiones):
+//   .../exec?num=0034&staff=pau&format=json
+//   .../exec?action=stats&format=json
 function doGet(e) {
-  const id = e.parameter.id;
-  if (!id) {
-    return HtmlService.createHtmlOutput('Falta el parámetro id.');
+  const format = e?.parameter?.format === 'json' ? 'json' : 'html'; // AÑADIDO
+  const action = e?.parameter?.action || 'checkin'; // AÑADIDO — 'checkin' es el comportamiento original por defecto
+
+  if (action === 'stats') { // AÑADIDO
+    return _stats(format);
   }
 
-  const getResp = UrlFetchApp.fetch(FIRESTORE_BASE + '/inscripciones/' + id, {
-    headers: authHeaders_(),
-    muteHttpExceptions: true,
-  });
+  return _checkin(e, format);
+}
 
-  if (getResp.getResponseCode() === 404) {
-    return HtmlService.createHtmlOutput('Inscripción no encontrada: ' + id);
+/***** ========================== CHECK-IN (original + LockService) ========================== *****/
+function _checkin(e, format) {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+
+  const num = e?.parameter?.num ? String(e.parameter.num).trim() : '';
+  if (!num) return _respond('invalid', 'Falta ?num', format);
+
+  // Leer sesión activa desde Config
+  const cfg = ss.getSheetByName(SHEET_CONFIG);
+  if (!cfg) return _respond('error', 'Falta hoja "Config"', format);
+  const session = cfg.getRange(CELL_CURRENT_SESSION).getDisplayValue().trim();
+  if (!session) return _respond('sin_sesion', 'Config!B2 vacío — no hay sesión activa', format);
+
+  // Comprobar que el número existe en asistentes
+  const shAsistentes = ss.getSheetByName(SHEET_ASISTENTES);
+  if (!shAsistentes) return _respond('error', 'Falta hoja "asistentes"', format);
+  const nums = shAsistentes
+    .getRange(2, COL_NUMERO, Math.max(shAsistentes.getLastRow() - 1, 0), 1)
+    .getValues()
+    .flat()
+    .map((v) => String(v).trim());
+
+  if (!nums.includes(num)) {
+    return _respond('no_encontrado', `Número ${num} no está en "asistentes"`, format);
   }
 
-  const doc = JSON.parse(getResp.getContentText());
-  const estadoActual = doc.fields.estado.stringValue;
+  const shLog = ss.getSheetByName(SHEET_ASISTENCIAS);
+  if (!shLog) return _respond('error', 'Falta hoja "asistencias"', format);
 
-  if (estadoActual === 'confirmado') {
-    return HtmlService.createHtmlOutput('Esta inscripción ya estaba confirmada. ¡Gracias!');
+  const staff = e?.parameter?.staff ? String(e.parameter.staff).trim() : ''; // AÑADIDO
+
+  // AÑADIDO: LockService — serializa comprobación de duplicado + escritura
+  // para que dos escaneos casi simultáneos del mismo número no se cuelen
+  // los dos a la vez (posible con varios móviles a la vez, no lo era con
+  // el Atajo de una sola persona).
+  const lock = LockService.getScriptLock();
+  try {
+    lock.waitLock(10000); // hasta 10s esperando su turno
+  } catch (err) {
+    return _respond('error', 'Ocupado, inténtalo de nuevo en unos segundos', format);
   }
 
-  const updateUrl = FIRESTORE_BASE + '/inscripciones/' + id + '?updateMask.fieldPaths=estado&updateMask.fieldPaths=tsConfirmacion';
-  const updateBody = {
-    fields: {
-      estado: { stringValue: 'confirmado' },
-      tsConfirmacion: { timestampValue: new Date().toISOString() },
-    },
-  };
+  try {
+    const last = shLog.getLastRow();
+    if (last >= 2) {
+      const pares = shLog.getRange(2, 1, last - 1, 2).getValues();
+      const ya = pares.some((r) => String(r[0]).trim() === num && String(r[1]).trim() === session);
+      if (ya) {
+        return _respond('duplicado', `Ya estaba registrado · Nº ${num} → ${session}`, format, { num, session });
+      }
+    }
 
-  UrlFetchApp.fetch(updateUrl, {
-    method: 'patch',
-    headers: authHeaders_(),
-    contentType: 'application/json',
-    payload: JSON.stringify(updateBody),
-  });
+    const ts = Utilities.formatDate(new Date(), 'Europe/Madrid', 'yyyy-MM-dd HH:mm:ss');
+    shLog.appendRow([num, session, ts, staff]); // columna D (staff) añadida al final, no rompe filas antiguas sin ese dato
 
-  return HtmlService.createHtmlOutput('Inscripción ' + id + ' confirmada. ¡Gracias!');
+    return _respond('ok', `Registrado Nº ${num} → ${session} (${ts})`, format, { num, session, ts, staff });
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+/***** ========================== STATS (nuevo) ========================== *****/
+function _stats(format) {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const cfg = ss.getSheetByName(SHEET_CONFIG);
+  const session = cfg ? cfg.getRange(CELL_CURRENT_SESSION).getDisplayValue().trim() : '';
+
+  const shAsistentes = ss.getSheetByName(SHEET_ASISTENTES);
+  const total = shAsistentes ? Math.max(shAsistentes.getLastRow() - 1, 0) : 0;
+
+  let registrados = 0;
+  const shLog = ss.getSheetByName(SHEET_ASISTENCIAS);
+  if (shLog && session) {
+    const last = shLog.getLastRow();
+    if (last >= 2) {
+      const filas = shLog.getRange(2, 1, last - 1, 2).getValues();
+      registrados = filas.filter((r) => String(r[1]).trim() === session).length;
+    }
+  }
+
+  const tasa = total > 0 ? Math.round((registrados / total) * 1000) / 10 : 0;
+  const data = { session, total, registrados, tasa };
+
+  if (format === 'json') {
+    return ContentService.createTextOutput(JSON.stringify(data)).setMimeType(ContentService.MimeType.JSON);
+  }
+  return _html(`${session || 'Sin sesión activa'}: ${registrados} de ${total} (${tasa}%)`);
+}
+
+/***** ========================== RESPUESTA (HTML original o JSON nuevo) ========================== *****/
+function _respond(status, mensaje, format, extra) {
+  if (format === 'json') {
+    const payload = Object.assign({ status, mensaje }, extra || {});
+    return ContentService.createTextOutput(JSON.stringify(payload)).setMimeType(ContentService.MimeType.JSON);
+  }
+  // Comportamiento original (idéntico al script de Atajos, con el sufijo
+  // "NO-PIN vFinal" que ya tenía Pau, para no romper nada si se reutiliza).
+  return _html(`${mensaje} (NO-PIN vFinal)`);
+}
+
+/***** ========================== HTML HELP (original) ========================== *****/
+function _html(msg) {
+  return HtmlService.createHtmlOutput(
+    `<html><body style="font-family:system-ui;padding:12px;font-size:16px"><b>${msg}</b></body></html>`
+  );
 }
