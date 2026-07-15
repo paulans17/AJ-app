@@ -148,22 +148,36 @@ const Store = (() => {
     return res.text();
   }
 
-  /** Recorre la cola local y dispara ?num=X por cada pendiente, en orden. */
+  /**
+   * Recorre la cola local y dispara ?num=X por cada pendiente, en orden.
+   * Solo se quita de la cola si la respuesta confirma un estado resuelto
+   * (ok o duplicado) — cualquier otra respuesta (sin_sesion, no_encontrado,
+   * error de hoja) se queda en la cola y se cuenta aparte como "failed",
+   * para no perder el check-in en silencio si p. ej. nadie ha activado
+   * todavía la sesión en Config!B2.
+   */
   async function syncQueue() {
-    if (!isOnline()) return { synced: 0, pending: getQueue().length };
+    if (!isOnline()) return { synced: 0, failed: 0, pending: getQueue().length };
     const q = getQueue();
     let synced = 0;
+    let failed = 0;
     const restantes = [];
     for (const item of q) {
       try {
-        await fetchCheckinHtml(item.num);
-        synced++;
+        const html = await fetchCheckinHtml(item.num);
+        const r = parseCheckinHtml(html);
+        if (r.status === 'ok' || r.status === 'duplicado') {
+          synced++;
+        } else {
+          failed++;
+          restantes.push(item);
+        }
       } catch (e) {
         restantes.push(item);
       }
     }
     setQueue(restantes);
-    return { synced, pending: restantes.length };
+    return { synced, failed, pending: restantes.length };
   }
 
   /** Sesión activa + recuento en vivo, para la pantalla Estadísticas (polling, D22). */
