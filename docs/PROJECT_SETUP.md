@@ -5,38 +5,35 @@ Gmail de Alfil Juvenil. Nada de esto lo puede hacer Claude Code por ti (son
 acciones en consolas web o que requieren credenciales tuyas), pero puedes
 pegar esta lista en esa sesión para que sepa qué asumir como ya hecho.
 
-## 1. Proyecto Firebase
+## 1. Proyecto Firebase ✅ (hecho 2026-07-15)
 
-- [ ] Entrar en [console.firebase.google.com](https://console.firebase.google.com)
-      con el Gmail de Alfil Juvenil (no el personal).
-- [ ] Crear proyecto nuevo. Nombre propuesto:
-      `alfiljuvenil-protocolo` (edítalo si prefieres otro — solo afecta a
-      URLs internas, no es visible para el staff).
-- [ ] **No activar** Google Analytics si no lo vas a usar (evita ruido).
+- [x] Proyecto creado con el Gmail de Alfil Juvenil: **`alfiljuvenil-protocolo`**.
+- [x] Config de la app Web ya guardada en `firebase/web-config.json` (no es
+      secreta, va en git).
 - [ ] Confirmar que el plan queda en **Spark** (gratuito) — no aceptar
       ninguna sugerencia de pasar a Blaze (D3).
 
 ## 2. Firestore
 
 - [ ] Firestore Database → Crear base de datos → modo producción → región
-      `eur3 (europe-west)` (más cerca de España que las de EE. UU.).
+      `eur3 (europe-west)` (más cerca de España que las de EE. UU.). Si no
+      lo has hecho todavía, hazlo antes de que Claude Code intente leer o
+      escribir nada.
 
-## 3. Authentication
+## 3. Authentication ✅ (hecho 2026-07-15)
 
-- [ ] Authentication → Sign-in method → activar **Anonymous**.
-- [ ] Authentication → Sign-in method → activar **Email/contraseña**.
+- [x] Authentication → Sign-in method → **Anonymous** activado.
+- [x] Authentication → Sign-in method → **Email/contraseña** activado.
 - [ ] Crear una cuenta email/contraseña para cada persona de
       Informática/Presidencia que vaya a usar el modo admin (o reutilizar
       las que ya existan del panel `/admin` de la web, si el proyecto es el
-      mismo — D2).
+      mismo — D2). De momento solo hay una cuenta de prueba (Pau).
 
-## 4. Custom claims (modo admin)
+## 4. Custom claims (modo admin) ✅ (clave generada 2026-07-15)
 
-- [ ] Generar una clave de cuenta de servicio: Configuración del proyecto →
-      Cuentas de servicio → Generar nueva clave privada. Guarda el JSON
-      **fuera del repo** o en una carpeta que esté en `.gitignore`
-      (ya cubierto por el `.gitignore` de este repo si la llamas
-      `serviceAccountKey.json` dentro de `scripts/`).
+- [x] Clave de cuenta de servicio generada y guardada en
+      `scripts/serviceAccountKey.json` (protegida por `.gitignore` — no se
+      sube a git).
 - [ ] Ejecutar `node scripts/set-claim.js <email> informatica` por cada
       cuenta admin (el script se escribe en Claude Code junto con el resto
       de la app — de momento solo está documentado el flujo).
@@ -67,8 +64,9 @@ pegar esta lista en esa sesión para que sepa qué asumir como ya hecho.
       campos: Nombre, Apellidos, FechaNacimiento, Grado o Actividades,
       MenuCena, DNI, Email, Alergias).
 - [ ] Copiar `apps-script/Code.gs` y `apps-script/appsscript.json` al editor
-      de Apps Script del Form (Extensiones → Apps Script).
-- [ ] Cambiar `PROJECT_ID` en `Code.gs` al proyecto nuevo.
+      de Apps Script del Form (Extensiones → Apps Script). `PROJECT_ID` ya
+      está puesto a `alfiljuvenil-protocolo` en el archivo, no hace falta
+      tocarlo.
 - [ ] Configurar el trigger `onFormSubmit`.
 - [ ] Publicar como aplicación web (`doGet`) para la URL de confirmación.
 

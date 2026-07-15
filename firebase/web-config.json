@@ -1,0 +1,10 @@
+{
+  "_instrucciones": "Config de la app Web de Firebase (Configuración del proyecto > General > Tus apps > app Web). No es secreto, se sube a git sin problema. Claude Code la usa para inicializar el SDK en js/store.js. measurementId es de Analytics, no lo usamos en la arquitectura actual (ver docs/ARCHITECTURE.md) — se deja por si acaso, no hace falta llamar a getAnalytics().",
+  "apiKey": "AIzaSyCyIzYXB3KrNzDDfEDdq3fu0PchSdaHCo8",
+  "authDomain": "alfiljuvenil-protocolo.firebaseapp.com",
+  "projectId": "alfiljuvenil-protocolo",
+  "storageBucket": "alfiljuvenil-protocolo.firebasestorage.app",
+  "messagingSenderId": "703190778034",
+  "appId": "1:703190778034:web:b2e79388e23d09e318c9ab",
+  "measurementId": "G-NY1SP6VG06"
+}
