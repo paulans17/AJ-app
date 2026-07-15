@@ -1,0 +1,2227 @@
+{
+  "directed": false,
+  "multigraph": false,
+  "graph": {},
+  "nodes": [
+    {
+      "label": "appsscript.json",
+      "file_type": "code",
+      "source_file": "apps-script/appsscript.json",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "apps_script_appsscript",
+      "community": 1,
+      "norm_label": "appsscript.json"
+    },
+    {
+      "label": "timeZone",
+      "file_type": "code",
+      "source_file": "apps-script/appsscript.json",
+      "source_location": "L2",
+      "_origin": "ast",
+      "id": "apps_script_appsscript_timezone",
+      "community": 1,
+      "norm_label": "timezone"
+    },
+    {
+      "label": "dependencies",
+      "file_type": "code",
+      "source_file": "apps-script/appsscript.json",
+      "source_location": "L3",
+      "_origin": "ast",
+      "id": "apps_script_appsscript_dependencies",
+      "community": 1,
+      "norm_label": "dependencies"
+    },
+    {
+      "label": "exceptionLogging",
+      "file_type": "code",
+      "source_file": "apps-script/appsscript.json",
+      "source_location": "L4",
+      "_origin": "ast",
+      "id": "apps_script_appsscript_exceptionlogging",
+      "community": 1,
+      "norm_label": "exceptionlogging"
+    },
+    {
+      "label": "runtimeVersion",
+      "file_type": "code",
+      "source_file": "apps-script/appsscript.json",
+      "source_location": "L5",
+      "_origin": "ast",
+      "id": "apps_script_appsscript_runtimeversion",
+      "community": 1,
+      "norm_label": "runtimeversion"
+    },
+    {
+      "label": "webapp",
+      "file_type": "code",
+      "source_file": "apps-script/appsscript.json",
+      "source_location": "L6",
+      "_origin": "ast",
+      "id": "apps_script_appsscript_webapp",
+      "community": 1,
+      "norm_label": "webapp"
+    },
+    {
+      "label": "executeAs",
+      "file_type": "code",
+      "source_file": "apps-script/appsscript.json",
+      "source_location": "L7",
+      "_origin": "ast",
+      "id": "apps_script_appsscript_webapp_executeas",
+      "community": 1,
+      "norm_label": "executeas"
+    },
+    {
+      "label": "access",
+      "file_type": "code",
+      "source_file": "apps-script/appsscript.json",
+      "source_location": "L8",
+      "_origin": "ast",
+      "id": "apps_script_appsscript_webapp_access",
+      "community": 1,
+      "norm_label": "access"
+    },
+    {
+      "label": "oauthScopes",
+      "file_type": "code",
+      "source_file": "apps-script/appsscript.json",
+      "source_location": "L10",
+      "_origin": "ast",
+      "id": "apps_script_appsscript_oauthscopes",
+      "community": 1,
+      "norm_label": "oauthscopes"
+    },
+    {
+      "label": "https://www.googleapis.com/auth/spreadsheets",
+      "file_type": "concept",
+      "source_file": "apps-script/appsscript.json",
+      "source_location": "L10",
+      "_origin": "ast",
+      "id": "ref_https_www_googleapis_com_auth_spreadsheets",
+      "community": 1,
+      "norm_label": "https://www.googleapis.com/auth/spreadsheets"
+    },
+    {
+      "label": "appsscript.json",
+      "file_type": "code",
+      "source_file": "apps-script/stats-readonly/appsscript.json",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "apps_script_stats_readonly_appsscript",
+      "community": 2,
+      "norm_label": "appsscript.json"
+    },
+    {
+      "label": "timeZone",
+      "file_type": "code",
+      "source_file": "apps-script/stats-readonly/appsscript.json",
+      "source_location": "L2",
+      "_origin": "ast",
+      "id": "apps_script_stats_readonly_appsscript_timezone",
+      "community": 2,
+      "norm_label": "timezone"
+    },
+    {
+      "label": "dependencies",
+      "file_type": "code",
+      "source_file": "apps-script/stats-readonly/appsscript.json",
+      "source_location": "L3",
+      "_origin": "ast",
+      "id": "apps_script_stats_readonly_appsscript_dependencies",
+      "community": 2,
+      "norm_label": "dependencies"
+    },
+    {
+      "label": "exceptionLogging",
+      "file_type": "code",
+      "source_file": "apps-script/stats-readonly/appsscript.json",
+      "source_location": "L4",
+      "_origin": "ast",
+      "id": "apps_script_stats_readonly_appsscript_exceptionlogging",
+      "community": 2,
+      "norm_label": "exceptionlogging"
+    },
+    {
+      "label": "runtimeVersion",
+      "file_type": "code",
+      "source_file": "apps-script/stats-readonly/appsscript.json",
+      "source_location": "L5",
+      "_origin": "ast",
+      "id": "apps_script_stats_readonly_appsscript_runtimeversion",
+      "community": 2,
+      "norm_label": "runtimeversion"
+    },
+    {
+      "label": "webapp",
+      "file_type": "code",
+      "source_file": "apps-script/stats-readonly/appsscript.json",
+      "source_location": "L6",
+      "_origin": "ast",
+      "id": "apps_script_stats_readonly_appsscript_webapp",
+      "community": 2,
+      "norm_label": "webapp"
+    },
+    {
+      "label": "executeAs",
+      "file_type": "code",
+      "source_file": "apps-script/stats-readonly/appsscript.json",
+      "source_location": "L7",
+      "_origin": "ast",
+      "id": "apps_script_stats_readonly_appsscript_webapp_executeas",
+      "community": 2,
+      "norm_label": "executeas"
+    },
+    {
+      "label": "access",
+      "file_type": "code",
+      "source_file": "apps-script/stats-readonly/appsscript.json",
+      "source_location": "L8",
+      "_origin": "ast",
+      "id": "apps_script_stats_readonly_appsscript_webapp_access",
+      "community": 2,
+      "norm_label": "access"
+    },
+    {
+      "label": "oauthScopes",
+      "file_type": "code",
+      "source_file": "apps-script/stats-readonly/appsscript.json",
+      "source_location": "L10",
+      "_origin": "ast",
+      "id": "apps_script_stats_readonly_appsscript_oauthscopes",
+      "community": 2,
+      "norm_label": "oauthscopes"
+    },
+    {
+      "label": "https://www.googleapis.com/auth/spreadsheets.readonly",
+      "file_type": "concept",
+      "source_file": "apps-script/stats-readonly/appsscript.json",
+      "source_location": "L10",
+      "_origin": "ast",
+      "id": "ref_https_www_googleapis_com_auth_spreadsheets_readonly",
+      "community": 2,
+      "norm_label": "https://www.googleapis.com/auth/spreadsheets.readonly"
+    },
+    {
+      "label": "app.js",
+      "file_type": "code",
+      "source_file": "js/app.js",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "js_app",
+      "community": 7,
+      "norm_label": "app.js"
+    },
+    {
+      "label": "App",
+      "file_type": "code",
+      "source_file": "js/app.js",
+      "source_location": "L5",
+      "_origin": "ast",
+      "id": "js_app_app",
+      "community": 7,
+      "norm_label": "app"
+    },
+    {
+      "label": "actualizarChips()",
+      "file_type": "code",
+      "source_file": "js/app.js",
+      "source_location": "L70",
+      "_origin": "ast",
+      "id": "js_app_actualizarchips",
+      "community": 7,
+      "norm_label": "actualizarchips()"
+    },
+    {
+      "label": "demo-data.js",
+      "file_type": "code",
+      "source_file": "js/demo-data.js",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "js_demo_data",
+      "community": 8,
+      "norm_label": "demo-data.js"
+    },
+    {
+      "label": "DEMO",
+      "file_type": "code",
+      "source_file": "js/demo-data.js",
+      "source_location": "L8",
+      "_origin": "ast",
+      "id": "js_demo_data_demo",
+      "community": 8,
+      "norm_label": "demo"
+    },
+    {
+      "label": "scanner.js",
+      "file_type": "code",
+      "source_file": "js/scanner.js",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "js_scanner",
+      "community": 9,
+      "norm_label": "scanner.js"
+    },
+    {
+      "label": "Scanner",
+      "file_type": "code",
+      "source_file": "js/scanner.js",
+      "source_location": "L7",
+      "_origin": "ast",
+      "id": "js_scanner_scanner",
+      "community": 9,
+      "norm_label": "scanner"
+    },
+    {
+      "label": "store.js",
+      "file_type": "code",
+      "source_file": "js/store.js",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "js_store",
+      "community": 7,
+      "norm_label": "store.js"
+    },
+    {
+      "label": "Store",
+      "file_type": "code",
+      "source_file": "js/store.js",
+      "source_location": "L8",
+      "_origin": "ast",
+      "id": "js_store_store",
+      "community": 7,
+      "norm_label": "store"
+    },
+    {
+      "label": "views.js",
+      "file_type": "code",
+      "source_file": "js/views.js",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "js_views",
+      "community": 10,
+      "norm_label": "views.js"
+    },
+    {
+      "label": "Views",
+      "file_type": "code",
+      "source_file": "js/views.js",
+      "source_location": "L8",
+      "_origin": "ast",
+      "id": "js_views_views",
+      "community": 10,
+      "norm_label": "views"
+    },
+    {
+      "label": "sw.js",
+      "file_type": "code",
+      "source_file": "sw.js",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "sw",
+      "community": 11,
+      "norm_label": "sw.js"
+    },
+    {
+      "label": "SHELL",
+      "file_type": "code",
+      "source_file": "sw.js",
+      "source_location": "L5",
+      "_origin": "ast",
+      "id": "sw_shell",
+      "community": 11,
+      "norm_label": "shell"
+    },
+    {
+      "label": "CLAUDE.md",
+      "type": "document",
+      "description": "Instrucciones para Claude Code sobre el estado vigente del proyecto Staff AJapp; ordena la lectura de docs y marca qu\u00e9 est\u00e1 superseded.",
+      "confidence": "EXTRACTED",
+      "source_location": "CLAUDE.md",
+      "file_type": "concept",
+      "id": "doc:CLAUDE.md",
+      "community": 5,
+      "norm_label": "claude.md"
+    },
+    {
+      "label": "README.md",
+      "type": "document",
+      "description": "README del repo staff-ajapp-pwa; describe estado de la demo, c\u00f3mo arrancarla y guion de demo. Contiene contenido desactualizado (pre-pivote a Sheets).",
+      "confidence": "EXTRACTED",
+      "source_location": "README.md",
+      "file_type": "concept",
+      "id": "doc:README.md",
+      "community": 4,
+      "norm_label": "readme.md"
+    },
+    {
+      "label": "ARCHITECTURE.md",
+      "type": "document",
+      "description": "Describe el 'c\u00f3mo' de la arquitectura vigente: Google Sheets + Apps Script, stack, estrategia offline y seguridad.",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/ARCHITECTURE.md",
+      "file_type": "concept",
+      "id": "doc:ARCHITECTURE.md",
+      "community": 0,
+      "norm_label": "architecture.md"
+    },
+    {
+      "label": "DECISIONS.md",
+      "type": "document",
+      "description": "Registro cronol\u00f3gico de decisiones (D1-D22) del redise\u00f1o de Staff AJapp; fuente de verdad del proyecto.",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/DECISIONS.md",
+      "file_type": "concept",
+      "id": "doc:DECISIONS.md",
+      "community": 5,
+      "norm_label": "decisions.md"
+    },
+    {
+      "label": "FIRESTORE_SCHEMA.md",
+      "type": "document",
+      "description": "Modelo de datos Firestore para el Curso de Protocolo XXII; marcado SUPERSEDED por D13, se deja como referencia hist\u00f3rica.",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/FIRESTORE_SCHEMA.md",
+      "file_type": "concept",
+      "id": "doc:FIRESTORE_SCHEMA.md",
+      "community": 4,
+      "norm_label": "firestore_schema.md"
+    },
+    {
+      "label": "FLOWS.md",
+      "type": "document",
+      "description": "Diagramas Mermaid de los flujos principales (login, check-in/offline, estad\u00edsticas, activar sesi\u00f3n, inscripci\u00f3n) basados en Sheets + Apps Script.",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/FLOWS.md",
+      "file_type": "concept",
+      "id": "doc:FLOWS.md",
+      "community": 5,
+      "norm_label": "flows.md"
+    },
+    {
+      "label": "PROJECT_SETUP.md",
+      "type": "document",
+      "description": "Checklist de infraestructura; mayormente superseded (pasos Firebase 1-9) salvo la nueva secci\u00f3n 0 (deploy de Apps Script).",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/PROJECT_SETUP.md",
+      "file_type": "concept",
+      "id": "doc:PROJECT_SETUP.md",
+      "community": 5,
+      "norm_label": "project_setup.md"
+    },
+    {
+      "label": "SHEET_SCHEMA.md",
+      "type": "document",
+      "description": "Modelo de datos vigente sobre la Google Sheet real (pesta\u00f1as asistentes/Config/asistencias/tabla) y el endpoint doGet del script original, sin extensiones.",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/SHEET_SCHEMA.md",
+      "file_type": "concept",
+      "id": "doc:SHEET_SCHEMA.md",
+      "community": 5,
+      "norm_label": "sheet_schema.md"
+    },
+    {
+      "label": "index.html",
+      "type": "component",
+      "description": "Shell HTML de la PWA (demo): topbar, tabbar (Sesiones/Escanear/Dashboard/Admin), carga scripts demo-data/store/scanner/views/app; debe recortarse a Login+Escanear+Estad\u00edsticas.",
+      "confidence": "EXTRACTED",
+      "source_location": "index.html",
+      "file_type": "concept",
+      "id": "doc:index.html",
+      "community": 6,
+      "norm_label": "index.html"
+    },
+    {
+      "label": "icon.svg",
+      "type": "component",
+      "description": "Icono vectorial de la PWA: fondo negro redondeado, s\u00edmbolo de alfil (\u2657) y texto 'STAFF' en dorado.",
+      "confidence": "EXTRACTED",
+      "source_location": "icons/icon.svg",
+      "file_type": "concept",
+      "id": "asset:icon.svg",
+      "community": 6,
+      "norm_label": "icon.svg"
+    },
+    {
+      "label": "icon-192.png",
+      "type": "component",
+      "description": "Icono PWA 192x192 px: 'AJ STAFF' en dorado sobre fondo negro redondeado, usado como apple-touch-icon.",
+      "confidence": "EXTRACTED",
+      "source_location": "index.html; icons/icon-192.png",
+      "file_type": "concept",
+      "id": "asset:icon-192.png",
+      "community": 6,
+      "norm_label": "icon-192.png"
+    },
+    {
+      "label": "icon-512.png",
+      "type": "component",
+      "description": "Icono PWA 512x512 px, misma composici\u00f3n 'AJ STAFF' en dorado sobre negro, para manifest.webmanifest.",
+      "confidence": "INFERRED",
+      "source_location": "icons/icon-512.png",
+      "file_type": "concept",
+      "id": "asset:icon-512.png",
+      "community": 12,
+      "norm_label": "icon-512.png"
+    },
+    {
+      "label": "Apps Script Web App checkin (Code.gs)",
+      "type": "component",
+      "description": "Script container-bound a la hoja, \u00fanico doGet con par\u00e1metro num; el script real de Pau (NO-PIN vFinal), no se toca sin permiso (D21).",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/SHEET_SCHEMA.md; docs/ARCHITECTURE.md",
+      "file_type": "concept",
+      "id": "component:apps-script-checkin",
+      "community": 3,
+      "norm_label": "apps script web app checkin (code.gs)"
+    },
+    {
+      "label": "Apps Script stats-readonly",
+      "type": "component",
+      "description": "Proyecto Apps Script standalone aparte, solo lectura, expone doGet sin par\u00e1metros devolviendo JSON {session,total,registrados,tasa} (D22).",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/SHEET_SCHEMA.md; docs/DECISIONS.md D22",
+      "file_type": "concept",
+      "id": "component:apps-script-stats",
+      "community": 3,
+      "norm_label": "apps script stats-readonly"
+    },
+    {
+      "label": "js/store.js",
+      "type": "component",
+      "description": "Capa de datos de la PWA; se reescribe para hacer fetch al Web App de Apps Script en vez de Firestore/localStorage puro, manteniendo la cola offline.",
+      "confidence": "EXTRACTED",
+      "source_location": "CLAUDE.md; docs/ARCHITECTURE.md",
+      "file_type": "concept",
+      "id": "component:store.js",
+      "community": 3,
+      "norm_label": "js/store.js"
+    },
+    {
+      "label": "js/views.js",
+      "type": "component",
+      "description": "Vistas de la PWA; se recorta para quitar pesta\u00f1as Sesiones y Admin (D14/D15), queda Login+Escanear+Estad\u00edsticas.",
+      "confidence": "EXTRACTED",
+      "source_location": "CLAUDE.md; docs/ARCHITECTURE.md",
+      "file_type": "concept",
+      "id": "component:views.js",
+      "community": 6,
+      "norm_label": "js/views.js"
+    },
+    {
+      "label": "js/app.js",
+      "type": "component",
+      "description": "Router/app shell de la PWA; se recorta quitando rutas Sesiones/Admin.",
+      "confidence": "EXTRACTED",
+      "source_location": "CLAUDE.md; docs/ARCHITECTURE.md",
+      "file_type": "concept",
+      "id": "component:app.js",
+      "community": 6,
+      "norm_label": "js/app.js"
+    },
+    {
+      "label": "js/scanner.js",
+      "type": "component",
+      "description": "M\u00f3dulo de escaneo QR (BarcodeDetector nativo con fallback jsQR); se reutiliza sin cambios.",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/ARCHITECTURE.md",
+      "file_type": "concept",
+      "id": "component:scanner.js",
+      "community": 6,
+      "norm_label": "js/scanner.js"
+    },
+    {
+      "label": "js/demo-data.js",
+      "type": "component",
+      "description": "Datos ficticios en localStorage para la demo; se queda para modo demo/dev sin Sheet real.",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/ARCHITECTURE.md",
+      "file_type": "concept",
+      "id": "component:demo-data.js",
+      "community": 6,
+      "norm_label": "js/demo-data.js"
+    },
+    {
+      "label": "sw.js",
+      "type": "component",
+      "description": "Service worker de la PWA; se reutiliza tal cual.",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/ARCHITECTURE.md",
+      "file_type": "concept",
+      "id": "component:sw.js",
+      "community": 13,
+      "norm_label": "sw.js"
+    },
+    {
+      "label": "Cola offline (getQueue/setQueue/syncQueue)",
+      "type": "component",
+      "description": "Mecanismo de cola en localStorage para check-ins sin conexi\u00f3n; se reutiliza casi tal cual, cambiando qu\u00e9 significa 'sincronizar' (D18).",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/ARCHITECTURE.md; docs/DECISIONS.md D18",
+      "file_type": "concept",
+      "id": "component:offline-queue",
+      "community": 3,
+      "norm_label": "cola offline (getqueue/setqueue/syncqueue)"
+    },
+    {
+      "label": "Google Sheet MIEMBROS CURSO PROTOCOLO XXI/XXII",
+      "type": "system",
+      "description": "Hoja de c\u00e1lculo real con pesta\u00f1as asistentes, Config, asistencias, tabla; almac\u00e9n de datos del evento, sustituye a Firestore.",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/SHEET_SCHEMA.md; docs/ARCHITECTURE.md",
+      "file_type": "concept",
+      "id": "system:google-sheet",
+      "community": 3,
+      "norm_label": "google sheet miembros curso protocolo xxi/xxii"
+    },
+    {
+      "label": "Proyecto Firebase alfiljuvenil-protocolo",
+      "type": "system",
+      "description": "Proyecto Firebase creado el 15/07 (D1) para la BD real; abandonado por Staff AJapp tras D13, queda libre por si alfil-statics lo usa.",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/DECISIONS.md D1, D13; docs/PROJECT_SETUP.md",
+      "file_type": "concept",
+      "id": "system:firebase-project",
+      "community": 0,
+      "norm_label": "proyecto firebase alfiljuvenil-protocolo"
+    },
+    {
+      "label": "Firestore",
+      "type": "system",
+      "description": "Base de datos NoSQL que se iba a usar como backend del evento; abandonada en D13 en favor de Google Sheets + Apps Script.",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/FIRESTORE_SCHEMA.md; docs/DECISIONS.md D13",
+      "file_type": "concept",
+      "id": "system:firestore",
+      "community": 0,
+      "norm_label": "firestore"
+    },
+    {
+      "label": "alfil-statics (web + panel /admin)",
+      "type": "system",
+      "description": "Web p\u00fablica + panel /admin en PHP, proyecto totalmente aparte de Staff AJapp; comparte (compart\u00eda) proyecto Firebase (D2).",
+      "confidence": "EXTRACTED",
+      "source_location": "README.md; CLAUDE.md; docs/DECISIONS.md D2",
+      "file_type": "concept",
+      "id": "system:alfil-statics",
+      "community": 4,
+      "norm_label": "alfil-statics (web + panel /admin)"
+    },
+    {
+      "label": "Staff AJapp (iOS/SwiftUI, obsoleta)",
+      "type": "system",
+      "description": "App iOS antigua en Swift usada como referencia visual y de l\u00f3gica (paleta Theme.swift, Views/Scan/); obsoleta como cliente.",
+      "confidence": "EXTRACTED",
+      "source_location": "README.md; CLAUDE.md",
+      "file_type": "concept",
+      "id": "system:staff-ajapp-ios",
+      "community": 4,
+      "norm_label": "staff ajapp (ios/swiftui, obsoleta)"
+    },
+    {
+      "label": "Staff AJappBd (backend Firebase de pruebas)",
+      "type": "system",
+      "description": "Backend del proyecto Firebase de pruebas (prueba-protocolo2627), ya no usado para producci\u00f3n; su FIRESTORE_SCHEMA.md es antecesor del de este repo.",
+      "confidence": "EXTRACTED",
+      "source_location": "README.md",
+      "file_type": "concept",
+      "id": "system:staff-ajappbd",
+      "community": 4,
+      "norm_label": "staff ajappbd (backend firebase de pruebas)"
+    },
+    {
+      "label": "Atajo de iPhone (Shortcut)",
+      "type": "system",
+      "description": "Atajo de iOS que Pau usaba en la edici\u00f3n pasada: escanea QR, llama a URL de Apps Script con el n\u00famero; patr\u00f3n original que Staff AJapp PWA replica.",
+      "confidence": "EXTRACTED",
+      "source_location": "CLAUDE.md; docs/ARCHITECTURE.md; docs/DECISIONS.md D13",
+      "file_type": "concept",
+      "id": "system:iphone-shortcut",
+      "community": 3,
+      "norm_label": "atajo de iphone (shortcut)"
+    },
+    {
+      "label": "Pau",
+      "type": "person",
+      "description": "Responsable de Inform\u00e1tica en Alfil Juvenil; due\u00f1o del script Apps Script original y quien tom\u00f3 las decisiones clave (D13, D21, D22).",
+      "confidence": "EXTRACTED",
+      "source_location": "CLAUDE.md; docs/DECISIONS.md",
+      "file_type": "concept",
+      "id": "person:pau",
+      "community": 5,
+      "norm_label": "pau"
+    },
+    {
+      "label": "Pesta\u00f1a asistentes",
+      "type": "concept",
+      "description": "Pesta\u00f1a de la hoja con columnas N\u00daMERO y NOMBRE; roster de asistentes al curso usado por el check-in.",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/SHEET_SCHEMA.md",
+      "file_type": "concept",
+      "id": "concept:sheet-tab-asistentes",
+      "community": 3,
+      "norm_label": "pestana asistentes"
+    },
+    {
+      "label": "Pesta\u00f1a Config (B2)",
+      "type": "concept",
+      "description": "Celda Config!B2 contiene la sesi\u00f3n activa; se edita manualmente en la hoja, sin pantalla en la app (D15).",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/SHEET_SCHEMA.md; docs/DECISIONS.md D15",
+      "file_type": "concept",
+      "id": "concept:sheet-tab-config",
+      "community": 3,
+      "norm_label": "pestana config (b2)"
+    },
+    {
+      "label": "Pesta\u00f1a asistencias",
+      "type": "concept",
+      "description": "Registro de cada escaneo v\u00e1lido: n\u00famero, sesi\u00f3n, timestamp; sin columna de qui\u00e9n escane\u00f3.",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/SHEET_SCHEMA.md",
+      "file_type": "concept",
+      "id": "concept:sheet-tab-asistencias",
+      "community": 3,
+      "norm_label": "pestana asistencias"
+    },
+    {
+      "label": "Pesta\u00f1a tabla",
+      "type": "concept",
+      "description": "Pesta\u00f1a existente en la hoja real cuyo contenido a\u00fan no est\u00e1 confirmado; pendiente de verificar si la usa la pantalla Estad\u00edsticas.",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/SHEET_SCHEMA.md; docs/DECISIONS.md; docs/PROJECT_SETUP.md",
+      "file_type": "concept",
+      "id": "concept:sheet-tab-tabla",
+      "community": 3,
+      "norm_label": "pestana tabla"
+    },
+    {
+      "label": "Regla de negocio ECTS (t\u00edtulo perdido por faltas)",
+      "type": "concept",
+      "description": "80% m\u00ednimo de asistencia a 14 sesiones para el t\u00edtulo; 2 faltas = en riesgo, 3+ = cr\u00edtico (D11).",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/DECISIONS.md D11; docs/FIRESTORE_SCHEMA.md",
+      "file_type": "concept",
+      "id": "concept:ects-rule",
+      "community": 14,
+      "norm_label": "regla de negocio ects (titulo perdido por faltas)"
+    },
+    {
+      "label": "D1: Proyecto Firebase nuevo (cuenta AJ)",
+      "type": "decision",
+      "description": "Crear proyecto Firebase propiedad de Alfil Juvenil (no personal de Pau) como definitivo para la BD real del curso.",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/DECISIONS.md",
+      "file_type": "concept",
+      "id": "decision:D1",
+      "community": 0,
+      "norm_label": "d1: proyecto firebase nuevo (cuenta aj)"
+    },
+    {
+      "label": "D2: Proyecto Firebase compartido con la web",
+      "type": "decision",
+      "description": "Un \u00fanico proyecto Firebase compartido entre alfil-statics (prefijo web_) y el evento (sin prefijo).",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/DECISIONS.md",
+      "file_type": "concept",
+      "id": "decision:D2",
+      "community": 4,
+      "norm_label": "d2: proyecto firebase compartido con la web"
+    },
+    {
+      "label": "D3: Sin plan Blaze",
+      "type": "decision",
+      "description": "No se activa facturaci\u00f3n (Blaze); nada de Cloud Functions desplegadas, coste 0\u20ac.",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/DECISIONS.md",
+      "file_type": "concept",
+      "id": "decision:D3",
+      "community": 4,
+      "norm_label": "d3: sin plan blaze"
+    },
+    {
+      "label": "D4: Autenticaci\u00f3n de dos niveles",
+      "type": "decision",
+      "description": "Staff general con Anonymous Auth; modo admin (Inform\u00e1tica/Presidencia) con login email/contrase\u00f1a real y custom claim departamento, reglas Firestore comprueban el claim.",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/DECISIONS.md",
+      "file_type": "concept",
+      "id": "decision:D4",
+      "community": 0,
+      "norm_label": "d4: autenticacion de dos niveles"
+    },
+    {
+      "label": "D5: Inscripci\u00f3n v\u00eda Google Form \u2192 Apps Script \u2192 Firestore",
+      "type": "decision",
+      "description": "Se mantiene el puente ya probado en prueba-protocolo2627, trasladado al proyecto nuevo.",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/DECISIONS.md",
+      "file_type": "concept",
+      "id": "decision:D5",
+      "community": 0,
+      "norm_label": "d5: inscripcion via google form \u2192 apps script \u2192 firestore"
+    },
+    {
+      "label": "D6: Monorepo PWA + backend Firebase",
+      "type": "decision",
+      "description": "Un solo repo staff-ajapp-pwa/ con frontend y configuraci\u00f3n Firebase juntos.",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/DECISIONS.md",
+      "file_type": "concept",
+      "id": "decision:D6",
+      "community": 0,
+      "norm_label": "d6: monorepo pwa + backend firebase"
+    },
+    {
+      "label": "D7: Reset antes del curso real",
+      "type": "decision",
+      "description": "Vaciar inscripciones/checkins y resetear contadorId antes de que arranque el Curso de Protocolo XXII.",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/DECISIONS.md",
+      "file_type": "concept",
+      "id": "decision:D7",
+      "community": 5,
+      "norm_label": "d7: reset antes del curso real"
+    },
+    {
+      "label": "D8: Mantener gradoActividades y alergias",
+      "type": "decision",
+      "description": "Se guardan en inscripciones este a\u00f1o porque no cuesta nada y alergias es relevante para catering.",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/DECISIONS.md",
+      "file_type": "concept",
+      "id": "decision:D8",
+      "community": 4,
+      "norm_label": "d8: mantener gradoactividades y alergias"
+    },
+    {
+      "label": "D9: Dise\u00f1o basado en prototipo Figma Make",
+      "type": "decision",
+      "description": "Se usa el prototipo Figma Make existente como base de pantallas, corrigiendo que el escaneo es por c\u00e1mara/QR, no NFC.",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/DECISIONS.md",
+      "file_type": "concept",
+      "id": "decision:D9",
+      "community": 0,
+      "norm_label": "d9: diseno basado en prototipo figma make"
+    },
+    {
+      "label": "D10: Demo funcional ya existente descubierta",
+      "type": "decision",
+      "description": "Reconoce la demo PWA ya construida el 07/07; corrige el esquema con porcentajeMinimo/sesiones.fecha y confirma que Inform\u00e1tica y Presidencia tienen igual nivel de admin.",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/DECISIONS.md",
+      "file_type": "concept",
+      "id": "decision:D10",
+      "community": 4,
+      "norm_label": "d10: demo funcional ya existente descubierta"
+    },
+    {
+      "label": "D11: Regla de negocio ECTS formalizada",
+      "type": "decision",
+      "description": "80% de asistencia m\u00ednima a 14 sesiones para el t\u00edtulo; formaliza la regla ya implementada en la demo.",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/DECISIONS.md",
+      "file_type": "concept",
+      "id": "decision:D11",
+      "community": 4,
+      "norm_label": "d11: regla de negocio ects formalizada"
+    },
+    {
+      "label": "D12: Modo admin con login real email/contrase\u00f1a",
+      "type": "decision",
+      "description": "Sustituye el gate solo-de-interfaz de la demo; confirmado por Pau el 15/07.",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/DECISIONS.md",
+      "file_type": "concept",
+      "id": "decision:D12",
+      "community": 0,
+      "norm_label": "d12: modo admin con login real email/contrasena"
+    },
+    {
+      "label": "D13: Backend del evento: Google Sheets + Apps Script (no Firestore)",
+      "type": "decision",
+      "description": "Pivote principal: abandona Firestore en favor de una hoja de c\u00e1lculo con pesta\u00f1as y un Web App de Apps Script; sustituye a D1-D5, D9, D12 en lo relativo al backend.",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/DECISIONS.md",
+      "file_type": "concept",
+      "id": "decision:D13",
+      "community": 0,
+      "norm_label": "d13: backend del evento: google sheets + apps script (no firestore)"
+    },
+    {
+      "label": "D14: App reducida a 2 pantallas",
+      "type": "decision",
+      "description": "La app de staff se reduce a Escanear y Estad\u00edsticas (m\u00e1s login inicial); se eliminan pesta\u00f1as Sesiones y Admin.",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/DECISIONS.md",
+      "file_type": "concept",
+      "id": "decision:D14",
+      "community": 0,
+      "norm_label": "d14: app reducida a 2 pantallas"
+    },
+    {
+      "label": "D15: Gesti\u00f3n manual en la hoja",
+      "type": "decision",
+      "description": "Sesi\u00f3n activa, staff e inscripciones se gestionan a mano en la hoja de c\u00e1lculo; no hay pantallas de administraci\u00f3n en la app.",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/DECISIONS.md",
+      "file_type": "concept",
+      "id": "decision:D15",
+      "community": 0,
+      "norm_label": "d15: gestion manual en la hoja"
+    },
+    {
+      "label": "D16: Correcci\u00f3n de IDs duplicados con LockService",
+      "type": "decision",
+      "description": "El bug hist\u00f3rico de IDs duplicados se corrige con LockService de Apps Script, no transacciones de Firestore. (Posteriormente revertido en D21.)",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/DECISIONS.md",
+      "file_type": "concept",
+      "id": "decision:D16",
+      "community": 0,
+      "norm_label": "d16: correccion de ids duplicados con lockservice"
+    },
+    {
+      "label": "D17: Seguridad simplificada sin Firebase Auth",
+      "type": "decision",
+      "description": "El Web App de Apps Script es p\u00fablico por URL; control de acceso es 'qui\u00e9n tiene la URL', riesgo aceptado.",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/DECISIONS.md",
+      "file_type": "concept",
+      "id": "decision:D17",
+      "community": 0,
+      "norm_label": "d17: seguridad simplificada sin firebase auth"
+    },
+    {
+      "label": "D18: Offline reutiliza la cola local existente",
+      "type": "decision",
+      "description": "Se reutiliza getQueue/setQueue/syncQueue de la demo; 'sincronizar' pasa a disparar la llamada real al Web App.",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/DECISIONS.md",
+      "file_type": "concept",
+      "id": "decision:D18",
+      "community": 0,
+      "norm_label": "d18: offline reutiliza la cola local existente"
+    },
+    {
+      "label": "D19: SHEET_SCHEMA.md y Code.gs parten del script y hoja reales",
+      "type": "decision",
+      "description": "Se ajustan D13-D18 con el script real 'NO-PIN vFinal' y la hoja real; a\u00f1ade extensiones marcadas // A\u00d1ADIDO (LockService, columna staff, acci\u00f3n stats, format=json). Posteriormente revertido por D21.",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/DECISIONS.md",
+      "file_type": "concept",
+      "id": "decision:D19",
+      "community": 0,
+      "norm_label": "d19: sheet_schema.md y code.gs parten del script y hoja reales"
+    },
+    {
+      "label": "D20: Inscripci\u00f3n/roster fuera de alcance",
+      "type": "decision",
+      "description": "Construir la lista asistentes sigue siendo proceso de Pau con Excel/scripts, fuera de este repo; reemplaza la idea de puente Form\u2192Apps Script\u2192Firestore/Sheet de D5.",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/DECISIONS.md",
+      "file_type": "concept",
+      "id": "decision:D20",
+      "community": 5,
+      "norm_label": "d20: inscripcion/roster fuera de alcance"
+    },
+    {
+      "label": "D21: Revertir Code.gs al script original exacto",
+      "type": "decision",
+      "description": "Pau rechaza las 4 extensiones de D19 (LockService, columna staff, acci\u00f3n stats, format=json); el script vuelve a ser exactamente 'NO-PIN vFinal', sin tocar ni una l\u00ednea.",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/DECISIONS.md",
+      "file_type": "concept",
+      "id": "decision:D21",
+      "community": 5,
+      "norm_label": "d21: revertir code.gs al script original exacto"
+    },
+    {
+      "label": "D22: Estad\u00edsticas resueltas con proyecto Apps Script separado",
+      "type": "decision",
+      "description": "Pau elige la opci\u00f3n 3: funci\u00f3n de lectura en un proyecto Apps Script standalone aparte (stats-readonly), sin tocar Code.gs; devuelve JSON.",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/DECISIONS.md",
+      "file_type": "concept",
+      "id": "decision:D22",
+      "community": 5,
+      "norm_label": "d22: estadisticas resueltas con proyecto apps script separado"
+    }
+  ],
+  "links": [
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps-script/appsscript.json",
+      "source_location": "L3",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "apps_script_appsscript",
+      "target": "apps_script_appsscript_dependencies",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps-script/appsscript.json",
+      "source_location": "L4",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "apps_script_appsscript",
+      "target": "apps_script_appsscript_exceptionlogging",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps-script/appsscript.json",
+      "source_location": "L10",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "apps_script_appsscript",
+      "target": "apps_script_appsscript_oauthscopes",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps-script/appsscript.json",
+      "source_location": "L5",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "apps_script_appsscript",
+      "target": "apps_script_appsscript_runtimeversion",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps-script/appsscript.json",
+      "source_location": "L2",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "apps_script_appsscript",
+      "target": "apps_script_appsscript_timezone",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps-script/appsscript.json",
+      "source_location": "L6",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "apps_script_appsscript",
+      "target": "apps_script_appsscript_webapp",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps-script/appsscript.json",
+      "source_location": "L8",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "apps_script_appsscript_webapp",
+      "target": "apps_script_appsscript_webapp_access",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps-script/appsscript.json",
+      "source_location": "L7",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "apps_script_appsscript_webapp",
+      "target": "apps_script_appsscript_webapp_executeas",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "extends",
+      "confidence": "EXTRACTED",
+      "source_file": "apps-script/appsscript.json",
+      "source_location": "L10",
+      "weight": 1.0,
+      "context": "import",
+      "_origin": "ast",
+      "source": "apps_script_appsscript_oauthscopes",
+      "target": "ref_https_www_googleapis_com_auth_spreadsheets",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps-script/stats-readonly/appsscript.json",
+      "source_location": "L3",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "apps_script_stats_readonly_appsscript",
+      "target": "apps_script_stats_readonly_appsscript_dependencies",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps-script/stats-readonly/appsscript.json",
+      "source_location": "L4",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "apps_script_stats_readonly_appsscript",
+      "target": "apps_script_stats_readonly_appsscript_exceptionlogging",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps-script/stats-readonly/appsscript.json",
+      "source_location": "L10",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "apps_script_stats_readonly_appsscript",
+      "target": "apps_script_stats_readonly_appsscript_oauthscopes",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps-script/stats-readonly/appsscript.json",
+      "source_location": "L5",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "apps_script_stats_readonly_appsscript",
+      "target": "apps_script_stats_readonly_appsscript_runtimeversion",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps-script/stats-readonly/appsscript.json",
+      "source_location": "L2",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "apps_script_stats_readonly_appsscript",
+      "target": "apps_script_stats_readonly_appsscript_timezone",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps-script/stats-readonly/appsscript.json",
+      "source_location": "L6",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "apps_script_stats_readonly_appsscript",
+      "target": "apps_script_stats_readonly_appsscript_webapp",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps-script/stats-readonly/appsscript.json",
+      "source_location": "L8",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "apps_script_stats_readonly_appsscript_webapp",
+      "target": "apps_script_stats_readonly_appsscript_webapp_access",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps-script/stats-readonly/appsscript.json",
+      "source_location": "L7",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "apps_script_stats_readonly_appsscript_webapp",
+      "target": "apps_script_stats_readonly_appsscript_webapp_executeas",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "extends",
+      "confidence": "EXTRACTED",
+      "source_file": "apps-script/stats-readonly/appsscript.json",
+      "source_location": "L10",
+      "weight": 1.0,
+      "context": "import",
+      "_origin": "ast",
+      "source": "apps_script_stats_readonly_appsscript_oauthscopes",
+      "target": "ref_https_www_googleapis_com_auth_spreadsheets_readonly",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "js/app.js",
+      "source_location": "L70",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "js_app",
+      "target": "js_app_actualizarchips",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "js/app.js",
+      "source_location": "L5",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "js_app",
+      "target": "js_app_app",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "js/app.js",
+      "source_location": "L75",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "js_app_actualizarchips",
+      "target": "js_store_store"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "js/demo-data.js",
+      "source_location": "L8",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "js_demo_data",
+      "target": "js_demo_data_demo",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "js/scanner.js",
+      "source_location": "L7",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "js_scanner",
+      "target": "js_scanner_scanner",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "js/store.js",
+      "source_location": "L8",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "js_store",
+      "target": "js_store_store",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "js/views.js",
+      "source_location": "L8",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "js_views",
+      "target": "js_views_views",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "sw.js",
+      "source_location": "L5",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "sw",
+      "target": "sw_shell",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "documents",
+      "confidence": "EXTRACTED",
+      "source_location": "CLAUDE.md",
+      "source_file": "",
+      "source": "doc:CLAUDE.md",
+      "target": "decision:D13",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "documents",
+      "confidence": "EXTRACTED",
+      "source_location": "CLAUDE.md",
+      "source_file": "",
+      "source": "doc:CLAUDE.md",
+      "target": "decision:D14",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "documents",
+      "confidence": "EXTRACTED",
+      "source_location": "CLAUDE.md",
+      "source_file": "",
+      "source": "doc:CLAUDE.md",
+      "target": "decision:D15",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "documents",
+      "confidence": "EXTRACTED",
+      "source_location": "CLAUDE.md",
+      "source_file": "",
+      "source": "doc:CLAUDE.md",
+      "target": "decision:D20",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "documents",
+      "confidence": "EXTRACTED",
+      "source_location": "CLAUDE.md",
+      "source_file": "",
+      "source": "doc:CLAUDE.md",
+      "target": "decision:D21",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "documents",
+      "confidence": "EXTRACTED",
+      "source_location": "CLAUDE.md",
+      "source_file": "",
+      "source": "doc:CLAUDE.md",
+      "target": "decision:D22",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_location": "CLAUDE.md",
+      "source_file": "",
+      "source": "doc:CLAUDE.md",
+      "target": "doc:ARCHITECTURE.md",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_location": "CLAUDE.md",
+      "source_file": "",
+      "source": "doc:CLAUDE.md",
+      "target": "doc:DECISIONS.md",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "marks as ignored/superseded",
+      "confidence": "EXTRACTED",
+      "source_location": "CLAUDE.md",
+      "source_file": "",
+      "source": "doc:CLAUDE.md",
+      "target": "doc:FIRESTORE_SCHEMA.md",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_location": "CLAUDE.md",
+      "source_file": "",
+      "source": "doc:CLAUDE.md",
+      "target": "doc:FLOWS.md",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_location": "CLAUDE.md",
+      "source_file": "",
+      "source": "doc:CLAUDE.md",
+      "target": "doc:PROJECT_SETUP.md",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_location": "CLAUDE.md",
+      "source_file": "",
+      "source": "doc:CLAUDE.md",
+      "target": "doc:SHEET_SCHEMA.md",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "describes as reusable, needs trimming",
+      "confidence": "EXTRACTED",
+      "source_location": "CLAUDE.md",
+      "source_file": "",
+      "source": "doc:CLAUDE.md",
+      "target": "doc:index.html",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "documents discovery referenced in",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/DECISIONS.md",
+      "source_file": "",
+      "source": "decision:D10",
+      "target": "doc:README.md",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "documents",
+      "confidence": "EXTRACTED",
+      "source_location": "README.md",
+      "source_file": "",
+      "source": "doc:README.md",
+      "target": "decision:D12",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "documents",
+      "confidence": "EXTRACTED",
+      "source_location": "README.md",
+      "source_file": "",
+      "source": "doc:README.md",
+      "target": "decision:D2",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "documents",
+      "confidence": "EXTRACTED",
+      "source_location": "README.md",
+      "source_file": "",
+      "source": "doc:README.md",
+      "target": "decision:D3",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_location": "README.md",
+      "source_file": "",
+      "source": "doc:README.md",
+      "target": "doc:ARCHITECTURE.md",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_location": "README.md",
+      "source_file": "",
+      "source": "doc:README.md",
+      "target": "doc:DECISIONS.md",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_location": "README.md",
+      "source_file": "",
+      "source": "doc:README.md",
+      "target": "doc:FIRESTORE_SCHEMA.md",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_location": "README.md",
+      "source_file": "",
+      "source": "doc:README.md",
+      "target": "doc:FLOWS.md",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_location": "README.md",
+      "source_file": "",
+      "source": "doc:README.md",
+      "target": "doc:PROJECT_SETUP.md",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "referenced as obsolete client in",
+      "confidence": "EXTRACTED",
+      "source_location": "README.md",
+      "source_file": "",
+      "source": "system:staff-ajapp-ios",
+      "target": "doc:README.md",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "documents",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/ARCHITECTURE.md",
+      "source_file": "",
+      "source": "doc:ARCHITECTURE.md",
+      "target": "decision:D13",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "documents",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/ARCHITECTURE.md",
+      "source_file": "",
+      "source": "doc:ARCHITECTURE.md",
+      "target": "decision:D14",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "documents",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/ARCHITECTURE.md",
+      "source_file": "",
+      "source": "doc:ARCHITECTURE.md",
+      "target": "decision:D15",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "documents",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/ARCHITECTURE.md",
+      "source_file": "",
+      "source": "doc:ARCHITECTURE.md",
+      "target": "decision:D17",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "documents",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/ARCHITECTURE.md",
+      "source_file": "",
+      "source": "doc:ARCHITECTURE.md",
+      "target": "decision:D18",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "documents",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/ARCHITECTURE.md",
+      "source_file": "",
+      "source": "doc:ARCHITECTURE.md",
+      "target": "decision:D21",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/ARCHITECTURE.md",
+      "source_file": "",
+      "source": "doc:ARCHITECTURE.md",
+      "target": "doc:DECISIONS.md",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "marks as superseded",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/ARCHITECTURE.md",
+      "source_file": "",
+      "source": "doc:ARCHITECTURE.md",
+      "target": "doc:FIRESTORE_SCHEMA.md",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/ARCHITECTURE.md",
+      "source_file": "",
+      "source": "doc:ARCHITECTURE.md",
+      "target": "doc:SHEET_SCHEMA.md",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "describes as part of demo to trim",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/ARCHITECTURE.md",
+      "source_file": "",
+      "source": "doc:ARCHITECTURE.md",
+      "target": "doc:index.html",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/PROJECT_SETUP.md",
+      "source_file": "",
+      "source": "doc:PROJECT_SETUP.md",
+      "target": "doc:DECISIONS.md",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "documents",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/FIRESTORE_SCHEMA.md",
+      "source_file": "",
+      "source": "doc:FIRESTORE_SCHEMA.md",
+      "target": "decision:D1",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "documents",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/FIRESTORE_SCHEMA.md",
+      "source_file": "",
+      "source": "doc:FIRESTORE_SCHEMA.md",
+      "target": "decision:D11",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "marked superseded by",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/FIRESTORE_SCHEMA.md",
+      "source_file": "",
+      "source": "doc:FIRESTORE_SCHEMA.md",
+      "target": "decision:D13",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "documents",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/FIRESTORE_SCHEMA.md",
+      "source_file": "",
+      "source": "doc:FIRESTORE_SCHEMA.md",
+      "target": "decision:D2",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "documents",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/FIRESTORE_SCHEMA.md",
+      "source_file": "",
+      "source": "doc:FIRESTORE_SCHEMA.md",
+      "target": "decision:D8",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "supersedes",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/SHEET_SCHEMA.md",
+      "source_file": "",
+      "source": "doc:SHEET_SCHEMA.md",
+      "target": "doc:FIRESTORE_SCHEMA.md",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "predecessor of",
+      "confidence": "EXTRACTED",
+      "source_location": "README.md",
+      "source_file": "",
+      "source": "system:staff-ajappbd",
+      "target": "doc:FIRESTORE_SCHEMA.md",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "documents",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/FLOWS.md",
+      "source_file": "",
+      "source": "doc:FLOWS.md",
+      "target": "decision:D15",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "documents",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/FLOWS.md",
+      "source_file": "",
+      "source": "doc:FLOWS.md",
+      "target": "decision:D21",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "documents",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/FLOWS.md",
+      "source_file": "",
+      "source": "doc:FLOWS.md",
+      "target": "decision:D22",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/FLOWS.md",
+      "source_file": "",
+      "source": "doc:FLOWS.md",
+      "target": "doc:SHEET_SCHEMA.md",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "documents",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/PROJECT_SETUP.md",
+      "source_file": "",
+      "source": "doc:PROJECT_SETUP.md",
+      "target": "decision:D21",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "documents",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/PROJECT_SETUP.md",
+      "source_file": "",
+      "source": "doc:PROJECT_SETUP.md",
+      "target": "decision:D22",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "documents",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/PROJECT_SETUP.md",
+      "source_file": "",
+      "source": "doc:PROJECT_SETUP.md",
+      "target": "decision:D3",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "documents",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/PROJECT_SETUP.md",
+      "source_file": "",
+      "source": "doc:PROJECT_SETUP.md",
+      "target": "decision:D7",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/PROJECT_SETUP.md",
+      "source_file": "",
+      "source": "doc:PROJECT_SETUP.md",
+      "target": "doc:SHEET_SCHEMA.md",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "documents",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/SHEET_SCHEMA.md",
+      "source_file": "",
+      "source": "doc:SHEET_SCHEMA.md",
+      "target": "decision:D21",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "documents",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/SHEET_SCHEMA.md",
+      "source_file": "",
+      "source": "doc:SHEET_SCHEMA.md",
+      "target": "decision:D22",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references as apple-touch-icon",
+      "confidence": "EXTRACTED",
+      "source_location": "index.html",
+      "source_file": "",
+      "source": "doc:index.html",
+      "target": "asset:icon-192.png",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references as favicon",
+      "confidence": "EXTRACTED",
+      "source_location": "index.html",
+      "source_file": "",
+      "source": "doc:index.html",
+      "target": "asset:icon.svg",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "loads",
+      "confidence": "EXTRACTED",
+      "source_location": "index.html",
+      "source_file": "",
+      "source": "doc:index.html",
+      "target": "component:app.js",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "loads",
+      "confidence": "EXTRACTED",
+      "source_location": "index.html",
+      "source_file": "",
+      "source": "doc:index.html",
+      "target": "component:demo-data.js",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "loads",
+      "confidence": "EXTRACTED",
+      "source_location": "index.html",
+      "source_file": "",
+      "source": "doc:index.html",
+      "target": "component:scanner.js",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "loads",
+      "confidence": "EXTRACTED",
+      "source_location": "index.html",
+      "source_file": "",
+      "source": "doc:index.html",
+      "target": "component:store.js",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "loads",
+      "confidence": "EXTRACTED",
+      "source_location": "index.html",
+      "source_file": "",
+      "source": "doc:index.html",
+      "target": "component:views.js",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "writes to",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/SHEET_SCHEMA.md",
+      "source_file": "",
+      "source": "component:apps-script-checkin",
+      "target": "concept:sheet-tab-asistencias",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "reads",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/SHEET_SCHEMA.md",
+      "source_file": "",
+      "source": "component:apps-script-checkin",
+      "target": "concept:sheet-tab-asistentes",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "reads",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/SHEET_SCHEMA.md",
+      "source_file": "",
+      "source": "component:apps-script-checkin",
+      "target": "concept:sheet-tab-config",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "reads/writes",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/SHEET_SCHEMA.md",
+      "source_file": "",
+      "source": "component:apps-script-checkin",
+      "target": "system:google-sheet",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "replicates pattern of",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/ARCHITECTURE.md",
+      "source_file": "",
+      "source": "component:apps-script-checkin",
+      "target": "system:iphone-shortcut",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_location": "CLAUDE.md",
+      "source_file": "",
+      "source": "component:store.js",
+      "target": "component:apps-script-checkin",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "constrains (no modification allowed)",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/DECISIONS.md",
+      "source_file": "",
+      "source": "decision:D21",
+      "target": "component:apps-script-checkin",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "reads (counts registrados)",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/SHEET_SCHEMA.md",
+      "source_file": "",
+      "source": "component:apps-script-stats",
+      "target": "concept:sheet-tab-asistencias",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "reads (counts total)",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/SHEET_SCHEMA.md",
+      "source_file": "",
+      "source": "component:apps-script-stats",
+      "target": "concept:sheet-tab-asistentes",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "reads",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/SHEET_SCHEMA.md",
+      "source_file": "",
+      "source": "component:apps-script-stats",
+      "target": "system:google-sheet",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_location": "CLAUDE.md",
+      "source_file": "",
+      "source": "component:store.js",
+      "target": "component:apps-script-stats",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "specifies",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/DECISIONS.md",
+      "source_file": "",
+      "source": "decision:D22",
+      "target": "component:apps-script-stats",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/ARCHITECTURE.md",
+      "source_file": "",
+      "source": "component:store.js",
+      "target": "component:offline-queue",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "adopts",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/DECISIONS.md",
+      "source_file": "",
+      "source": "decision:D13",
+      "target": "system:google-sheet",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/SHEET_SCHEMA.md",
+      "source_file": "",
+      "source": "system:google-sheet",
+      "target": "concept:sheet-tab-asistencias",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/SHEET_SCHEMA.md",
+      "source_file": "",
+      "source": "system:google-sheet",
+      "target": "concept:sheet-tab-asistentes",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/SHEET_SCHEMA.md",
+      "source_file": "",
+      "source": "system:google-sheet",
+      "target": "concept:sheet-tab-config",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/SHEET_SCHEMA.md",
+      "source_file": "",
+      "source": "system:google-sheet",
+      "target": "concept:sheet-tab-tabla",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "creates",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/DECISIONS.md",
+      "source_file": "",
+      "source": "decision:D1",
+      "target": "system:firebase-project",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "abandons for this app",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/DECISIONS.md",
+      "source_file": "",
+      "source": "decision:D13",
+      "target": "system:firebase-project",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "bundles config for",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/DECISIONS.md",
+      "source_file": "",
+      "source": "decision:D6",
+      "target": "system:firebase-project",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rejects/abandons",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/DECISIONS.md",
+      "source_file": "",
+      "source": "decision:D13",
+      "target": "system:firestore",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "shares project with",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/DECISIONS.md",
+      "source_file": "",
+      "source": "decision:D2",
+      "target": "system:alfil-statics",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "based on script from",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/DECISIONS.md",
+      "source_file": "",
+      "source": "decision:D19",
+      "target": "system:iphone-shortcut",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "used",
+      "confidence": "EXTRACTED",
+      "source_location": "CLAUDE.md",
+      "source_file": "",
+      "source": "person:pau",
+      "target": "system:iphone-shortcut",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "prompted by",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/DECISIONS.md",
+      "source_file": "",
+      "source": "decision:D13",
+      "target": "person:pau",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "assigns roster process to",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/DECISIONS.md",
+      "source_file": "",
+      "source": "decision:D20",
+      "target": "person:pau",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "requested by",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/DECISIONS.md",
+      "source_file": "",
+      "source": "decision:D21",
+      "target": "person:pau",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "decided by",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/DECISIONS.md",
+      "source_file": "",
+      "source": "decision:D22",
+      "target": "person:pau",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "supersedes",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/DECISIONS.md",
+      "source_file": "",
+      "source": "decision:D13",
+      "target": "decision:D1",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "supersedes",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/DECISIONS.md",
+      "source_file": "",
+      "source": "decision:D13",
+      "target": "decision:D2",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "supersedes",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/DECISIONS.md",
+      "source_file": "",
+      "source": "decision:D13",
+      "target": "decision:D3",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "supersedes",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/DECISIONS.md",
+      "source_file": "",
+      "source": "decision:D13",
+      "target": "decision:D4",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "supersedes",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/DECISIONS.md",
+      "source_file": "",
+      "source": "decision:D17",
+      "target": "decision:D4",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "supersedes",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/DECISIONS.md",
+      "source_file": "",
+      "source": "decision:D13",
+      "target": "decision:D5",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "supersedes",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/DECISIONS.md",
+      "source_file": "",
+      "source": "decision:D20",
+      "target": "decision:D5",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "supersedes",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/DECISIONS.md",
+      "source_file": "",
+      "source": "decision:D13",
+      "target": "decision:D9",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "supersedes",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/DECISIONS.md",
+      "source_file": "",
+      "source": "decision:D13",
+      "target": "decision:D12",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "supersedes",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/DECISIONS.md",
+      "source_file": "",
+      "source": "decision:D17",
+      "target": "decision:D12",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "depends on",
+      "confidence": "INFERRED",
+      "source_location": "docs/DECISIONS.md",
+      "source_file": "",
+      "source": "decision:D14",
+      "target": "decision:D13",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "depends on",
+      "confidence": "INFERRED",
+      "source_location": "docs/DECISIONS.md",
+      "source_file": "",
+      "source": "decision:D15",
+      "target": "decision:D13",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "adjusts",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/DECISIONS.md",
+      "source_file": "",
+      "source": "decision:D19",
+      "target": "decision:D13",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "adjusts",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/DECISIONS.md",
+      "source_file": "",
+      "source": "decision:D19",
+      "target": "decision:D14",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "adjusts",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/DECISIONS.md",
+      "source_file": "",
+      "source": "decision:D19",
+      "target": "decision:D15",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "adjusts",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/DECISIONS.md",
+      "source_file": "",
+      "source": "decision:D19",
+      "target": "decision:D16",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "reverts",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/DECISIONS.md; docs/SHEET_SCHEMA.md",
+      "source_file": "",
+      "source": "decision:D21",
+      "target": "decision:D16",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "adjusts",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/DECISIONS.md",
+      "source_file": "",
+      "source": "decision:D19",
+      "target": "decision:D17",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "adjusts",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/DECISIONS.md",
+      "source_file": "",
+      "source": "decision:D19",
+      "target": "decision:D18",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "supersedes",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/DECISIONS.md",
+      "source_file": "",
+      "source": "decision:D21",
+      "target": "decision:D19",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "resolves open question from",
+      "confidence": "EXTRACTED",
+      "source_location": "docs/DECISIONS.md",
+      "source_file": "",
+      "source": "decision:D22",
+      "target": "decision:D21",
+      "confidence_score": 1.0
+    }
+  ],
+  "hyperedges": [],
+  "built_at_commit": "144e919b34d88eee9b76b5d7bb42439f0b78cb74"
+}
