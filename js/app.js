@@ -57,7 +57,15 @@ const App = (() => {
     });
     window.addEventListener('offline', actualizarChips);
 
-    Store.onChange(actualizarChips);
+    Store.onChange(() => {
+      actualizarChips();
+      // No se re-renderiza mientras hay cámara/hoja abierta (evita cortar un
+      // escaneo en curso) ni la pantalla de escanear (gestiona su propio ciclo
+      // de vida de cámara) — el resto de vistas se refrescan solas al
+      // converger el espejo de Firestore.
+      const overlayAbierto = document.getElementById('cam-cover') || document.getElementById('sheet-bg');
+      if (current !== 'escanear' && !overlayAbierto && routes[current]) routes[current]();
+    });
 
     const hash = location.hash.replace('#', '');
     go(Store.currentUser() ? (hash || 'escanear') : 'login');
@@ -83,4 +91,6 @@ function actualizarChips() {
   uc.classList.toggle('hidden', !u);
 }
 
-document.addEventListener('DOMContentLoaded', App.init);
+document.addEventListener('DOMContentLoaded', () => {
+  Store.ready.then(App.init).catch((e) => { console.error('Store.ready falló:', e); App.init(); });
+});
