@@ -277,12 +277,44 @@ La PWA acaba llamando a **dos URLs distintas**: una para `?num=X`
 (check-in, `apps-script/Code.gs`) y otra para las estadísticas
 (`apps-script/stats-readonly/Code.gs`, sin parámetros, siempre GET).
 
+## 2026-07-15 (sexta vuelta — desplegado y conectado)
+
+**D23. Las 2 URLs de Apps Script se despliegan y `js/store.js` se conecta
+a ellas.** Pau despliega `apps-script/Code.gs` sobre la hoja real (Web
+App, "Yo" / "Cualquier usuario") y `apps-script/stats-readonly/Code.gs`
+como proyecto standalone aparte — URLs guardadas en `docs/DEPLOY_URLS.md`
+(fuente de verdad). Claude Code hace el trabajo en una rama
+(`claude/busy-sinoussi-065fb3`): reescribe `js/store.js` (fetch real a
+las 2 URLs, parseo del HTML de check-in per D21, `stats()` async por
+polling), recorta `js/views.js`/`js/app.js`/`index.html`/`css/app.css` a
+Login+Escanear+Estadísticas (sin Sesiones/Admin/demo-banner/SheetJS), y
+añade un server estático de desarrollo (`.claude/static-server.js` +
+`launch.json`, puerto 8420) para probar sin hosting.
+
+Esa misma rama arrastraba también cambios sobre `firebase/firestore.rules`
+y un `scripts/set-claim.js` nuevo — restos de una versión anterior de la
+rama, de antes de que D13 (abandono de Firebase) terminara de aplicarse
+ahí. **No se traen a `master`**: Firebase sigue fuera de alcance para
+este repo, y esos archivos ya estaban marcados superseded. Solo se
+fusionan a `master` los 8 archivos relevantes (`js/store.js`,
+`js/views.js`, `js/app.js`, `index.html`, `css/app.css`, `sw.js`,
+`.claude/launch.json`, `.claude/static-server.js`) — commit `525e223`.
+
+`apps-script/Code.gs` se verifica sin ninguna diferencia respecto al
+commit anterior — sigue exactamente igual que en D21.
+
+**Nota dejada en el propio código:** la lista `STAFF` de `js/store.js` es
+un placeholder de 10 nombres de ejemplo (`TODO(Pau)`) — hace falta el
+roster real de ~20 personas antes de usarlo en el curso de verdad.
+
 ## Pendiente de decidir (no bloqueante para empezar)
 
 - Nombre definitivo del proyecto Firebase nuevo (propuesta en
-  `PROJECT_SETUP.md`, a confirmar por Pau).
-- Roster real de ~20 miembros de staff (nombres + username + departamento)
-  — sigue pendiente desde el 03/07.
-- Dominio/hosting final de la PWA (Firebase Hosting cubre esto gratis en
-  Spark; falta decidir si se usa un subdominio de alfiljuvenil.es o el
-  dominio `.web.app` por defecto).
+  `PROJECT_SETUP.md`, a confirmar por Pau) — nota: ya no bloquea Staff
+  AJapp (D13), solo relevante si `alfil-statics` lo reutiliza.
+- Roster real de ~20 miembros de staff (nombres) para sustituir el
+  placeholder de `js/store.js` (D23).
+- Hosting final de la PWA para instalarla en el móvil desde una URL
+  pública (GitHub Pages o Firebase Hosting) — mientras tanto, se puede
+  probar en local con `.claude/static-server.js` + móvil en la misma
+  Wi-Fi.
