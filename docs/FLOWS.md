@@ -1,6 +1,7 @@
-> ⚠️ Reescrito 2026-07-15 (pivote D13-D18): sustituye los flujos basados
-> en Firestore por los basados en Google Sheets + Apps Script, extendiendo
-> el flujo real que Pau ya usaba en Atajos de iPhone la edición pasada.
+> ⚠️ Reescrito 2026-07-15 (pivote D13-D18, corregido en D21): flujos
+> basados en Google Sheets + Apps Script, usando el script real de Pau
+> **tal cual**, sin extensiones (ni LockService, ni columna `staff`, ni
+> acción `stats`, ni JSON — ver D21).
 
 # Flujos — Staff AJapp (PWA)
 
@@ -34,27 +35,28 @@ sequenceDiagram
     participant U as Staff (móvil)
     participant App as PWA
     participant Q as Cola local (localStorage)
-    participant WA as Web App Apps Script
+    participant WA as Web App Apps Script (script original)
 
     U->>App: Escanea QR (o número manual)
     App->>App: ¿navigator.onLine?
     alt Sin conexión
-        App->>Q: Guarda {num, staff, ts} en cola
+        App->>Q: Guarda {num, ts} en cola
         Q-->>U: "Guardado sin conexión — se sincronizará"
     else Con conexión
-        App->>WA: GET .../exec?num=X&staff=Y&format=json
-        WA->>WA: Busca sesión activa (Config!B2)
+        App->>WA: GET .../exec?num=X
+        WA->>WA: Lee Config!B2 (sesión activa)
         WA->>WA: Comprueba num en "asistentes"
-        WA->>WA: LockService + comprueba duplicado en "asistencias"
+        WA->>WA: Comprueba duplicado (num, sesión) en "asistencias"
         alt Nuevo
             WA->>WA: appendRow en "asistencias"
-            WA-->>App: {status: "ok", ...}
+            WA-->>App: HTML "✅ Registrado Nº X → sesión (ts) (NO-PIN vFinal)"
         else Ya registrado
-            WA-->>App: {status: "duplicado", ...}
+            WA-->>App: HTML "✅ Ya estaba registrado..."
         else No encontrado / sin sesión
-            WA-->>App: {status: "no_encontrado" | "sin_sesion", ...}
+            WA-->>App: HTML "Número X no está en asistentes" / "Config!B2 vacío"
         end
-        App-->>U: Pantalla verde/naranja/roja según status
+        App->>App: Parsea el texto de la respuesta para decidir el estado
+        App-->>U: Pantalla verde/naranja/roja según el texto recibido
     end
 ```
 
@@ -65,30 +67,29 @@ flowchart TD
     A[window online event] --> B[Leer cola local]
     B --> C{Cola vacía?}
     C -- sí --> Z[Nada que hacer]
-    C -- no --> D[Por cada elemento, en orden:<br/>GET .../exec?num=X&staff=Y&format=json]
-    D --> E[Quitar de la cola si status != error]
+    C -- no --> D[Por cada elemento, en orden:<br/>GET .../exec?num=X]
+    D --> E[Quitar de la cola tras la respuesta]
     E --> F{Quedan elementos?}
     F -- sí --> D
     F -- no --> G[Toast: 'N check-ins sincronizados']
 ```
 
-Duplicados entre dos móviles distintos sin red: si ambos escanean al
+**Duplicados entre dos móviles distintos sin red:** si ambos escanean al
 mismo asistente offline, los dos lo aceptan localmente (no pueden verse
-entre sí). Al sincronizar, el primero que llegue al Web App se registra
-(`ok`); el segundo recibe `duplicado` gracias al `LockService` — se
-resuelve solo, sin intervención manual.
+entre sí). Al sincronizar, el primero que llegue al Web App se registra;
+el segundo recibe la respuesta "Ya estaba registrado" — el script
+original no usa `LockService` (D21), así que en el caso límite de que dos
+sincronizaciones lleguen exactamente a la vez existe una ventana de
+carrera teórica. No se ha resuelto porque Pau pidió no tocar el script;
+queda anotado por si en algún momento se decide lo contrario.
 
-## 3. Estadísticas (polling)
+## 3. Estadísticas — pendiente de decidir la fuente de datos (D21)
 
-```mermaid
-flowchart TD
-    A[Abrir pantalla Estadísticas] --> B[GET .../exec?action=stats&format=json]
-    B --> C[Mostrar sesión activa, registrados/total, %]
-    C --> D[Esperar 5-10s]
-    D --> B
-    A --> E[Cerrar pantalla]
-    E --> F[Parar el polling]
-```
+El script original no tiene ninguna acción de lectura (el Atajo no tenía
+pantalla de estadísticas). Sin tocarlo, la pantalla no tiene de dónde
+sacar los números. Ver las 3 opciones en `docs/SHEET_SCHEMA.md`
+("Pregunta abierta"). Hasta que Pau elija una, esta pantalla no tiene un
+flujo de datos definido — no inventar uno.
 
 ## 4. Activar/cerrar sesión (fuera de la app — D15)
 

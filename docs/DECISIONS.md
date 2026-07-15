@@ -232,6 +232,34 @@ contrario más adelante.
 izquierda o no en la edición XXII, y qué contiene exactamente la pestaña
 `tabla` (¿la usa la pantalla Estadísticas o es un informe aparte?).
 
+## 2026-07-15 (cuarta vuelta — Pau rechaza las extensiones de D19)
+
+**D21. Se revierte `apps-script/Code.gs` al script original exacto, sin
+ninguna de las 4 extensiones de D19.** Pau fue explícito: "vamos a usar
+tal cual esto... lo que haya hecho Claude, quitando las pantallas, no
+vale". Se descartan: `LockService`, columna `staff` en `asistencias`,
+acción `stats`, y respuesta `format=json`. El archivo vuelve a ser
+exactamente el script que Pau ya tenía funcionando (`NO-PIN vFinal`), sin
+tocar una línea de la lógica.
+
+**Motivo (interpretado, no verificado con Pau palabra por palabra):**
+prioriza usar exactamente lo que ya está probado y funcionando sobre
+cualquier mejora no pedida, aunque sea de bajo riesgo. Aplica también
+hacia delante: no añadir nada a este script sin que Pau lo pida
+explícitamente.
+
+**Lo que sí se mantiene de todo el trabajo anterior:** las pantallas
+(UI) que ya se hayan construido en la PWA (Escanear, Estadísticas) — lo
+que no vale es lo que se haya hecho *por debajo* sin ceñirse a este
+script exacto. Hay que conectar esas pantallas a este endpoint tal cual
+es, con `?num=X`.
+
+**Abre una pregunta sin resolver:** el script original no tiene ninguna
+acción para leer estadísticas (no había pantalla de Estadísticas en el
+Atajo de iPhone). Sin tocar `Code.gs`, no hay forma de que la pantalla
+Estadísticas obtenga datos reales. Pendiente de que Pau diga cómo lo
+quiere resolver — ver `docs/SHEET_SCHEMA.md`.
+
 ## Pendiente de decidir (no bloqueante para empezar)
 
 - Nombre definitivo del proyecto Firebase nuevo (propuesta en

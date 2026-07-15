@@ -1,9 +1,12 @@
 # Instrucciones para Claude Code — Staff AJapp (PWA)
 
-> ⚠️ Reescrito 2026-07-15 (pivote). Si tenías contexto de una versión
-> anterior de este archivo con Firebase/Firestore/Cloud Functions/custom
-> claims: **ignóralo, está superseded.** Ver `docs/DECISIONS.md` D13-D20
-> para el porqué del cambio.
+> ⚠️ Reescrito 2026-07-15, dos veces el mismo día. Si tenías contexto de
+> una versión anterior de este archivo con Firebase/Firestore/Cloud
+> Functions/custom claims, **o con `LockService`/columna `staff`/acción
+> `stats`/respuesta JSON en `apps-script/Code.gs`: ignóralo, está
+> superseded.** Pau fue explícito (D21): el script de Apps Script se usa
+> **tal cual**, sin ninguna extensión — "lo que hayas hecho, quitando las
+> pantallas, no vale". Ver `docs/DECISIONS.md` D13-D21 para el porqué.
 
 Léelo entero antes de escribir código.
 
@@ -27,8 +30,8 @@ editando una celda directamente en la hoja de cálculo, fuera de la app.
    historial de cómo se llegó hasta aquí, no las repliques.
 2. `docs/ARCHITECTURE.md` — stack, diagrama, estrategia offline.
 3. `docs/SHEET_SCHEMA.md` — la estructura real de la hoja de cálculo
-   (pestañas `asistentes`, `Config`, `asistencias`) y las 4 acciones del
-   Web App de Apps Script.
+   (pestañas `asistentes`, `Config`, `asistencias`) y el único endpoint
+   real del Web App (`?num=X`, sin más parámetros).
 4. `docs/FLOWS.md` — diagramas de cada flujo.
 5. `docs/PROJECT_SETUP.md` — checklist de infraestructura. Nota: la mayor
    parte de este archivo describe pasos de Firebase que **ya no hacen
@@ -40,23 +43,28 @@ así al principio. No leas esos archivos para entender el sistema actual.
 
 ## Ya construido — reutilizar, no rehacer
 
-- `apps-script/Code.gs` — **este es el código más importante del repo**.
-  Es el script real que Pau ya usaba (comentarios "NO-PIN vFinal"),
-  extendido con 4 cosas mínimas marcadas `// AÑADIDO` en el propio
-  archivo: `LockService`, columna `staff` opcional, acción `stats`, y
-  respuesta JSON opcional. No lo reescribas desde cero — si hace falta
-  tocarlo, entiende primero qué es del script original (no tocar la
-  lógica base sin motivo) y qué es la extensión.
-- La demo PWA de la mañana (`index.html`, `css/app.css`,
+- `apps-script/Code.gs` — **el código más importante del repo, y el que
+  NO se toca.** Es el script real que Pau ya usaba y ya funcionaba
+  (comentarios "NO-PIN vFinal"), **exactamente tal cual, sin ninguna
+  extensión** (D21 — se intentó añadir LockService/staff/stats/JSON y Pau
+  lo rechazó explícitamente: "lo que hayas hecho, quitando las pantallas,
+  no vale"). No se te ocurra "mejorarlo" por iniciativa propia, ni
+  aunque veas un caso límite sin cubrir (está anotado en
+  `docs/ARCHITECTURE.md` y es un riesgo aceptado, no un olvido). Si de
+  verdad hace falta tocarlo, para y pregunta primero.
+- La demo PWA (`index.html`, `css/app.css`,
   `js/{demo-data,store,scanner,views,app}.js`, `sw.js`,
   `manifest.webmanifest`, `icons/`) — reutilizable pero **hay que
   recortarla**: quita las pestañas Sesiones y Admin de `views.js`/`app.js`
   (ya no existen, D14/D15), y reescribe `js/store.js` para hacer `fetch()`
-  al Web App de Apps Script (GET, query string, sin headers custom — ver
-  "Por qué peticiones GET simples" en `ARCHITECTURE.md`) en vez de hablar
-  con Firestore o `localStorage` puro. La cola offline que ya tenía la
-  demo (`getQueue`/`setQueue`/`syncQueue`) se reutiliza casi tal cual,
-  solo cambia qué hace "sincronizar" (ver `docs/FLOWS.md` §2).
+  a `.../exec?num=X` (GET, query string, sin headers custom) en vez de
+  hablar con Firestore o `localStorage` puro. La respuesta es **HTML de
+  una línea, no JSON** — hay que parsear el texto (mirar si contiene
+  "Ya estaba registrado", "no está en", "Config!B2 vacío", o si es un
+  "Registrado" limpio) para decidir qué pantalla de resultado mostrar. La
+  cola offline que ya tenía la demo (`getQueue`/`setQueue`/`syncQueue`) se
+  reutiliza casi tal cual, solo cambia qué hace "sincronizar" (ver
+  `docs/FLOWS.md` §2).
 - Diseño visual de referencia: sigue siendo `../Staff AJapp/Staff AJapp/`
   (proyecto Xcode/SwiftUI) — paleta en `Components/Theme.swift`
   (`#0B0B0B` / `#1A1A1A` / `#C6A75E`), estilo de la pantalla de escaneo en
@@ -64,26 +72,28 @@ así al principio. No leas esos archivos para entender el sistema actual.
 
 ## Tareas concretas
 
-1. Desplegar (o dejar listo para que Pau despliegue) `apps-script/Code.gs`
-   como Web App sobre la hoja real — necesita la URL `.../exec` resultante
-   para poder probar la PWA contra datos reales. Si no la tienes, trabaja
-   con una URL de prueba/mock y pregúntale a Pau por la real.
+1. Confirma con Pau la URL `.../exec` del Web App ya desplegado sobre la
+   hoja real (["MIEMBROS CURSO PROTOCOLO XXI"](https://docs.google.com/spreadsheets/d/1YDADLLWwA92Gm-_WYPYY4qGxTt5Wx-RIjM7Ju8z9FHE/edit?usp=sharing),
+   que se usa tal cual para las pruebas, no una copia). Sin esa URL no se
+   puede probar nada real.
 2. Recortar `js/views.js` y `js/app.js`: solo Login, Escanear,
    Estadísticas. Quitar todo rastro de Sesiones/Admin (tabs, rutas,
    funciones de `store.js` que ya no se usan como `setEstadoSesion`,
-   `addAsistente`, `importAsistentes`, `informeAsistencia`, etc. — esas
-   responsabilidades ya no viven en la app, D15/D20).
-3. Reescribir `js/store.js`: función `checkin(codigo, metodo)` hace
-   `fetch` al Web App con `num`, `staff` (el usuario logueado) y
-   `format=json`; función `stats()` hace `fetch` con `action=stats`.
-   Mantener la cola offline existente, cambiando el destino de la
-   sincronización.
-4. Pantalla Estadísticas: polling cada 5-10s mientras está abierta,
-   parar el intervalo al salir de la pantalla (ya había un patrón
-   parecido en `Views.stopLive()` de la demo — revísalo).
+   `addAsistente`, `importAsistentes`, `informeAsistencia`, etc.).
+3. Reescribir `js/store.js`: función `checkin(codigo)` hace `fetch` a
+   `.../exec?num=` + codigo, y parsea el HTML de respuesta como se
+   describe arriba. Mantener la cola offline existente, cambiando el
+   destino de la sincronización.
+4. Pantalla Estadísticas: **sin fuente de datos definida todavía** (D21 —
+   el script no tiene ninguna acción de lectura). No inventes una acción
+   nueva en `Code.gs` para esto — pregúntale a Pau cuál de las opciones de
+   `docs/SHEET_SCHEMA.md` prefiere (no tocar nada por ahora / leer la hoja
+   en modo público-solo-lectura sin pasar por el script / una función de
+   lectura en un archivo `.gs` nuevo y separado). Mientras tanto, la
+   pantalla puede quedarse sin datos reales.
 5. Login: lista de staff puede quedarse como constante en el propio
-   código (no hace falta pedirla al Web App) salvo que Pau prefiera
-   gestionarla también desde la hoja — pregunta si no está claro.
+   código — no hay ninguna fuente de esto en el script real ni en la
+   hoja (`asistentes` es la lista de asistentes al curso, no del staff).
 
 ## Fuera de alcance — no construir
 
