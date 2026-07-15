@@ -1,305 +1,170 @@
 /* ============================================================
-   Staff AJapp — CAPA DE DATOS (modo demo)
-   En la versión real, este archivo es el ÚNICO que cambia:
-   cada función pasa a leer/escribir en Firestore
-   (prueba-protocolo2627) en vez de en localStorage.
+   Staff AJapp — CAPA DE DATOS (D21/D22)
+   Dos Web Apps de Apps Script distintos, ninguno tocado por este repo:
+   - CHECKIN_URL -> apps-script/Code.gs, TAL CUAL (script real de Pau,
+     "NO-PIN vFinal"). Responde HTML de una línea, no JSON — hay que
+     parsear el texto (D21).
+   - STATS_URL -> apps-script/stats-readonly/Code.gs, proyecto standalone
+     aparte, solo lectura. Responde JSON (D22).
    ============================================================ */
 
 const Store = (() => {
-  const KEY = 'ajapp-demo-v2';
-  const KEY_QUEUE = 'ajapp-demo-cola';
-  const KEY_SESSION = 'ajapp-demo-login';
-  let db = null;
+  // URLs reales, desplegadas sobre "MIEMBROS CURSO PROTOCOLO XXI" — ver
+  // docs/DEPLOY_URLS.md (fuente de verdad, no las cambies aquí sin actualizar
+  // también ese archivo).
+  const CHECKIN_URL = 'https://script.google.com/macros/s/AKfycbz3sICmCU9bvVtYH0ocQVVOpRDTdDq0IiMOtSbwy62tvtHw_4ZDQ97u3F8A3qlQwDoi/exec';
+  const STATS_URL = 'https://script.google.com/macros/s/AKfycbz7gRYm8EKaGoKgcpXRB94A63wHpGefMU1aFzfPxqU2MuCHf-ODdy-xuHaswtXjKxL6/exec';
+  const MOCK_CHECKIN = !CHECKIN_URL || CHECKIN_URL === 'URL_CHECKIN_PENDIENTE';
+  const MOCK_STATS = !STATS_URL || STATS_URL === 'URL_STATS_PENDIENTE';
+
+  const KEY_QUEUE = 'ajapp-cola';
+  const KEY_SESSION = 'ajapp-login';
   const listeners = [];
+  const onChange = (fn) => listeners.push(fn);
+  const notify = () => listeners.forEach((fn) => fn());
 
-  /* ---------- persistencia ---------- */
-  function load() {
-    try {
-      const raw = localStorage.getItem(KEY);
-      db = raw ? JSON.parse(raw) : null;
-    } catch (e) { db = null; }
-    if (!db) reset();
-  }
-  function save() {
-    localStorage.setItem(KEY, JSON.stringify(db));
-    listeners.forEach((fn) => fn());
-  }
-  function reset() {
-    db = JSON.parse(JSON.stringify(DEMO)); // copia limpia del seed
-    localStorage.setItem(KEY, JSON.stringify(db));
-    localStorage.removeItem(KEY_QUEUE);
-    listeners.forEach((fn) => fn());
-  }
-  function onChange(fn) { listeners.push(fn); }
-
-  /* ---------- login (solo usuario, sin contraseña) ---------- */
-  function login(username) {
-    const s = db.staff.find((x) => x.username === username && x.activo);
-    if (!s) return null;
-    localStorage.setItem(KEY_SESSION, username);
-    return s;
+  /* ---------- login (lista fija en el código — no hay fuente de esto
+     en el script real ni en la hoja, tarea 5 de CLAUDE.md) ---------- */
+  // TODO(Pau): sustituye por el roster real de ~20 personas del staff.
+  const STAFF = ['Pau', 'Marta', 'Javier', 'Sara', 'Nacho', 'Elena', 'David', 'Clara', 'Hugo', 'Ainhoa'];
+  const staff = () => STAFF;
+  function login(nombre) {
+    if (!STAFF.includes(nombre)) return null;
+    localStorage.setItem(KEY_SESSION, nombre);
+    return nombre;
   }
   function logout() { localStorage.removeItem(KEY_SESSION); }
-  function currentUser() {
-    const u = localStorage.getItem(KEY_SESSION);
-    return u ? db.staff.find((x) => x.username === u) : null;
-  }
-  const isInformatica = () => {
-    const u = currentUser();
-    return !!u && (u.departamento === 'informatica' || u.departamento === 'presidencia');
-  };
+  function currentUser() { return localStorage.getItem(KEY_SESSION); }
 
-  /* ---------- getters ---------- */
-  const config = () => db.config;
-  const staff = () => db.staff;
-  const sesiones = () => [...db.sesiones].sort((a, b) => a.dia - b.dia || a.hora.localeCompare(b.hora));
-  const sesion = (id) => db.sesiones.find((s) => s.id === id);
-  const sesionActiva = () => db.sesiones.find((s) => s.estado === 'activa') || null;
-  const inscripciones = () => [...db.inscripciones].sort((a, b) => a.apellidoOrden.localeCompare(b.apellidoOrden));
-  const asistente = (id) => db.inscripciones.find((a) => a.id === id || a.qrCode === id);
-  const checkins = () => db.checkins;
-  const checkinsDeSesion = (sesId) => db.checkins.filter((c) => c.sesionId === sesId);
-  const checkinsDeAsistente = (aId) => db.checkins.filter((c) => c.asistenteId === aId);
+  /* ---------- conexión ---------- */
+  let simOffline = false;
+  const setSimOffline = (v) => { simOffline = v; notify(); };
+  const isOnline = () => navigator.onLine && !simOffline;
+  const isSimOffline = () => simOffline;
 
-  /* ---------- lógica de negocio: faltas / riesgo ----------
-     Título ECTS = asistir al menos al 80% de las 14 medias ponencias
-     → con 14 sesiones, un máximo de 2 faltas. 3 faltas = título perdido. */
-  function maxFaltas() {
-    const total = db.sesiones.length;
-    return Math.floor(total * (1 - db.config.porcentajeMinimo)); // 14 → 2
-  }
-  function estadoAsistencia(aId) {
-    const cerradas = db.sesiones.filter((s) => s.estado === 'cerrada');
-    const asistidas = new Set(checkinsDeAsistente(aId).map((c) => c.sesionId));
-    const faltas = cerradas.filter((s) => !asistidas.has(s.id)).length;
-    const max = maxFaltas();
-    let nivel = 'ok';
-    if (faltas > max) nivel = 'critico';
-    else if (faltas === max) nivel = 'riesgo';
-    return { faltas, max, nivel, asistidas: asistidas.size, cerradas: cerradas.length };
-  }
-  function asistentesEnRiesgo() {
-    return db.inscripciones
-      .filter((a) => a.estado === 'confirmado')
-      .map((a) => ({ ...a, ...estadoAsistencia(a.id) }))
-      .filter((a) => a.nivel !== 'ok')
-      .sort((x, y) => y.faltas - x.faltas);
-  }
-
-  /* ---------- check-in (con cola offline) ---------- */
+  /* ---------- cola offline (D18) ---------- */
   function getQueue() {
     try { return JSON.parse(localStorage.getItem(KEY_QUEUE)) || []; } catch (e) { return []; }
   }
   function setQueue(q) {
     localStorage.setItem(KEY_QUEUE, JSON.stringify(q));
-    listeners.forEach((fn) => fn());
+    notify();
   }
 
-  // Simulación de cobertura: en la demo se puede forzar el modo sin conexión
-  let simOffline = false;
-  const setSimOffline = (v) => { simOffline = v; listeners.forEach((fn) => fn()); };
-  const isOnline = () => navigator.onLine && !simOffline;
-  const isSimOffline = () => simOffline;
+  /* ---------- parseo de la respuesta HTML del check-in (D21: texto, no JSON) ----------
+     El script real responde siempre HTML de una línea, mensajes que acaban en
+     "(NO-PIN vFinal)". No hay campo status estructurado — se decide por texto,
+     tal como pide docs/SHEET_SCHEMA.md. */
+  function parseCheckinHtml(html) {
+    const texto = String(html)
+      .replace(/<[^>]+>/g, '')
+      .replace(/\s*\(NO-PIN vFinal\)\s*$/i, '')
+      .trim();
+    let status = 'error';
+    if (/ya estaba registrado/i.test(texto)) status = 'duplicado';
+    else if (/no está en/i.test(texto)) status = 'no_encontrado';
+    else if (/config!b2 vacío/i.test(texto)) status = 'sin_sesion';
+    else if (/registrado/i.test(texto)) status = 'ok';
+    return { status, mensaje: texto };
+  }
+
+  /* ---------- mock local (solo mientras no haya URLs reales desplegadas) ---------- */
+  const mockAsistentes = new Map([
+    ['1', 'García, Ana'], ['2', 'López, Marcos'], ['3', 'Ruiz, Elena'],
+    ['12', 'Sanz, David'], ['34', 'Prieto, Clara'], ['99', 'Vega, Hugo']
+  ]);
+  let mockSesion = 'Protocolo empresarial (mock)';
+  const mockAsistencias = []; // {num, session}
+
+  function mockCheckinHtml(num) {
+    if (!mockSesion) return 'Config!B2 vacío (NO-PIN vFinal)';
+    if (!mockAsistentes.has(num)) return `Número ${num} no está en "asistentes" (NO-PIN vFinal)`;
+    const dup = mockAsistencias.some((a) => a.num === num && a.session === mockSesion);
+    if (dup) return `✅ Ya estaba registrado · Nº ${num} → ${mockSesion} (NO-PIN vFinal)`;
+    mockAsistencias.push({ num, session: mockSesion });
+    const ts = new Date().toISOString().slice(0, 19).replace('T', ' ');
+    return `✅ Registrado Nº ${num} → ${mockSesion} (${ts}) (NO-PIN vFinal)`;
+  }
+  function mockStats() {
+    const registrados = mockAsistencias.filter((a) => a.session === mockSesion).length;
+    const total = mockAsistentes.size;
+    return { session: mockSesion, total, registrados, tasa: total ? Math.round((registrados / total) * 1000) / 10 : 0 };
+  }
 
   /**
-   * Registra un check-in. Devuelve {status, asistente, mensaje}.
-   * status: ok | duplicado | pendiente | no_encontrado | sin_sesion | offline_ok
+   * Registra un check-in. Devuelve {status, mensaje, num}.
+   * status: ok | duplicado | no_encontrado | sin_sesion | offline_ok | error
    */
-  function checkin(codigo, metodo) {
-    const ses = sesionActiva();
-    if (!ses) return { status: 'sin_sesion', mensaje: 'No hay ninguna media ponencia activa' };
-    const a = asistente(String(codigo).trim().toUpperCase());
-    if (!a) return { status: 'no_encontrado', mensaje: `Código "${codigo}" no corresponde a ningún inscrito` };
-    if (a.estado !== 'confirmado') return { status: 'pendiente', asistente: a, mensaje: 'Inscripción sin confirmar (pago pendiente)' };
+  async function checkin(codigo) {
+    const num = String(codigo).trim();
+    if (!num) return { status: 'no_encontrado', mensaje: 'Código vacío', num };
 
-    // duplicado: ya en la base o ya en la cola offline
-    const dup = db.checkins.some((c) => c.sesionId === ses.id && c.asistenteId === a.id) ||
-                getQueue().some((c) => c.sesionId === ses.id && c.asistenteId === a.id);
-    if (dup) return { status: 'duplicado', asistente: a, mensaje: 'Ya tiene registrada esta media ponencia' };
-
-    const doc = {
-      id: 'ck' + Date.now() + Math.floor(Math.random() * 999),
-      sesionId: ses.id,
-      asistenteId: a.id,
-      staffUsername: currentUser() ? currentUser().username : '?',
-      metodo: metodo || 'qr',
-      timestamp: new Date().toISOString()
-    };
+    if (getQueue().some((c) => c.num === num)) {
+      return { status: 'duplicado', mensaje: 'Ya está en la cola de este móvil, pendiente de sincronizar', num };
+    }
 
     if (!isOnline()) {
-      // SIN COBERTURA → a la cola local, se sincroniza al volver la conexión
-      const q = getQueue(); q.push(doc); setQueue(q);
-      return { status: 'offline_ok', asistente: a, mensaje: 'Guardado sin conexión — se sincronizará' };
+      const q = getQueue();
+      q.push({ num, ts: Date.now() });
+      setQueue(q);
+      return { status: 'offline_ok', mensaje: 'Guardado sin conexión — se sincronizará', num };
     }
-    db.checkins.push(doc);
-    const s = sesion(ses.id); s.asistentesRegistrados++;
-    save();
-    return { status: 'ok', asistente: a, mensaje: 'Asistencia registrada' };
+
+    try {
+      const html = await fetchCheckinHtml(num);
+      return { ...parseCheckinHtml(html), num };
+    } catch (e) {
+      // Falla el fetch pese a isOnline() (CORS, timeout, Web App caído) -> a la cola
+      const q = getQueue();
+      q.push({ num, ts: Date.now() });
+      setQueue(q);
+      return { status: 'offline_ok', mensaje: 'No se pudo contactar con la hoja — guardado sin conexión', num };
+    }
   }
 
-  /** Vuelca la cola offline a la base (en real: batch write a Firestore) */
-  function syncQueue() {
+  async function fetchCheckinHtml(num) {
+    if (MOCK_CHECKIN) {
+      await new Promise((r) => setTimeout(r, 250)); // simula latencia de red
+      return mockCheckinHtml(num);
+    }
+    const res = await fetch(`${CHECKIN_URL}?num=${encodeURIComponent(num)}`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return res.text();
+  }
+
+  /** Recorre la cola local y dispara ?num=X por cada pendiente, en orden. */
+  async function syncQueue() {
     if (!isOnline()) return { synced: 0, pending: getQueue().length };
     const q = getQueue();
-    let n = 0;
-    q.forEach((doc) => {
-      const dup = db.checkins.some((c) => c.sesionId === doc.sesionId && c.asistenteId === doc.asistenteId);
-      if (!dup) {
-        db.checkins.push(doc);
-        const s = sesion(doc.sesionId); if (s) s.asistentesRegistrados++;
-        n++;
+    let synced = 0;
+    const restantes = [];
+    for (const item of q) {
+      try {
+        await fetchCheckinHtml(item.num);
+        synced++;
+      } catch (e) {
+        restantes.push(item);
       }
-    });
-    setQueue([]);
-    save();
-    return { synced: n, pending: 0 };
+    }
+    setQueue(restantes);
+    return { synced, pending: restantes.length };
   }
 
-  /**
-   * SOLO DEMO: simula que otro miembro del staff (otro móvil) escanea a alguien
-   * en la sesión activa — para enseñar el dashboard "en vivo" en la presentación.
-   * Devuelve el asistente escaneado o null si ya no queda nadie por entrar.
-   */
-  function simulateExternalCheckin() {
-    const ses = sesionActiva();
-    if (!ses) return null;
-    const dentro = new Set(checkinsDeSesion(ses.id).map((c) => c.asistenteId));
-    const fuera = db.inscripciones.filter((a) => a.estado === 'confirmado' && !dentro.has(a.id));
-    if (!fuera.length) return null;
-    const a = fuera[Math.floor(Math.random() * fuera.length)];
-    const otros = db.staff.filter((s) => s.activo && (!currentUser() || s.username !== currentUser().username));
-    const quien = otros[Math.floor(Math.random() * otros.length)];
-    db.checkins.push({
-      id: 'ck' + Date.now() + Math.floor(Math.random() * 999),
-      sesionId: ses.id,
-      asistenteId: a.id,
-      staffUsername: quien ? quien.username : '?',
-      metodo: 'qr',
-      timestamp: new Date().toISOString()
-    });
-    sesion(ses.id).asistentesRegistrados++;
-    save();
-    return a;
+  /** Sesión activa + recuento en vivo, para la pantalla Estadísticas (polling, D22). */
+  async function stats() {
+    if (MOCK_STATS) {
+      await new Promise((r) => setTimeout(r, 250));
+      return mockStats();
+    }
+    const res = await fetch(STATS_URL);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return res.json();
   }
 
-  /* ---------- gestión (admin) ---------- */
-  function setEstadoSesion(id, estado) {
-    if (estado === 'activa') db.sesiones.forEach((s) => { if (s.estado === 'activa') s.estado = 'cerrada'; });
-    const s = sesion(id); if (s) s.estado = estado;
-    save();
-  }
-  function setCapacidadSesion(id, cap) { const s = sesion(id); if (s) s.capacidad = cap; save(); }
-
-  function nuevoIdInscripcion() {
-    // En real: incremento atómico de config.contadorId en Firestore (transaction / field transform)
-    db.config.contadorId++;
-    return db.config.prefijoId + String(db.config.contadorId).padStart(4, '0');
-  }
-  function addAsistente(datos) {
-    const id = nuevoIdInscripcion();
-    const conCena = !!(datos.menuCena && datos.menuCena.trim());
-    const a = {
-      id,
-      nombre: datos.nombre || '',
-      apellidos: datos.apellidos || '',
-      apellidoOrden: (datos.apellidos || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase(),
-      fechaNacimiento: datos.fechaNacimiento || '',
-      gradoActividades: datos.gradoActividades || '',
-      menuCena: datos.menuCena || '',
-      dni: datos.dni || '',
-      email: datos.email || '',
-      alergias: datos.alergias || '',
-      modalidad: conCena ? 'curso_cena' : 'solo_curso',
-      precio: conCena ? 90 : 65,
-      estado: datos.estado || 'pendiente',
-      tsInscripcion: new Date().toISOString(),
-      qrCode: id
-    };
-    db.inscripciones.push(a);
-    save();
-    return a;
-  }
-  function setEstadoAsistente(id, estado) {
-    const a = asistente(id); if (a) { a.estado = estado; if (estado === 'confirmado') a.tsConfirmacion = new Date().toISOString(); }
-    save();
-  }
-  function addStaff(username, nombreCompleto, departamento) {
-    if (db.staff.some((s) => s.username === username)) return false;
-    db.staff.push({ username, nombreCompleto, departamento, activo: true });
-    save();
-    return true;
-  }
-  function toggleStaff(username) {
-    const s = db.staff.find((x) => x.username === username);
-    if (s) s.activo = !s.activo;
-    save();
-  }
-
-  /* ---------- import (Excel/CSV) ---------- */
-  /** filas = array de objetos ya mapeados {nombre, apellidos, ...}. Devuelve nº creados. */
-  function importAsistentes(filas) {
-    let n = 0;
-    filas.forEach((f) => {
-      if (!f.nombre && !f.apellidos) return;
-      // evita duplicar por email o dni si ya existe
-      if (f.email && db.inscripciones.some((a) => a.email === f.email)) return;
-      if (f.dni && db.inscripciones.some((a) => a.dni === f.dni)) return;
-      addAsistente(f);
-      n++;
-    });
-    return n;
-  }
-
-  /* ---------- export ---------- */
-  function csvEscape(v) {
-    v = v == null ? '' : String(v);
-    return /[",;\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v;
-  }
-  function toCSV(headers, rows) {
-    return [headers.join(';'), ...rows.map((r) => r.map(csvEscape).join(';'))].join('\n');
-  }
-  function informeAsistencia() {
-    const cerradas = db.sesiones.filter((s) => s.estado !== 'planificada');
-    const headers = ['ID', 'Apellidos', 'Nombre', 'Estado', ...cerradas.map((s) => s.id), 'Asistidas', 'Faltas', 'Título'];
-    const rows = inscripciones().map((a) => {
-      const asistidas = new Set(checkinsDeAsistente(a.id).map((c) => c.sesionId));
-      const est = estadoAsistencia(a.id);
-      return [
-        a.id, a.apellidos, a.nombre, a.estado,
-        ...cerradas.map((s) => (asistidas.has(s.id) ? 'SÍ' : '—')),
-        est.asistidas, est.faltas,
-        est.nivel === 'critico' ? 'PERDIDO' : est.nivel === 'riesgo' ? 'EN RIESGO' : 'OK'
-      ];
-    });
-    return toCSV(headers, rows);
-  }
-  function informeSesion(sesId) {
-    const cks = checkinsDeSesion(sesId);
-    const headers = ['ID', 'Apellidos', 'Nombre', 'Hora', 'Método', 'Escaneado por'];
-    const rows = cks.map((c) => {
-      const a = asistente(c.asistenteId) || {};
-      return [c.asistenteId, a.apellidos || '?', a.nombre || '?', (c.timestamp || '').slice(11, 16), c.metodo, c.staffUsername];
-    });
-    return toCSV(headers, rows);
-  }
-  function descargarCSV(nombre, contenido) {
-    const blob = new Blob(['﻿' + contenido], { type: 'text/csv;charset=utf-8' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = nombre;
-    a.click();
-    URL.revokeObjectURL(a.href);
-  }
-
-  load();
   return {
-    reset, onChange, save,
-    login, logout, currentUser, isInformatica,
-    config, staff, sesiones, sesion, sesionActiva, inscripciones, asistente,
-    checkins, checkinsDeSesion, checkinsDeAsistente,
-    maxFaltas, estadoAsistencia, asistentesEnRiesgo,
-    checkin, getQueue, syncQueue, isOnline, setSimOffline, isSimOffline, simulateExternalCheckin,
-    setEstadoSesion, setCapacidadSesion, addAsistente, setEstadoAsistente, addStaff, toggleStaff,
-    importAsistentes, informeAsistencia, informeSesion, descargarCSV
+    onChange,
+    staff, login, logout, currentUser,
+    checkin, syncQueue, stats,
+    getQueue, isOnline, setSimOffline, isSimOffline
   };
 })();
