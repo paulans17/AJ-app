@@ -1,6 +1,7 @@
 # Credenciales — nunca se suben
 scripts/serviceAccountKey.json
 **/serviceAccountKey.json
+*firebase-adminsdk*.json
 .env
 .env.*
 secure/config.php
