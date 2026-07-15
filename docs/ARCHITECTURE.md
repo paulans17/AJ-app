@@ -1,10 +1,13 @@
 # Arquitectura — Staff AJapp (PWA)
 
-> ⚠️ Este documento fue reescrito el 2026-07-15 por la tarde tras el
-> pivote D13-D18 (ver `DECISIONS.md`): se abandonó Firestore en favor de
-> Google Sheets + Apps Script. Si ves referencias a Firebase/Firestore en
-> otro sitio del repo (`docs/FIRESTORE_SCHEMA.md`, `firebase/`), están
-> marcadas como superseded — la versión vigente es esta.
+> ⚠️ Este documento fue reescrito el 2026-07-15 tras el pivote D13-D18
+> (ver `DECISIONS.md`): se abandonó Firestore en favor de Google Sheets +
+> Apps Script. Corregido de nuevo el mismo día (D21): **el script de Apps
+> Script se usa tal cual, sin extensiones** (nada de `LockService`,
+> columna `staff`, acción `stats` ni JSON). Si ves referencias a
+> Firebase/Firestore en otro sitio del repo (`docs/FIRESTORE_SCHEMA.md`,
+> `firebase/`), están marcadas como superseded — la versión vigente es
+> esta.
 
 Ver decisiones y motivos completos en `DECISIONS.md`. Este documento
 describe el **cómo**, ya con las decisiones tomadas.
@@ -32,11 +35,11 @@ Excel/scripts que Pau ya usa; fuera de alcance de este repo, D20)
 │  │ tabla │  (informe, contenido por confirmar) │
 │  └───────┘                                    │
 │                                               │
-│  Apps Script (container-bound, Code.gs) — Web App │
-│  GET .../exec?action=checkin&num=...&staff=... │
-│  GET .../exec?action=stats                    │
-│  GET .../exec?action=staff                    │
-│  GET .../exec?action=confirm&id=...           │
+│  Apps Script #1 (container-bound, Code.gs)    │
+│  GET .../exec?num=...  ← check-in, tal cual (D21) │
+│                                               │
+│  Apps Script #2 (standalone, stats-readonly/) │
+│  GET .../exec  ← solo lectura, stats (D22)    │
 └──────────────────────▲────────────────────────┘
                         │ fetch (GET, sin headers custom)
                         │
@@ -78,8 +81,8 @@ alcance** que antes de este pivote:
   cambios, ya funciona.
 - **Backend:** Google Apps Script, container-bound a la hoja de cálculo,
   publicado como Web App (`Ejecutar como: yo`, `Acceso: cualquier
-  usuario`). Un único endpoint con varias `action` (ver
-  `docs/SHEET_SCHEMA.md`).
+  usuario`). Un único endpoint, `?num=X`, tal cual lo tenía Pau — sin
+  tocar (D21, ver `docs/SHEET_SCHEMA.md`).
 - **Almacén de datos:** Google Sheets. Sin base de datos NoSQL/SQL
   externa, sin proyecto Firebase.
 - **Hosting de la PWA:** puede ser cualquier cosa que sirva archivos
@@ -97,11 +100,8 @@ GET y todos los parámetros en la query string, sin cabeceras
 personalizadas (`Content-Type`, `Authorization`, etc.). Motivo técnico:
 una petición GET "simple" no dispara *CORS preflight* en el navegador,
 que es donde suelen fallar las integraciones de Apps Script Web Apps
-llamadas desde JS de cliente. Si en algún momento hace falta mandar datos
-más complejos (por ejemplo, en el import de un CSV grande), tocará
-investigar el caso aparte — para `checkin`/`stats`/`staff`/`confirm`, GET
-con query string es suficiente y ya está probado (es literalmente lo que
-hacía el Atajo).
+llamadas desde JS de cliente. Para `?num=X`, GET con query string es
+suficiente y ya está probado (es literalmente lo que hacía el Atajo).
 
 ## Estrategia offline (D18)
 
@@ -112,14 +112,18 @@ mantenerla a mano, reutilizando lo que la demo ya tenía:
   falla), el check-in se guarda en una cola en `localStorage` en vez de
   intentarse contra el Web App.
 - Al recuperar conexión (`window.addEventListener('online', ...)`), se
-  recorre la cola y se dispara `?action=checkin` por cada elemento
-  pendiente, en orden.
+  recorre la cola y se dispara `?num=X` por cada elemento pendiente, en
+  orden.
 - Duplicados: el chequeo de "ya registrado" se hace primero contra la
   cola local (por si la misma persona se escaneó dos veces sin red desde
   el mismo móvil) y luego, al sincronizar, el propio Web App vuelve a
-  comprobar contra `Checkins` con `LockService` antes de escribir — así
-  que un duplicado entre **dos móviles distintos** sin red se resuelve al
-  sincronizar (el segundo en llegar recibe `duplicado`), no antes.
+  comprobar contra `asistencias` antes de escribir (tal cual ya hacía el
+  script) — así que un duplicado entre **dos móviles distintos** sin red
+  se resuelve al sincronizar (el segundo en llegar recibe "Ya estaba
+  registrado"), no antes. El script no usa `LockService` (D21, rechazado
+  explícitamente), así que en el caso límite de dos sincronizaciones
+  llegando exactamente a la vez hay una ventana de carrera teórica sin
+  cerrar — aceptado.
 - La interfaz debe indicar cuántos check-ins están pendientes de
   sincronizar (ya existe ese indicador en la demo — `queue-badge`).
 
@@ -129,11 +133,10 @@ Sin Firebase Auth, sin Firestore Rules. El Web App de Apps Script es
 público por URL — el control de acceso es "quién tiene la URL", igual que
 antes con el Atajo. Es un riesgo aceptado y consciente para una
 herramienta interna de bajo riesgo (peor caso: alguien sin autorización
-registra check-ins falsos, no hay DNIs ni datos sensibles expuestos por
-ese endpoint en concreto — `Inscripciones` con los DNIs no se sirve nunca
-completa, solo se valida un ID puntual). Si más adelante hiciera falta más
-control, se puede añadir un parámetro secreto compartido a las llamadas;
-no es prioridad ahora.
+registra check-ins falsos; la pestaña `asistentes` solo tiene número y
+nombre, sin DNI ni otros datos sensibles). Si más adelante hiciera falta
+más control, se puede añadir algo — pero no modificando `Code.gs` sin que
+Pau lo pida (D21).
 
 ## Estructura del repo
 
@@ -161,6 +164,6 @@ staff-ajapp-pwa/
 │   └── PROJECT_SETUP.md           (⚠️ mayormente superseded — ver aviso al inicio)
 ├── firebase/                      (⚠️ superseded, solo histórico — no se despliega)
 └── apps-script/
-    ├── Code.gs                    (YA EXTENDIDO — script real de Pau + LockService/stats/staff/JSON)
+    ├── Code.gs                    (script real de Pau, TAL CUAL — no tocar sin permiso, D21)
     └── appsscript.json
 ```

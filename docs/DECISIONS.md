@@ -232,6 +232,51 @@ contrario más adelante.
 izquierda o no en la edición XXII, y qué contiene exactamente la pestaña
 `tabla` (¿la usa la pantalla Estadísticas o es un informe aparte?).
 
+## 2026-07-15 (cuarta vuelta — Pau rechaza las extensiones de D19)
+
+**D21. Se revierte `apps-script/Code.gs` al script original exacto, sin
+ninguna de las 4 extensiones de D19.** Pau fue explícito: "vamos a usar
+tal cual esto... lo que haya hecho Claude, quitando las pantallas, no
+vale". Se descartan: `LockService`, columna `staff` en `asistencias`,
+acción `stats`, y respuesta `format=json`. El archivo vuelve a ser
+exactamente el script que Pau ya tenía funcionando (`NO-PIN vFinal`), sin
+tocar una línea de la lógica.
+
+**Motivo (interpretado, no verificado con Pau palabra por palabra):**
+prioriza usar exactamente lo que ya está probado y funcionando sobre
+cualquier mejora no pedida, aunque sea de bajo riesgo. Aplica también
+hacia delante: no añadir nada a este script sin que Pau lo pida
+explícitamente.
+
+**Lo que sí se mantiene de todo el trabajo anterior:** las pantallas
+(UI) que ya se hayan construido en la PWA (Escanear, Estadísticas) — lo
+que no vale es lo que se haya hecho *por debajo* sin ceñirse a este
+script exacto. Hay que conectar esas pantallas a este endpoint tal cual
+es, con `?num=X`.
+
+**Abre una pregunta sin resolver:** el script original no tiene ninguna
+acción para leer estadísticas (no había pantalla de Estadísticas en el
+Atajo de iPhone). Sin tocar `Code.gs`, no hay forma de que la pantalla
+Estadísticas obtenga datos reales. Pendiente de que Pau diga cómo lo
+quiere resolver — ver `docs/SHEET_SCHEMA.md`.
+
+## 2026-07-15 (quinta vuelta — Estadísticas resuelto)
+
+**D22. Pau elige la opción 3 para Estadísticas: función de lectura en un
+proyecto de Apps Script separado, no dentro de `Code.gs`.** Detalle
+técnico importante: un Web App de Apps Script solo puede exponer un
+`doGet` por proyecto (no hay rutas tipo Express), así que "archivo
+separado" en la práctica es un **proyecto de Apps Script standalone
+aparte** (`apps-script/stats-readonly/`), con su propio `doGet`, su
+propio deploy y su propia URL `.../exec` — completamente independiente
+del de check-in. Abre la misma hoja por `SpreadsheetApp.openById(...)` en
+vez de estar vinculado a ella, y **solo lee**, nunca escribe. Cero
+cambios sobre `apps-script/Code.gs`.
+
+La PWA acaba llamando a **dos URLs distintas**: una para `?num=X`
+(check-in, `apps-script/Code.gs`) y otra para las estadísticas
+(`apps-script/stats-readonly/Code.gs`, sin parámetros, siempre GET).
+
 ## Pendiente de decidir (no bloqueante para empezar)
 
 - Nombre definitivo del proyecto Firebase nuevo (propuesta en

@@ -1,17 +1,18 @@
-> ⚠️ Reescrito 2026-07-15 (tarde), segunda vuelta: Pau pasó el script real
-> que usó el año pasado (`NO-PIN vFinal`) y el link a la hoja real
-> ("MIEMBROS CURSO PROTOCOLO XXI"). Este documento ya no es un diseño
-> especulativo — describe la estructura real existente más las extensiones
-> mínimas necesarias para que la use un equipo entero desde una PWA en vez
-> de un único Atajo de iPhone.
+> ⚠️ Reescrito 2026-07-15, cuarta vuelta (D21): Pau pidió usar el script
+> **tal cual**, sin ninguna extensión. Las versiones anteriores de este
+> documento (que añadían LockService, columna `staff`, acción `stats` y
+> respuesta JSON) quedan descartadas. Lo que sigue describe únicamente lo
+> que el script real ya hace.
 
-# Modelo de datos — Google Sheet (real, no un diseño desde cero)
+# Modelo de datos — Google Sheet (script original, sin tocar)
 
-Sustituye a `docs/FIRESTORE_SCHEMA.md` (superseded). La hoja real de la
-edición XXI tenía 4 pestañas: `asistentes`, `Config`, `asistencias`,
-`tabla`. Para la XXII se reutiliza la misma estructura.
+Sustituye a `docs/FIRESTORE_SCHEMA.md` (superseded). Hoja real:
+["MIEMBROS CURSO PROTOCOLO XXI"](https://docs.google.com/spreadsheets/d/1YDADLLWwA92Gm-_WYPYY4qGxTt5Wx-RIjM7Ju8z9FHE/edit?usp=sharing),
+pestañas `asistentes`, `Config`, `asistencias`, `tabla`. Se usa **esta
+misma hoja, tal cual, para las pruebas** — no una copia ni una hoja nueva
+para la XXII (decisión de Pau, 2026-07-15).
 
-## Pestañas ya existentes (edición XXI, confirmadas)
+## Pestañas
 
 ### `asistentes`
 Fila 1 = cabecera (`NÚMERO`, `NOMBRE`). Desde la fila 2: una fila por
@@ -19,84 +20,73 @@ persona acreditada.
 
 | Columna | Contenido |
 |---|---|
-| A — NÚMERO | El número que lleva impreso/en el QR de la acreditación. En la hoja de la XXI aparece como número simple (`1`, `2`... `99`), **no** con ceros a la izquierda — aunque el comentario del script de ejemplo usaba `num=0034`. Antes de dar por buena la convención de esta edición, comprobar con qué formato exacto se van a imprimir los QR/acreditaciones de la XXII, y normalizar en el script (quitar ceros a la izquierda a ambos lados antes de comparar) para que dé igual cómo venga. |
-| B — NOMBRE | `Apellidos, Nombre` (texto libre, ya así en la hoja real) |
-
-Esta pestaña **es el roster de asistentes** — no tiene DNI, email, menú ni
-modalidad. Esos datos (si hacen falta para catering/facturación) viven en
-otra hoja de inscripción aparte, no en esta — Staff AJapp no los toca, solo
-necesita saber "¿existe este número?" y "¿cómo se llama?".
+| A — NÚMERO | El número que lleva impreso/en el QR de la acreditación. En la hoja real aparece como número simple (`1`, `2`... `99`), sin ceros a la izquierda visibles en la celda — el script compara como string tal cual viene, así que el número que se escanee/teclee tiene que coincidir exactamente con lo que hay en la celda. |
+| B — NOMBRE | `Apellidos, Nombre` |
 
 ### `Config`
-- **`B2`** = sesión activa en este momento (texto libre, ej. "Protocolo
-  empresarial" o el identificador que se use). **Se edita a mano** durante
-  el evento — no hay pantalla en la app para cambiarlo (D15). Todo lo que
-  se escanea se registra contra el valor que haya en esta celda en ese
-  momento.
-- Puede tener más celdas de configuración si hace falta (ej. capacidad
-  total, aforo) — a día de hoy el script solo lee `B2`.
+- **`B2`** = sesión activa en este momento (texto libre). Se edita a mano
+  en la propia hoja — no hay pantalla en la app para esto.
 
 ### `asistencias`
-Fila 1 = cabecera. Desde la fila 2: una fila por cada escaneo válido
-(nunca duplicados de la misma persona en la misma sesión).
+Fila 1 = cabecera. Desde la fila 2: una fila por cada escaneo válido.
 
-| Columna | Contenido (ya existente) |
+| Columna | Contenido |
 |---|---|
-| A | Número (mismo valor que `asistentes!A`) |
-| B | Sesión (mismo valor que estaba en `Config!B2` en el momento del escaneo) |
+| A | Número (igual que `asistentes!A`) |
+| B | Sesión (el valor que había en `Config!B2` en el momento del escaneo) |
 | C | Timestamp (`yyyy-MM-dd HH:mm:ss`, zona `Europe/Madrid`) |
-| D — **nuevo, propuesto** | `staff` — quién escaneó. La versión de Atajos no lo tenía (tenía sentido, solo la usaba una persona); con varios móviles a la vez sí aporta saber quién registró cada entrada. Es aditivo: si no se manda, se deja en blanco, no rompe nada de lo que ya funciona. |
+
+Sin columna de quién escaneó — el script original no la tiene, no se
+añade (D21).
 
 ### `tabla`
-Existe en la hoja real pero no se ha revisado su contenido en esta sesión
-(el fetch no pudo renderizarla). Probablemente un resumen/pivote de
-asistencia por persona y sesión, en la línea del informe ECTS que se
-mencionaba en `DECISIONS.md`. Pendiente: que Pau confirme qué hay ahí y si
-la pantalla Estadísticas debe leer de esta pestaña o si basta con calcular
-el recuento en vivo desde `asistencias` (ver más abajo, es lo que asume
-este documento por ahora).
+Existe en la hoja real, contenido sin confirmar todavía.
 
-## Web App de Apps Script — extendiendo el script real, no sustituyéndolo
+## El endpoint — exactamente como está, sin extensiones
 
-El punto de partida es el script que Pau ya usaba (`NO-PIN vFinal`,
-guardado ahora en `apps-script/Code.gs`). La extensión mínima para que
-sirva a una PWA con varias personas escaneando a la vez:
+`apps-script/Code.gs` es el script real de Pau, sin modificar. Un único
+`doGet(e)`:
 
-1. **`LockService`** alrededor de la comprobación de duplicado + el
-   `appendRow` — la versión de Atajos no lo necesitaba (un único usuario,
-   nunca dos peticiones a la vez); con ~20 personas escaneando en
-   paralelo desde la PWA, dos escaneos casi simultáneos del mismo número
-   sí pueden colarse los dos sin lock. Es la única adición que se
-   considera obligatoria, no opcional.
-2. **Parámetro `staff`** opcional en la llamada, para rellenar la columna
-   D nueva de `asistencias`.
-3. **`action=stats`** — nueva acción (no tocaba nada de esto el script
-   original) para la pantalla Estadísticas: lee `Config!B2` (sesión
-   activa), cuenta filas de `asistentes` (total) y de `asistencias` con
-   `B == sesión activa` (registrados), calcula `%`. Se llama por *polling*
-   (cada 5-10s) mientras esa pantalla está abierta — Sheets no empuja
-   cambios en vivo.
-4. **Respuesta:** el script original devuelve HTML plano (pensado para
-   que un Atajo de iOS lo lea como notificación). La PWA necesita poder
-   distinguir programáticamente entre "registrado", "ya estaba
-   registrado" y "número no encontrado" para pintar colores/iconos
-   distintos, no solo mostrar un texto. Propuesta: añadir un parámetro
-   `format=json` que la PWA siempre mande — si está presente, se responde
-   JSON (`{status, mensaje}`); si no está (o sea, si alguien sigue usando
-   el Atajo de iPhone tal cual), se responde exactamente igual que hasta
-   ahora (HTML). Cambio aditivo, no rompe el Atajo existente si alguna vez
-   se quiere usar de nuevo como respaldo.
+- **Parámetro:** `num` (el número escaneado/tecleado).
+- **Lógica:** lee `Config!B2` (sesión activa) → si no hay, responde
+  "Config!B2 vacío" → busca `num` en `asistentes!A` → si no está,
+  responde "no está en asistentes" → busca en `asistencias` si ya hay una
+  fila con ese `num` + esa sesión → si ya existe, responde "Ya estaba
+  registrado" → si no, añade una fila nueva a `asistencias` y responde
+  "Registrado".
+- **Respuesta:** siempre HTML de una línea (pensado para que un Atajo de
+  iOS lo lea como notificación), nunca JSON. Todos los mensajes acaban en
+  `(NO-PIN vFinal)`.
 
-Ver `apps-script/Code.gs` para el código real ya extendido con estos 4
-puntos, comentado para que quede claro qué es del script original y qué
-se ha añadido.
+La PWA tiene que llamar a esta URL con `fetch(...+"?num="+codigo)` y
+**interpretar el texto de la respuesta** para decidir qué pantalla de
+resultado mostrar (verde/naranja/rojo) — por ejemplo, mirar si el HTML
+contiene "Registrado" (sin más) vs "Ya estaba registrado" vs "no está en
+asistentes". No hay un campo `status` estructurado; hay que parsear texto.
+Es así a propósito (D21) — si en algún momento se necesita algo más
+robusto, se decide explícitamente, no se añade por iniciativa propia.
 
-## Qué NO se replica del diseño Firestore de por la mañana
+## Estadísticas — resuelto (D22)
 
-- Nada de `AJ2026-XXXX` como formato de ID — el número real es el que ya
-  usa la hoja (`asistentes!A`, sin prefijo).
-- Nada de columnas de inscripción completas (DNI, menú, modalidad,
-  alergias) dentro de este sistema — no estaban en la hoja real de
-  check-in y no hacen falta para validar un escaneo.
-- Nada de `Sesiones` como pestaña con estados por sesión — la sesión
-  activa es un único valor en `Config!B2`, tal cual ya funcionaba.
+Pau eligió la opción 3: una función de lectura nueva, en un **proyecto de
+Apps Script separado** (`apps-script/stats-readonly/Code.gs`) — nunca
+dentro de `Code.gs`. Un Web App de Apps Script solo expone un `doGet` por
+proyecto, así que "archivo separado" es, en la práctica, un proyecto
+standalone aparte: se crea en script.google.com como proyecto nuevo (no
+vinculado a la hoja), abre la hoja por ID con
+`SpreadsheetApp.openById(...)`, y se despliega con su propia URL,
+distinta de la de check-in. Es de solo lectura — no escribe nada en
+ninguna pestaña.
+
+Devuelve JSON: `{"session": "...", "total": N, "registrados": N, "tasa": N}`.
+`total` = filas de `asistentes` (menos la cabecera). `registrados` =
+filas de `asistencias` cuya columna B coincide con la sesión activa
+(`Config!B2`). La PWA hace *polling* a esta URL cada 5-10s mientras la
+pantalla Estadísticas está abierta.
+
+## Qué NO se hace (revertido en D21)
+
+- Nada de `LockService`.
+- Nada de columna `staff` en `asistencias`.
+- Nada de acción `stats` dentro de `Code.gs`.
+- Nada de respuestas JSON — se queda en HTML de texto plano.

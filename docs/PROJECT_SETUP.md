@@ -9,19 +9,30 @@
 
 ## 0. Lo que hace falta de verdad ahora (Sheets + Apps Script)
 
-- [ ] Confirmar que la hoja real ("MIEMBROS CURSO PROTOCOLO XXI" o su
-      copia para la XXII) tiene las pestañas `asistentes`, `Config`,
-      `asistencias` con la estructura de `docs/SHEET_SCHEMA.md`.
+**Check-in (script sin tocar, D21):**
+- [ ] Confirmar que la hoja real ("MIEMBROS CURSO PROTOCOLO XXI",
+      usada tal cual para las pruebas) tiene las pestañas `asistentes`,
+      `Config`, `asistencias` con la estructura de `docs/SHEET_SCHEMA.md`.
 - [ ] Abrir esa hoja → Extensiones → Apps Script → pegar
-      `apps-script/Code.gs` y `apps-script/appsscript.json`.
+      `apps-script/Code.gs` y `apps-script/appsscript.json` (tal cual,
+      sin editar nada).
 - [ ] Implementar → Nueva implementación → Aplicación web → ejecutar como
       "Yo", acceso "Cualquier usuario" → copiar la URL `.../exec`
-      resultante y pasársela a Claude Code (la necesita para conectar la
-      PWA a datos reales).
-- [ ] Confirmar si los números de `asistentes!A` de la XXII llevan ceros a
-      la izquierda o no (afecta a cómo se comparan en el script — ver
-      nota en `docs/SHEET_SCHEMA.md`).
-- [ ] Decidir/confirmar qué contiene la pestaña `tabla` de la hoja.
+      resultante y pasársela a Claude Code.
+
+**Estadísticas (proyecto aparte, solo lectura, D22):**
+- [ ] script.google.com → Nuevo proyecto (standalone, NO vinculado a la
+      hoja) → pegar `apps-script/stats-readonly/Code.gs` y su
+      `appsscript.json`.
+- [ ] Implementar → Nueva implementación → Aplicación web → misma
+      configuración → copiar esta **segunda** URL `.../exec` (distinta de
+      la de check-in) y pasársela también a Claude Code.
+
+**Pendiente de confirmar (no bloqueante):**
+- [ ] Si los números de `asistentes!A` de la XXII llevan ceros a la
+      izquierda o no (afecta a cómo se comparan en el script — ver nota
+      en `docs/SHEET_SCHEMA.md`).
+- [ ] Qué contiene la pestaña `tabla` de la hoja.
 
 ## Pasos antiguos (Firebase, ya no bloquean nada) — histórico
 
