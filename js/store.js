@@ -56,8 +56,24 @@ const Store = (() => {
      "(NO-PIN vFinal)". No hay campo status estructurado — se decide por texto,
      tal como pide docs/SHEET_SCHEMA.md. */
   function parseCheckinHtml(html) {
-    const texto = String(html)
-      .replace(/<[^>]+>/g, '')
+    // Apps Script sirve HtmlService envuelto en un loader sandboxed
+    // (goog.script.init) en vez de HTML plano cuando se le hace fetch()
+    // directo — comprobado en real: la URL responde 200 pero el cuerpo es
+    // una página de carga con el mensaje escapado dentro (\x3cb\x3e...).
+    // Se desescapan las secuencias \xHH y se ancla en "(NO-PIN vFinal)"
+    // (sufijo fijo y siempre en texto plano de _html() en Code.gs) para
+    // extraer el mensaje real sin depender del formato interno del loader.
+    const desescapar = (s) => s
+      .replace(/\\x([0-9a-fA-F]{2})/g, (_, h) => String.fromCharCode(parseInt(h, 16)))
+      .replace(/\\"/g, '"')
+      .replace(/\\\//g, '/');
+    // Dos pasadas: los mensajes de error citan nombres de hoja entre
+    // comillas (ej. "asistentes"), que quedan doblemente escapados dentro
+    // del loader (JSON dentro de un string JS) — una sola pasada no basta.
+    const unescaped = desescapar(desescapar(String(html)));
+    const m = unescaped.match(/<b>([\s\S]*?\(NO-PIN vFinal\))/i);
+    const bruto = m ? m[1] : unescaped.replace(/<[^>]+>/g, '');
+    const texto = bruto
       .replace(/\s*\(NO-PIN vFinal\)\s*$/i, '')
       .trim();
     let status = 'error';
