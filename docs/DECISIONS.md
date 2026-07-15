@@ -307,6 +307,44 @@ commit anterior — sigue exactamente igual que en D21.
 un placeholder de 10 nombres de ejemplo (`TODO(Pau)`) — hace falta el
 roster real de ~20 personas antes de usarlo en el curso de verdad.
 
+## 2026-07-15 (séptima vuelta — probado en el móvil real, dos bugs encontrados)
+
+Repo subido a GitHub (`https://github.com/paulans17/AJ-app`) y publicado
+con GitHub Pages (`https://paulans17.github.io/AJ-app/`) — instalado en
+el iPhone de Pau con "Añadir a pantalla de inicio". Al probarlo de
+verdad aparecen dos fallos que ni `curl` ni el servidor local habían
+revelado:
+
+**D24. El check-in fallaba siempre con "sin cobertura" aunque hubiera
+red — causa: CORS, no conexión.** `apps-script/Code.gs` usa
+`HtmlService.createHtmlOutput()`, cuyas respuestas no llevan la cabecera
+`Access-Control-Allow-Origin` — comprobado comparando cabeceras: la URL
+de Estadísticas (`ContentService`) sí la lleva, la de check-in no. Un
+navegador real bloquea leer esa respuesta entre dominios (`fetch()` desde
+`paulans17.github.io` hacia `script.google.com`), aunque el registro sí
+llega a escribirse en `asistencias` — por eso `curl` nunca lo detectó
+(CORS es una restricción exclusiva del navegador). La PWA lo interpretaba
+como fallo de red y lo mandaba a la cola offline.
+
+**Se rompe la regla de D21 con permiso explícito de Pau**: se cambia
+`_html()` en `apps-script/Code.gs` de `HtmlService.createHtmlOutput()` a
+`ContentService.createTextOutput().setMimeType(HTML)` — mismo texto de
+salida, misma lógica de negocio (nada más de `doGet()` cambia), solo
+cambia cómo lo sirve Google por dentro. `ContentService` ya manda la
+cabecera CORS (lo prueba que Estadísticas funciona). No debería notarse
+ninguna diferencia desde el Atajo de iPhone. **Pendiente**: Pau tiene que
+copiar el `Code.gs` actualizado al editor de Apps Script real (vinculado
+a la hoja) y redesplegar — el cambio en el repo no toca el script en
+producción por sí solo.
+
+**D25. La cámara no detectaba ningún QR en Safari/iOS.** Causa probable:
+soporte experimental/incompleto de `BarcodeDetector` en versiones
+recientes de Safari — el código asumía "si existe, funciona" y nunca
+caía a `jsQR` cuando el nativo estaba presente pero no detectaba nada.
+Arreglado en `js/scanner.js` (no toca Apps Script): cada frame prueba
+`BarcodeDetector` primero y, si no encuentra nada, prueba `jsQR` también
+en el mismo frame, en vez de ser mutuamente excluyentes.
+
 ## Pendiente de decidir (no bloqueante para empezar)
 
 - Nombre definitivo del proyecto Firebase nuevo (propuesta en
@@ -314,7 +352,5 @@ roster real de ~20 personas antes de usarlo en el curso de verdad.
   AJapp (D13), solo relevante si `alfil-statics` lo reutiliza.
 - Roster real de ~20 miembros de staff (nombres) para sustituir el
   placeholder de `js/store.js` (D23).
-- Hosting final de la PWA para instalarla en el móvil desde una URL
-  pública (GitHub Pages o Firebase Hosting) — mientras tanto, se puede
-  probar en local con `.claude/static-server.js` + móvil en la misma
-  Wi-Fi.
+- Confirmar en el móvil que D24 (CORS) y D25 (cámara) quedan resueltos
+  tras redesplegar `Code.gs` y publicar el nuevo `js/scanner.js`.
