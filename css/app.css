@@ -30,18 +30,6 @@ body {
 }
 .hidden { display: none !important; }
 
-/* ---- banner demo ---- */
-#demo-banner {
-  background: #1c1607;
-  color: var(--gold);
-  text-align: center;
-  font-size: 11px;
-  letter-spacing: 1.5px;
-  padding: 4px 8px;
-  text-transform: uppercase;
-  border-bottom: 1px solid rgba(198,167,94,0.25);
-}
-
 /* ---- topbar (estado conexión / usuario) ---- */
 #topbar { position: sticky; top: 0; z-index: 20; background: var(--background); }
 .topbar-inner { display: flex; align-items: center; gap: 8px; padding: 8px 16px 0; max-width: 760px; margin: 0 auto; }

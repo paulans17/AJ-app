@@ -34,9 +34,11 @@ pegar esta lista en esa sesión para que sepa qué asumir como ya hecho.
 - [x] Clave de cuenta de servicio generada y guardada en
       `scripts/serviceAccountKey.json` (protegida por `.gitignore` — no se
       sube a git).
-- [ ] Ejecutar `node scripts/set-claim.js <email> informatica` por cada
-      cuenta admin (el script se escribe en Claude Code junto con el resto
-      de la app — de momento solo está documentado el flujo).
+- [ ] Ejecutar `node scripts/set-claim.js <email> informatica` (o
+      `presidencia`) por cada cuenta admin — el script ya existe en
+      `scripts/`. Requiere `npm install firebase-admin` primero (no hay
+      `package.json` en el repo todavía, instálalo donde vayas a ejecutar
+      el script).
 
 ## 5. Reglas de Firestore
 

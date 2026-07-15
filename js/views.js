@@ -83,7 +83,7 @@ const Views = (() => {
       <div class="login-wrap">
         <div class="login-logo">♗</div>
         <h1>Staff AJapp</h1>
-        <p class="login-sub">${esc(Store.config().nombreEdicion)}<br>Elige tu usuario — sin contraseña</p>
+        <p class="login-sub">Curso de Protocolo ${esc(Store.config().edicion || '')}<br>Elige tu usuario — sin contraseña</p>
         ${activos.map((s) => `
           <button class="staff-item" data-login="${esc(s.username)}">
             <span class="avatar">${iniciales(s.nombreCompleto)}</span>
@@ -284,11 +284,9 @@ const Views = (() => {
   /* ============================================================
      DASHBOARD — réplica de DashboardView.swift
      ============================================================ */
-  let liveTimer = null;
-  function stopLive() { if (liveTimer) { clearInterval(liveTimer); liveTimer = null; } }
+  function stopLive() {}
 
   function vDashboard() {
-    stopLive();
     const confirmados = Store.inscripciones().filter((a) => a.estado === 'confirmado');
     const ses = Store.sesionActiva();
     const presentes = ses ? Store.checkinsDeSesion(ses.id).length : 0;
@@ -324,8 +322,6 @@ const Views = (() => {
         <div class="mini-card"><div class="mc-title">Ausentes</div><div class="mc-num white" id="live-aus">${ausentes}</div></div>
       </div>
 
-      ${ses ? `<button class="btn-outline btn-block" id="btn-live" style="margin-bottom:16px">▶ Simular escaneos de otros móviles (demo)</button>` : ''}
-
       <div class="card">
         <div class="rate-row" style="margin-bottom:10px">
           <span class="rt">⚠ En riesgo de perder el título</span>
@@ -339,24 +335,6 @@ const Views = (() => {
           </div>`).join('') : '<div class="muted">Nadie en riesgo por ahora</div>'}
         <p class="muted" style="margin-top:10px">Mínimo ${Math.round(Store.config().porcentajeMinimo * 100)}% de asistencia — a la ${Store.maxFaltas() + 1}ª falta se pierde el título.</p>
       </div>`;
-
-    const btnLive = $('#btn-live');
-    if (btnLive) btnLive.addEventListener('click', () => {
-      if (liveTimer) { stopLive(); btnLive.textContent = '▶ Simular escaneos de otros móviles (demo)'; return; }
-      btnLive.textContent = '⏸ Parar simulación';
-      liveTimer = setInterval(() => {
-        const a = Store.simulateExternalCheckin();
-        if (!a) { stopLive(); btnLive.textContent = '▶ Simular escaneos de otros móviles (demo)'; return; }
-        const s2 = Store.sesionActiva();
-        const n = Store.checkinsDeSesion(s2.id).length;
-        const pct = confirmados.length ? (n / confirmados.length) * 100 : 0;
-        const set = (id, v) => { const e = $(id); if (e) e.textContent = v; };
-        set('#live-num', n); set('#live-pres', n);
-        set('#live-aus', Math.max(0, confirmados.length - n));
-        set('#live-pct', pct.toFixed(1) + '%');
-        const bar = $('#live-bar'); if (bar) bar.style.width = pct + '%';
-      }, 1800);
-    });
   }
 
   /* ============================================================
@@ -368,6 +346,7 @@ const Views = (() => {
 
   function vAdmin() {
     if (!Store.isInformatica()) { App.go('escanear'); return; }
+    if (!Store.isAdminAuthenticated()) { vAdminLogin(); return; }
     const tabs = [['asistentes', 'Asistentes'], ['importar', 'Importar'], ['informes', 'Informes'], ['staff', 'Equipo'], ['config', 'Config']];
     view().innerHTML = `
       <div class="title-kicker">Solo Informática / Presidencia</div>
@@ -377,6 +356,37 @@ const Views = (() => {
     view().querySelectorAll('[data-tab]').forEach((b) => b.addEventListener('click', () => { adminTab = b.dataset.tab; vAdmin(); }));
     const body = $('#admin-body');
     ({ asistentes: aAsistentes, importar: aImportar, informes: aInformes, staff: aStaff, config: aConfig }[adminTab])(body);
+  }
+
+  /* Gate D12: entrar a Admin exige email+contraseña real (custom claim departamento) */
+  function vAdminLogin() {
+    view().innerHTML = `
+      <div class="login-wrap">
+        <div class="login-logo">♗</div>
+        <div class="big-title">Modo Admin</div>
+        <p class="login-sub">Inicia sesión con tu cuenta de Informática/Presidencia<br>para gestionar sesiones, asistentes y equipo.</p>
+        <label>Email</label><input id="admin-email" type="email" autocomplete="username">
+        <label>Contraseña</label><input id="admin-pass" type="password" autocomplete="current-password">
+        <div class="err-msg" id="admin-login-err"></div>
+        <button class="btn-gold btn-block" id="admin-login-btn" style="margin-top:14px">Entrar</button>
+        <button class="btn-plain btn-block" id="admin-login-cancel">Cancelar</button>
+      </div>`;
+    const intentar = async () => {
+      const email = $('#admin-email').value.trim();
+      const pass = $('#admin-pass').value;
+      const err = $('#admin-login-err');
+      err.textContent = '';
+      if (!email || !pass) { err.textContent = 'Introduce email y contraseña'; return; }
+      const btn = $('#admin-login-btn');
+      btn.disabled = true; btn.textContent = 'Entrando…';
+      const r = await Store.adminLogin(email, pass);
+      if (r.ok) { vAdmin(); return; }
+      btn.disabled = false; btn.textContent = 'Entrar';
+      err.textContent = r.error;
+    };
+    $('#admin-login-btn').addEventListener('click', intentar);
+    $('#admin-pass').addEventListener('keydown', (e) => { if (e.key === 'Enter') intentar(); });
+    $('#admin-login-cancel').addEventListener('click', () => App.go('escanear'));
   }
 
   /* ---- admin: asistentes ---- */
@@ -434,8 +444,8 @@ const Views = (() => {
         <label>DNI</label><input id="f-dni">
         <label>Menú cena (vacío = solo curso)</label><input id="f-menu" placeholder="ej. Merluza en salsa verde">
         <button class="btn-gold btn-block" id="f-guardar">Crear (genera ID + QR)</button>`);
-      $('#f-guardar').addEventListener('click', () => {
-        const a = Store.addAsistente({
+      $('#f-guardar').addEventListener('click', async () => {
+        const a = await Store.addAsistente({
           nombre: $('#f-nombre').value, apellidos: $('#f-apellidos').value,
           email: $('#f-email').value, dni: $('#f-dni').value, menuCena: $('#f-menu').value,
           estado: 'confirmado'
@@ -483,8 +493,10 @@ const Views = (() => {
           ${mapeadas.length > 8 ? `<p class="muted">…y ${mapeadas.length - 8} más</p>` : ''}
         </div>
         <button class="btn-gold btn-block" id="btn-imp-ok" style="margin-top:10px">Importar ${mapeadas.length} asistentes</button>`;
-      $('#btn-imp-ok').addEventListener('click', () => {
-        const n = Store.importAsistentes(importFilas);
+      $('#btn-imp-ok').addEventListener('click', async () => {
+        const btn = $('#btn-imp-ok');
+        btn.disabled = true; btn.textContent = 'Importando…';
+        const n = await Store.importAsistentes(importFilas);
         toast(`${n} asistentes importados con su ID y QR`);
         adminTab = 'asistentes';
         vAdmin();
@@ -602,19 +614,14 @@ const Views = (() => {
           <div><label>Aforo máximo</label><input value="${c.maxPlazas}" disabled></div>
           <div><label>Asistencia mínima</label><input value="${Math.round(c.porcentajeMinimo * 100)}%" disabled></div>
         </div>
-        <p class="muted">En la versión real esto vive en <code>config/general</code> de Firestore y sí es editable.</p>
+        <p class="muted">Vive en <code>config/general</code> de Firestore (proyecto <b>alfiljuvenil-protocolo</b>).</p>
       </div>
-      <div class="card">
-        <div class="rate-row"><span class="rt">Demo</span></div>
-        <button class="btn-danger-outline btn-block" id="btn-reset">↺ Reiniciar la demo (datos originales)</button>
-        <p class="muted" style="margin-top:10px">Vuelve al estado inicial: día 3 del curso, D3_S1 activa.</p>
-      </div>
-      <div class="card">
-        <div class="rate-row"><span class="rt">Arquitectura (para la presentación)</span></div>
-        <p class="muted">PWA instalable (0 € · sin App Store) → Firebase <b>prueba-protocolo2627</b>: Firestore + Anonymous Auth + reglas ya desplegadas. Inscripción: Google Form → Apps Script → Firestore. Import Excel de respaldo. Esta demo replica ese esquema en local.</p>
-      </div>
-      <button class="btn-plain btn-block" id="btn-logout">Cerrar sesión de @${esc(Store.currentUser().username)}</button>`;
-    $('#btn-reset').addEventListener('click', () => { Store.reset(); toast('Demo reiniciada'); App.go('escanear'); });
+      <button class="btn-danger-outline btn-block" id="btn-exit-admin">Salir de modo admin</button>
+      <button class="btn-plain btn-block" id="btn-logout" style="margin-top:10px">Cerrar sesión de @${esc(Store.currentUser().username)}</button>`;
+    $('#btn-exit-admin').addEventListener('click', async () => {
+      await Store.exitAdminMode();
+      App.go('escanear');
+    });
     $('#btn-logout').addEventListener('click', () => { Store.logout(); App.go('login'); });
   }
 

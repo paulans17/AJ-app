@@ -1,38 +1,137 @@
 /* ============================================================
-   Staff AJapp — CAPA DE DATOS (modo demo)
-   En la versión real, este archivo es el ÚNICO que cambia:
-   cada función pasa a leer/escribir en Firestore
-   (prueba-protocolo2627) en vez de en localStorage.
+   Staff AJapp — CAPA DE DATOS (Firebase real)
+   Firestore (SDK web modular) + Firebase Auth. Mantiene la misma
+   interfaz pública que consumían js/views.js y js/app.js: getters
+   síncronos que leen de un espejo en memoria, alimentado en vivo por
+   onSnapshot. Persistencia offline nativa del SDK (persistentLocalCache),
+   sin cola manual — ver docs/ARCHITECTURE.md, "Estrategia offline".
    ============================================================ */
 
 const Store = (() => {
-  const KEY = 'ajapp-demo-v2';
-  const KEY_QUEUE = 'ajapp-demo-cola';
-  const KEY_SESSION = 'ajapp-demo-login';
-  let db = null;
+  const SDK_VERSION = '12.16.0';
+  const KEY_SESSION = 'ajapp-login';
+
+  const db = { config: {}, staff: [], sesiones: [], inscripciones: [], checkins: [] };
   const listeners = [];
+  const onChange = (fn) => listeners.push(fn);
+  const notify = () => listeners.forEach((fn) => fn());
 
-  /* ---------- persistencia ---------- */
-  function load() {
-    try {
-      const raw = localStorage.getItem(KEY);
-      db = raw ? JSON.parse(raw) : null;
-    } catch (e) { db = null; }
-    if (!db) reset();
-  }
-  function save() {
-    localStorage.setItem(KEY, JSON.stringify(db));
-    listeners.forEach((fn) => fn());
-  }
-  function reset() {
-    db = JSON.parse(JSON.stringify(DEMO)); // copia limpia del seed
-    localStorage.setItem(KEY, JSON.stringify(db));
-    localStorage.removeItem(KEY_QUEUE);
-    listeners.forEach((fn) => fn());
-  }
-  function onChange(fn) { listeners.push(fn); }
+  let fs = null;   // { app, firestore, auth, mod: { firestoreFns, authFns } }
+  let adminClaimOk = false; // true si la sesión Auth actual es real (no anónima) y con custom claim válido
 
-  /* ---------- login (solo usuario, sin contraseña) ---------- */
+  /* ---------- helpers ---------- */
+  function tsToISO(v) {
+    if (!v) return null;
+    if (typeof v.toDate === 'function') return v.toDate().toISOString();
+    return v;
+  }
+
+  async function initFirebase() {
+    const [{ initializeApp }, firestoreMod, authMod] = await Promise.all([
+      import(`https://www.gstatic.com/firebasejs/${SDK_VERSION}/firebase-app.js`),
+      import(`https://www.gstatic.com/firebasejs/${SDK_VERSION}/firebase-firestore.js`),
+      import(`https://www.gstatic.com/firebasejs/${SDK_VERSION}/firebase-auth.js`)
+    ]);
+    const cfg = await fetch('firebase/web-config.json').then((r) => r.json());
+    const app = initializeApp(cfg);
+    const firestore = firestoreMod.initializeFirestore(app, {
+      localCache: firestoreMod.persistentLocalCache()
+    });
+    const auth = authMod.getAuth(app);
+    fs = { app, firestore, auth, firestoreMod, authMod };
+
+    await new Promise((resolve) => {
+      const unsub = authMod.onAuthStateChanged(auth, (user) => {
+        unsub();
+        if (user) { resolve(); return; }
+        authMod.signInAnonymously(auth).then(resolve).catch(resolve);
+      });
+    });
+
+    subscribeAll();
+    await Promise.all([
+      waitFirst('config'), waitFirst('staff'), waitFirst('sesiones'),
+      waitFirst('inscripciones'), waitFirst('checkins')
+    ]);
+  }
+
+  const firstSnapDone = {};
+  const firstSnapResolvers = {};
+  function waitFirst(key) {
+    if (firstSnapDone[key]) return Promise.resolve();
+    return new Promise((resolve) => { firstSnapResolvers[key] = resolve; });
+  }
+  function markFirst(key) {
+    if (!firstSnapDone[key]) {
+      firstSnapDone[key] = true;
+      if (firstSnapResolvers[key]) firstSnapResolvers[key]();
+    }
+  }
+
+  // Si un listener falla (p.ej. rules aún no desplegadas: permission-denied),
+  // no debe dejar Store.ready colgado para siempre — se libera igualmente
+  // con esa fuente vacía, y se avisa por consola para que quede claro que es
+  // un problema de permisos/red, no un bug silencioso.
+  function onErr(key) {
+    return (err) => {
+      console.error(`Store: fallo leyendo "${key}" —`, err.code || err.message || err);
+      markFirst(key);
+      notify();
+    };
+  }
+
+  function subscribeAll() {
+    const { firestoreMod: F, firestore } = fs;
+
+    F.onSnapshot(F.doc(firestore, 'config', 'general'), (snap) => {
+      db.config = snap.exists() ? snap.data() : {};
+      markFirst('config');
+      notify();
+    }, onErr('config'));
+
+    F.onSnapshot(F.collection(firestore, 'staff'), (snap) => {
+      db.staff = snap.docs.map((d) => ({ username: d.id, ...d.data() }));
+      markFirst('staff');
+      notify();
+    }, onErr('staff'));
+
+    F.onSnapshot(F.collection(firestore, 'sesiones'), (snap) => {
+      db.sesiones = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+      markFirst('sesiones');
+      notify();
+    }, onErr('sesiones'));
+
+    F.onSnapshot(F.collection(firestore, 'inscripciones'), (snap) => {
+      db.inscripciones = snap.docs.map((d) => {
+        const data = d.data();
+        return {
+          id: d.id, ...data,
+          fechaNacimiento: tsToISO(data.fechaNacimiento),
+          tsInscripcion: tsToISO(data.tsInscripcion),
+          tsConfirmacion: tsToISO(data.tsConfirmacion)
+        };
+      });
+      markFirst('inscripciones');
+      notify();
+    }, onErr('inscripciones'));
+
+    F.onSnapshot(F.collection(firestore, 'checkins'), { includeMetadataChanges: true }, (snap) => {
+      db.checkins = snap.docs.map((d) => {
+        const data = d.data({ serverTimestamps: 'estimate' });
+        return {
+          id: d.id, ...data,
+          timestamp: tsToISO(data.timestamp),
+          pendienteSync: d.metadata.hasPendingWrites
+        };
+      });
+      markFirst('checkins');
+      notify();
+    }, onErr('checkins'));
+  }
+
+  const ready = initFirebase();
+
+  /* ---------- login staff (solo usuario, sin contraseña — D4) ---------- */
   function login(username) {
     const s = db.staff.find((x) => x.username === username && x.activo);
     if (!s) return null;
@@ -49,6 +148,38 @@ const Store = (() => {
     return !!u && (u.departamento === 'informatica' || u.departamento === 'presidencia');
   };
 
+  /* ---------- modo admin real (D12) ---------- */
+  const isAdminAuthenticated = () => adminClaimOk;
+
+  async function adminLogin(email, password) {
+    const { authMod: A, auth } = fs;
+    try {
+      const cred = await A.signInWithEmailAndPassword(auth, email, password);
+      const tok = await cred.user.getIdTokenResult(true);
+      const dep = tok.claims.departamento;
+      if (dep === 'informatica' || dep === 'presidencia') {
+        adminClaimOk = true;
+        notify();
+        return { ok: true };
+      }
+      await A.signOut(auth);
+      await A.signInAnonymously(auth);
+      adminClaimOk = false;
+      notify();
+      return { ok: false, error: 'Esta cuenta no tiene permisos de Informática/Presidencia' };
+    } catch (e) {
+      return { ok: false, error: 'Email o contraseña incorrectos' };
+    }
+  }
+
+  async function exitAdminMode() {
+    const { authMod: A, auth } = fs;
+    adminClaimOk = false;
+    try { await A.signOut(auth); } catch (e) { /* noop */ }
+    try { await A.signInAnonymously(auth); } catch (e) { /* noop */ }
+    notify();
+  }
+
   /* ---------- getters ---------- */
   const config = () => db.config;
   const staff = () => db.staff;
@@ -61,12 +192,10 @@ const Store = (() => {
   const checkinsDeSesion = (sesId) => db.checkins.filter((c) => c.sesionId === sesId);
   const checkinsDeAsistente = (aId) => db.checkins.filter((c) => c.asistenteId === aId);
 
-  /* ---------- lógica de negocio: faltas / riesgo ----------
-     Título ECTS = asistir al menos al 80% de las 14 medias ponencias
-     → con 14 sesiones, un máximo de 2 faltas. 3 faltas = título perdido. */
+  /* ---------- lógica de negocio: faltas / riesgo (D11) ---------- */
   function maxFaltas() {
     const total = db.sesiones.length;
-    return Math.floor(total * (1 - db.config.porcentajeMinimo)); // 14 → 2
+    return Math.floor(total * (1 - db.config.porcentajeMinimo));
   }
   function estadoAsistencia(aId) {
     const cerradas = db.sesiones.filter((s) => s.estado === 'cerrada');
@@ -86,24 +215,21 @@ const Store = (() => {
       .sort((x, y) => y.faltas - x.faltas);
   }
 
-  /* ---------- check-in (con cola offline) ---------- */
-  function getQueue() {
-    try { return JSON.parse(localStorage.getItem(KEY_QUEUE)) || []; } catch (e) { return []; }
-  }
-  function setQueue(q) {
-    localStorage.setItem(KEY_QUEUE, JSON.stringify(q));
-    listeners.forEach((fn) => fn());
-  }
-
-  // Simulación de cobertura: en la demo se puede forzar el modo sin conexión
+  /* ---------- conexión ---------- */
   let simOffline = false;
-  const setSimOffline = (v) => { simOffline = v; listeners.forEach((fn) => fn()); };
+  const setSimOffline = (v) => { simOffline = v; notify(); };
   const isOnline = () => navigator.onLine && !simOffline;
   const isSimOffline = () => simOffline;
+  const getQueue = () => db.checkins.filter((c) => c.pendienteSync);
+  function syncQueue() {
+    return { synced: getQueue().length, pending: 0 };
+  }
 
   /**
    * Registra un check-in. Devuelve {status, asistente, mensaje}.
    * status: ok | duplicado | pendiente | no_encontrado | sin_sesion | offline_ok
+   * Escritura optimista contra Firestore (persistentLocalCache encola sola
+   * si no hay red) — no se espera el roundtrip al servidor.
    */
   function checkin(codigo, metodo) {
     const ses = sesionActiva();
@@ -112,141 +238,103 @@ const Store = (() => {
     if (!a) return { status: 'no_encontrado', mensaje: `Código "${codigo}" no corresponde a ningún inscrito` };
     if (a.estado !== 'confirmado') return { status: 'pendiente', asistente: a, mensaje: 'Inscripción sin confirmar (pago pendiente)' };
 
-    // duplicado: ya en la base o ya en la cola offline
-    const dup = db.checkins.some((c) => c.sesionId === ses.id && c.asistenteId === a.id) ||
-                getQueue().some((c) => c.sesionId === ses.id && c.asistenteId === a.id);
+    const dup = db.checkins.some((c) => c.sesionId === ses.id && c.asistenteId === a.id);
     if (dup) return { status: 'duplicado', asistente: a, mensaje: 'Ya tiene registrada esta media ponencia' };
 
-    const doc = {
-      id: 'ck' + Date.now() + Math.floor(Math.random() * 999),
+    const { firestoreMod: F, firestore } = fs;
+    F.addDoc(F.collection(firestore, 'checkins'), {
       sesionId: ses.id,
       asistenteId: a.id,
       staffUsername: currentUser() ? currentUser().username : '?',
       metodo: metodo || 'qr',
-      timestamp: new Date().toISOString()
-    };
+      timestamp: F.serverTimestamp()
+    }).catch(() => {});
 
     if (!isOnline()) {
-      // SIN COBERTURA → a la cola local, se sincroniza al volver la conexión
-      const q = getQueue(); q.push(doc); setQueue(q);
       return { status: 'offline_ok', asistente: a, mensaje: 'Guardado sin conexión — se sincronizará' };
     }
-    db.checkins.push(doc);
-    const s = sesion(ses.id); s.asistentesRegistrados++;
-    save();
     return { status: 'ok', asistente: a, mensaje: 'Asistencia registrada' };
-  }
-
-  /** Vuelca la cola offline a la base (en real: batch write a Firestore) */
-  function syncQueue() {
-    if (!isOnline()) return { synced: 0, pending: getQueue().length };
-    const q = getQueue();
-    let n = 0;
-    q.forEach((doc) => {
-      const dup = db.checkins.some((c) => c.sesionId === doc.sesionId && c.asistenteId === doc.asistenteId);
-      if (!dup) {
-        db.checkins.push(doc);
-        const s = sesion(doc.sesionId); if (s) s.asistentesRegistrados++;
-        n++;
-      }
-    });
-    setQueue([]);
-    save();
-    return { synced: n, pending: 0 };
-  }
-
-  /**
-   * SOLO DEMO: simula que otro miembro del staff (otro móvil) escanea a alguien
-   * en la sesión activa — para enseñar el dashboard "en vivo" en la presentación.
-   * Devuelve el asistente escaneado o null si ya no queda nadie por entrar.
-   */
-  function simulateExternalCheckin() {
-    const ses = sesionActiva();
-    if (!ses) return null;
-    const dentro = new Set(checkinsDeSesion(ses.id).map((c) => c.asistenteId));
-    const fuera = db.inscripciones.filter((a) => a.estado === 'confirmado' && !dentro.has(a.id));
-    if (!fuera.length) return null;
-    const a = fuera[Math.floor(Math.random() * fuera.length)];
-    const otros = db.staff.filter((s) => s.activo && (!currentUser() || s.username !== currentUser().username));
-    const quien = otros[Math.floor(Math.random() * otros.length)];
-    db.checkins.push({
-      id: 'ck' + Date.now() + Math.floor(Math.random() * 999),
-      sesionId: ses.id,
-      asistenteId: a.id,
-      staffUsername: quien ? quien.username : '?',
-      metodo: 'qr',
-      timestamp: new Date().toISOString()
-    });
-    sesion(ses.id).asistentesRegistrados++;
-    save();
-    return a;
   }
 
   /* ---------- gestión (admin) ---------- */
   function setEstadoSesion(id, estado) {
-    if (estado === 'activa') db.sesiones.forEach((s) => { if (s.estado === 'activa') s.estado = 'cerrada'; });
-    const s = sesion(id); if (s) s.estado = estado;
-    save();
+    const { firestoreMod: F, firestore } = fs;
+    const batch = F.writeBatch(firestore);
+    if (estado === 'activa') {
+      db.sesiones.forEach((s) => {
+        if (s.estado === 'activa' && s.id !== id) batch.update(F.doc(firestore, 'sesiones', s.id), { estado: 'cerrada' });
+      });
+    }
+    batch.update(F.doc(firestore, 'sesiones', id), { estado });
+    batch.commit().catch(() => {});
   }
-  function setCapacidadSesion(id, cap) { const s = sesion(id); if (s) s.capacidad = cap; save(); }
+  function setCapacidadSesion(id, cap) {
+    const { firestoreMod: F, firestore } = fs;
+    F.updateDoc(F.doc(firestore, 'sesiones', id), { capacidad: cap }).catch(() => {});
+  }
 
-  function nuevoIdInscripcion() {
-    // En real: incremento atómico de config.contadorId en Firestore (transaction / field transform)
-    db.config.contadorId++;
-    return db.config.prefijoId + String(db.config.contadorId).padStart(4, '0');
-  }
-  function addAsistente(datos) {
-    const id = nuevoIdInscripcion();
+  /** Incremento atómico real de config.contadorId + creación del documento. */
+  async function addAsistente(datos) {
+    const { firestoreMod: F, firestore } = fs;
     const conCena = !!(datos.menuCena && datos.menuCena.trim());
-    const a = {
-      id,
-      nombre: datos.nombre || '',
-      apellidos: datos.apellidos || '',
-      apellidoOrden: (datos.apellidos || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase(),
-      fechaNacimiento: datos.fechaNacimiento || '',
-      gradoActividades: datos.gradoActividades || '',
-      menuCena: datos.menuCena || '',
-      dni: datos.dni || '',
-      email: datos.email || '',
-      alergias: datos.alergias || '',
-      modalidad: conCena ? 'curso_cena' : 'solo_curso',
-      precio: conCena ? 90 : 65,
-      estado: datos.estado || 'pendiente',
-      tsInscripcion: new Date().toISOString(),
-      qrCode: id
-    };
-    db.inscripciones.push(a);
-    save();
-    return a;
+    const configRef = F.doc(firestore, 'config', 'general');
+    const nuevoId = await F.runTransaction(firestore, async (tx) => {
+      const snap = await tx.get(configRef);
+      const cfg = snap.data();
+      const contador = (cfg.contadorId || 0) + 1;
+      const id = cfg.prefijoId + String(contador).padStart(4, '0');
+      tx.update(configRef, { contadorId: contador });
+      tx.set(F.doc(firestore, 'inscripciones', id), {
+        nombre: datos.nombre || '',
+        apellidos: datos.apellidos || '',
+        apellidoOrden: (datos.apellidos || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase(),
+        fechaNacimiento: datos.fechaNacimiento || '',
+        gradoActividades: datos.gradoActividades || '',
+        menuCena: datos.menuCena || '',
+        dni: datos.dni || '',
+        email: datos.email || '',
+        alergias: datos.alergias || '',
+        modalidad: conCena ? 'curso_cena' : 'solo_curso',
+        precio: conCena ? 90 : 65,
+        estado: datos.estado || 'pendiente',
+        tsInscripcion: F.serverTimestamp(),
+        tsConfirmacion: null,
+        qrCode: id
+      });
+      return id;
+    });
+    return { id: nuevoId };
   }
   function setEstadoAsistente(id, estado) {
-    const a = asistente(id); if (a) { a.estado = estado; if (estado === 'confirmado') a.tsConfirmacion = new Date().toISOString(); }
-    save();
+    const { firestoreMod: F, firestore } = fs;
+    const patch = { estado };
+    if (estado === 'confirmado') patch.tsConfirmacion = F.serverTimestamp();
+    F.updateDoc(F.doc(firestore, 'inscripciones', id), patch).catch(() => {});
   }
   function addStaff(username, nombreCompleto, departamento) {
     if (db.staff.some((s) => s.username === username)) return false;
-    db.staff.push({ username, nombreCompleto, departamento, activo: true });
-    save();
+    const { firestoreMod: F, firestore } = fs;
+    F.setDoc(F.doc(firestore, 'staff', username), { nombreCompleto, departamento, activo: true, cuentaAdmin: null }).catch(() => {});
     return true;
   }
   function toggleStaff(username) {
     const s = db.staff.find((x) => x.username === username);
-    if (s) s.activo = !s.activo;
-    save();
+    if (!s) return;
+    const { firestoreMod: F, firestore } = fs;
+    F.updateDoc(F.doc(firestore, 'staff', username), { activo: !s.activo }).catch(() => {});
   }
 
   /* ---------- import (Excel/CSV) ---------- */
   /** filas = array de objetos ya mapeados {nombre, apellidos, ...}. Devuelve nº creados. */
-  function importAsistentes(filas) {
+  async function importAsistentes(filas) {
     let n = 0;
-    filas.forEach((f) => {
-      if (!f.nombre && !f.apellidos) return;
-      // evita duplicar por email o dni si ya existe
-      if (f.email && db.inscripciones.some((a) => a.email === f.email)) return;
-      if (f.dni && db.inscripciones.some((a) => a.dni === f.dni)) return;
-      addAsistente(f);
+    for (const f of filas) {
+      if (!f.nombre && !f.apellidos) continue;
+      if (f.email && db.inscripciones.some((a) => a.email === f.email)) continue;
+      if (f.dni && db.inscripciones.some((a) => a.dni === f.dni)) continue;
+      await addAsistente(f);
       n++;
-    });
+    }
     return n;
   }
 
@@ -291,14 +379,14 @@ const Store = (() => {
     URL.revokeObjectURL(a.href);
   }
 
-  load();
   return {
-    reset, onChange, save,
+    ready, onChange,
     login, logout, currentUser, isInformatica,
+    isAdminAuthenticated, adminLogin, exitAdminMode,
     config, staff, sesiones, sesion, sesionActiva, inscripciones, asistente,
     checkins, checkinsDeSesion, checkinsDeAsistente,
     maxFaltas, estadoAsistencia, asistentesEnRiesgo,
-    checkin, getQueue, syncQueue, isOnline, setSimOffline, isSimOffline, simulateExternalCheckin,
+    checkin, getQueue, syncQueue, isOnline, setSimOffline, isSimOffline,
     setEstadoSesion, setCapacidadSesion, addAsistente, setEstadoAsistente, addStaff, toggleStaff,
     importAsistentes, informeAsistencia, informeSesion, descargarCSV
   };

@@ -43,12 +43,16 @@ service cloud.firestore {
     }
 
     // inscripciones: la app necesita LEER para validar un QR escaneado y mostrar
-    // el nombre del asistente, pero nunca crea/edita/borra inscripciones -- eso lo
-    // hace el puente Apps Script -> Firestore REST API (autenticado con el token
-    // OAuth de la cuenta de Alfil Juvenil, fuera del alcance de estas reglas).
+    // el nombre del asistente. La vía normal de alta es el puente Apps Script ->
+    // Firestore REST API (autenticado con el token OAuth de la cuenta de Alfil
+    // Juvenil, fuera del alcance de estas reglas -- un token de propietario del
+    // proyecto no pasa por security rules). Informática/Presidencia puede
+    // además escribir aquí desde el modo admin de la PWA, como respaldo (alta
+    // manual e importación Excel/CSV cuando el Form falla o hay que corregir
+    // algo a mano).
     match /inscripciones/{inscripcionId} {
       allow read: if isSignedIn();
-      allow write: if false;
+      allow write: if isStaffAdmin();
     }
 
     // checkins: cualquier cliente autenticado (anónimo o real) puede crear un
