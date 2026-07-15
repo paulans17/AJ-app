@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="96" fill="#0F0F0F"/>
+  <text x="256" y="300" font-size="260" text-anchor="middle" fill="#C9A24D" font-family="Georgia, serif">♗</text>
+  <text x="256" y="430" font-size="72" text-anchor="middle" fill="#E6C97A" font-family="Georgia, serif" letter-spacing="6">STAFF</text>
+</svg>
