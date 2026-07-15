@@ -1,3 +1,8 @@
+> ⚠️ **SUPERSEDED (2026-07-15, D13)** — el evento ya no usa Firestore, se
+> pivotó a Google Sheets + Apps Script. Documento actual:
+> `docs/SHEET_SCHEMA.md`. Este archivo se deja como referencia histórica
+> de por qué se diseñó así en primer lugar.
+
 # Modelo de datos Firestore — Curso de Protocolo XXII
 
 Proyecto Firebase nuevo, propiedad de la cuenta de Alfil Juvenil (ver

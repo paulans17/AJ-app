@@ -141,6 +141,97 @@ inicia sesión una vez con su cuenta real (la misma del panel `/admin` de la
 web). Esto añade un paso de login solo para esas ~4-5 personas, nunca para
 el resto del staff.
 
+## 2026-07-15 (pivote — por la tarde, tras ver el flujo funcionando en Xcode/demo)
+
+**⚠️ D13-D18 sustituyen D1-D5, D9 y D12 en todo lo relativo al backend del
+evento.** No se borran las decisiones anteriores (quedan como historial de
+por qué se llegó hasta aquí), pero a partir de aquí son la referencia
+correcta `docs/SHEET_SCHEMA.md` (sustituye a `FIRESTORE_SCHEMA.md`) y las
+secciones reescritas de `ARCHITECTURE.md`/`FLOWS.md`/`CLAUDE.md`.
+
+**Motivo del cambio:** Pau enseñó el flujo real que usó en la edición
+pasada — un Atajo de iPhone: escanear QR → llamar a una URL de Apps
+Script con el número → la hoja de cálculo registra la asistencia. Le
+funcionó, es simple, y no le convencía la complejidad que estábamos
+montando (Firestore, Auth de dos niveles, custom claims, Cloud
+Functions-que-no-son-Cloud-Functions). Decisión: replicar ese mismo patrón
+dentro de una PWA (para que lo pueda usar todo el equipo, no solo el
+móvil de Pau con el Atajo), en vez de construir un backend nuevo.
+
+**D13. Backend del evento: Google Sheets + Apps Script, no Firestore.**
+Una única hoja de cálculo con pestañas `Inscripciones`, `Sesiones`,
+`Checkins`, `Staff`, `Config`, y un Web App de Apps Script (container-bound
+a la hoja) con varias acciones por parámetro (`checkin`, `stats`, `staff`,
+`confirm`). Detalle completo en `docs/SHEET_SCHEMA.md`. El proyecto
+Firebase `alfiljuvenil-protocolo` montado esta misma mañana (D1) ya no lo
+usa Staff AJapp — queda libre por si `alfil-statics` (la web) lo quiere
+para sí, decisión aparte y futura de Pau.
+
+**D14. La app de staff se reduce a 2 pantallas: Escanear y Estadísticas.**
+(Más la pantalla de login sin contraseña, que no cuenta como una de las
+"2 pantallas" — es un paso previo de una vez, no una sección de
+navegación.) Se acabaron las pestañas Sesiones y Admin dentro de la app.
+
+**D15. Sesión activa, staff e inscripciones se gestionan a mano en la
+hoja.** No hay pantalla en la app para activar/cerrar una sesión, dar de
+alta a alguien del equipo, ni para el alta manual/import Excel de
+asistentes — la hoja de cálculo **es** el panel de administración, con
+funciones de Apps Script como menús propios donde haga falta automatizar
+algo (ej. "Generar informe de asistencia").
+
+**D16. El bug histórico de IDs duplicados (edición XXI) se corrige con
+`LockService` de Apps Script**, no con transacciones de Firestore (que ya
+no existen). Ver `docs/SHEET_SCHEMA.md`.
+
+**D17. Seguridad simplificada — sin Firebase Auth.** Sin Firestore no hay
+reglas que proteger con custom claims; se cae todo el diseño de D4/D12
+(login real de modo Admin). El Web App de Apps Script es público por URL;
+el control de acceso es "quién tiene la URL guardada en su móvil", igual
+que el Atajo de iPhone del año pasado. Aceptable para una herramienta
+interna de bajo riesgo — si en algún momento hiciera falta más
+seguridad, se puede añadir un parámetro secreto compartido a las
+llamadas, pero no es la prioridad ahora.
+
+**D18. Offline: se reutiliza casi tal cual la cola local que ya tenía la
+demo** (`getQueue`/`setQueue`/`syncQueue` en `js/store.js`), cambiando qué
+significa "sincronizar": en vez de escribir en un array local, cada
+elemento de la cola dispara la llamada `?action=checkin` real contra el
+Web App cuando vuelve la conexión. No hay persistencia offline nativa de
+Firestore que aproveche esto gratis (D3/D4 ya no aplican), así que esta
+cola manual pasa de ser "simulación de demo" a ser la pieza real de
+producción.
+
+## 2026-07-15 (pivote — tercera vuelta, con el script y la hoja reales)
+
+Pau pasó el script de Apps Script que ya usaba de verdad el año pasado
+(`NO-PIN vFinal`, con el Atajo de iPhone) y el link a la hoja real
+("MIEMBROS CURSO PROTOCOLO XXI", pestañas `asistentes`/`Config`/
+`asistencias`/`tabla`). Esto no era un diseño desde cero — era un sistema
+que ya funcionaba. Se ajustan D13-D18 con esta base real:
+
+**D19. `docs/SHEET_SCHEMA.md` y `apps-script/Code.gs` parten del script y
+la hoja reales, no de un diseño nuevo.** La única pestaña relevante para
+el check-in es `asistentes` (número + nombre, sin DNI/email/menú) —
+mucho más simple que la `inscripciones` que se había diseñado por la
+mañana para Firestore. Las extensiones sobre el script real son mínimas y
+están marcadas como `// AÑADIDO` en el código: `LockService` (necesario
+ahora que hay varios móviles a la vez, no un único Atajo), columna
+`staff` opcional en `asistencias`, acción `stats` nueva, y respuesta JSON
+opcional vía `&format=json` que no rompe el uso del Atajo original.
+
+**D20. La inscripción/roster queda fuera de alcance de este repo.**
+Construir la lista `asistentes` (con los números y nombres) sigue siendo
+un proceso de Pau con el Excel/scripts de años anteriores, independiente
+de Staff AJapp. Esto reemplaza la idea de un puente Google Form → Apps
+Script → Firestore/Sheet que se había planteado por la mañana (D5) — ya
+no forma parte de lo que construye Claude Code, salvo que se decida lo
+contrario más adelante.
+
+**Pendiente de verificar con Pau (no bloqueante, anotado en
+`SHEET_SCHEMA.md`):** si los números de `asistentes!A` llevan ceros a la
+izquierda o no en la edición XXII, y qué contiene exactamente la pestaña
+`tabla` (¿la usa la pantalla Estadísticas o es un informe aparte?).
+
 ## Pendiente de decidir (no bloqueante para empezar)
 
 - Nombre definitivo del proyecto Firebase nuevo (propuesta en

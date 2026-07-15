@@ -1,168 +1,166 @@
 # Arquitectura — Staff AJapp (PWA)
 
-Ver decisiones y motivos completos en `DECISIONS.md`. Este documento describe
-el **cómo**, ya con las decisiones tomadas.
+> ⚠️ Este documento fue reescrito el 2026-07-15 por la tarde tras el
+> pivote D13-D18 (ver `DECISIONS.md`): se abandonó Firestore en favor de
+> Google Sheets + Apps Script. Si ves referencias a Firebase/Firestore en
+> otro sitio del repo (`docs/FIRESTORE_SCHEMA.md`, `firebase/`), están
+> marcadas como superseded — la versión vigente es esta.
+
+Ver decisiones y motivos completos en `DECISIONS.md`. Este documento
+describe el **cómo**, ya con las decisiones tomadas.
 
 ## Resumen
 
 Staff AJapp es la herramienta que usa el equipo de Alfil Juvenil (~20
-personas) durante el Curso de Protocolo para registrar la asistencia de cada
-sesión (check-in por QR o manual) y, para Informática, controlar el estado
-de las sesiones en vivo.
+personas) durante el Curso de Protocolo para registrar la asistencia de
+cada sesión (check-in por QR o manual). Es la evolución directa de un
+Atajo de iPhone que Pau usaba en la edición pasada: escanear un QR,
+llamar a una URL de Apps Script con el número, la hoja de cálculo lo
+registra. Ahora ese mismo patrón vive en una PWA para que lo use todo el
+equipo, no solo el móvil de una persona.
 
 ```
-┌─────────────────────┐        ┌──────────────────────────┐
-│   Google Form        │  Apps  │   Firebase (proyecto      │
-│   (inscripción)       │─Script─▶   Alfil Juvenil, Spark)   │
-└─────────────────────┘  REST  │                            │
-                                │  Firestore                │
-┌─────────────────────┐        │   - staff                 │
-│   Staff AJapp (PWA)   │◀──────▶   - sesiones               │
-│   móvil de cada staff │  SDK   │   - inscripciones          │
-│   (instalable, offline)│  web   │   - checkins               │
-└─────────────────────┘        │   - config/general         │
-                                │                            │
-┌─────────────────────┐        │  Auth                     │
-│  Web /admin (PHP)     │◀──────▶   - Anonymous (staff)      │
-│  alfil-statics         │        │   - Email/password         │
-└─────────────────────┘        │     (Informática/Presid.) │
-                                │                            │
-                                │  Hosting (la propia PWA)  │
-                                └──────────────────────────┘
+(El roster de asistentes — "asistentes" — se carga aparte, con el
+Excel/scripts que Pau ya usa; fuera de alcance de este repo, D20)
+
+┌─────────────────────────────────────────────┐
+│  Google Sheet "MIEMBROS CURSO PROTOCOLO XXII" │
+│  ┌────────────┐ ┌────────┐ ┌─────────────┐   │
+│  │ asistentes │ │ Config │ │ asistencias │   │
+│  └────────────┘ └────────┘ └─────────────┘   │
+│  ┌───────┐                                    │
+│  │ tabla │  (informe, contenido por confirmar) │
+│  └───────┘                                    │
+│                                               │
+│  Apps Script (container-bound, Code.gs) — Web App │
+│  GET .../exec?action=checkin&num=...&staff=... │
+│  GET .../exec?action=stats                    │
+│  GET .../exec?action=staff                    │
+│  GET .../exec?action=confirm&id=...           │
+└──────────────────────▲────────────────────────┘
+                        │ fetch (GET, sin headers custom)
+                        │
+┌───────────────────────┴───────────────────────┐
+│   Staff AJapp (PWA) — móvil de cada staff        │
+│   Login (elegir nombre) → Escanear → Estadísticas │
+│   Cola local si no hay conexión, reintenta al volver │
+└─────────────────────────────────────────────────┘
 ```
 
-Un único proyecto Firebase (plan Spark, sin Blaze — D3) para todo: el evento
-y la web (D2). Nada de Cloud Functions desplegadas.
+Sin Firebase, sin backend propio, sin servidor que mantener — Google Sheets
++ Apps Script como en la edición anterior, solo que ahora detrás de una
+interfaz compartida por todo el equipo en vez de un Atajo personal.
 
-## Ya construido (demo, 07/07 — ver `DECISIONS.md` D10)
+## Ya construido (demo, 07/07) — qué se reutiliza y qué no
 
-Antes de este documento ya se construyó una PWA funcional completa con
-datos ficticios en `localStorage`, en la raíz de este mismo repo:
-`index.html`, `css/app.css`, `js/{demo-data,store,scanner,views,app}.js`,
-`sw.js`, `manifest.webmanifest`, `icons/`. Su propio README explica que
-**solo `js/store.js` cambia** para pasar a Firestore real — el resto
-(vistas, escáner, navegación, app shell/PWA) se queda igual. Todo lo que
-sigue en este documento describe esa base ya existente más lo que falta
-para hacerla real, no un proyecto desde cero.
+La demo original (`index.html`, `css/app.css`,
+`js/{demo-data,store,scanner,views,app}.js`, `sw.js`,
+`manifest.webmanifest`, `icons/`) sigue siendo la base, pero con **menos
+alcance** que antes de este pivote:
+
+- **Se reutiliza tal cual:** `js/scanner.js` (escaneo QR), el service
+  worker, el manifest, los iconos, y buena parte de `css/app.css`.
+- **Se reescribe:** `js/store.js` — en vez de hablar con Firestore (que ya
+  no existe en este proyecto), hace `fetch()` al Web App de Apps Script.
+  La cola offline que ya tenía (`getQueue`/`setQueue`/`syncQueue`) se
+  queda casi igual, pero ahora "sincronizar" significa disparar la
+  llamada HTTP real, no escribir en un array local (D18).
+- **Se recorta:** `js/views.js`/`app.js` pierden las pestañas Sesiones y
+  Admin (D14/D15) — se quedan Escanear y Estadísticas, más el login. Todo
+  lo que hacían esas dos pestañas (activar sesión, alta de staff, import
+  Excel, informes) se mueve a la propia hoja de cálculo y a menús de
+  Apps Script.
 
 ## Stack
 
-- **Frontend:** HTML/CSS/JS vanilla (sin framework, sin build step) — ya
-  construido así en la demo. Módulos con IIFE (`Store`, `App`, `Views`,
-  `Scanner`), sin dependencias de build. Service worker + manifest ya
-  soportan instalación en Android/iOS.
-- **Escaneo QR:** `BarcodeDetector` nativo (Chrome/Android) con fallback a
-  `jsQR` sobre `<canvas>` para Safari/iOS — ya implementado en
-  `js/scanner.js`. Equivalente web del `AVFoundation`/`QRScannerManager`
-  que existía en la app Swift.
-- **Import Excel/CSV (respaldo de inscripción, D5):** SheetJS (`xlsx`),
-  cargado por CDN — ya usado en la demo para `importAsistentes`.
-- **Backend de datos:** Firestore (SDK web, cliente directo — sin capa de
-  servidor propia).
-- **Puente de inscripción:** Google Apps Script (`apps-script/Code.gs`),
-  llama a la API REST de Firestore. Vive fuera de este repo (vinculado al
-  Form en Google Drive), pero el código fuente se versiona aquí.
-- **Hosting:** Firebase Hosting (gratis en Spark, sirve la PWA con HTTPS y
-  el dominio `*.web.app`/`*.firebaseapp.com` por defecto).
-- **Scripts de administración locales:** Node.js + `firebase-admin` (SDK de
-  administración), para tareas puntuales que no encajan en Cloud Functions
-  ni en las rules (asignar custom claims, cargas iniciales de datos, el
-  reset pre-curso). Se ejecutan a mano desde el ordenador de Pau/Informática,
-  nunca se despliegan.
+- **Frontend:** el mismo HTML/CSS/JS vanilla de la demo, recortado.
+- **Escaneo QR:** `BarcodeDetector` nativo con fallback `jsQR` — sin
+  cambios, ya funciona.
+- **Backend:** Google Apps Script, container-bound a la hoja de cálculo,
+  publicado como Web App (`Ejecutar como: yo`, `Acceso: cualquier
+  usuario`). Un único endpoint con varias `action` (ver
+  `docs/SHEET_SCHEMA.md`).
+- **Almacén de datos:** Google Sheets. Sin base de datos NoSQL/SQL
+  externa, sin proyecto Firebase.
+- **Hosting de la PWA:** puede ser cualquier cosa que sirva archivos
+  estáticos por HTTPS — GitHub Pages, Firebase Hosting (el proyecto
+  `alfiljuvenil-protocolo` ya existe y sigue siendo válido solo para
+  esto, servir el HTML/CSS/JS, aunque ya no aloje Firestore/Auth para
+  esta app), o cualquier hosting estático. A decidir cuando llegue el
+  momento, no bloquea el desarrollo.
 
-## Modelo de autenticación (D4, confirmado y afinado en D12)
+## Por qué peticiones GET simples (y no POST con JSON)
 
-La demo actual (D10) oculta la pestaña Admin solo a nivel de interfaz,
-según el `departamento` del nombre elegido en el login — sin verificación
-real. Eso es suficiente para una demo, pero no para proteger escrituras
-reales sin Cloud Functions. La versión real añade un segundo nivel, ambos
-usando Firebase Auth del mismo proyecto:
+Igual que el Atajo de iPhone del año pasado hacía "Get contents of
+[URL]?num=...", el Web App de Apps Script se llama con `fetch()` en modo
+GET y todos los parámetros en la query string, sin cabeceras
+personalizadas (`Content-Type`, `Authorization`, etc.). Motivo técnico:
+una petición GET "simple" no dispara *CORS preflight* en el navegador,
+que es donde suelen fallar las integraciones de Apps Script Web Apps
+llamadas desde JS de cliente. Si en algún momento hace falta mandar datos
+más complejos (por ejemplo, en el import de un CSV grande), tocará
+investigar el caso aparte — para `checkin`/`stats`/`staff`/`confirm`, GET
+con query string es suficiente y ya está probado (es literalmente lo que
+hacía el Atajo).
 
-| | Staff general (~20) | Informática / Presidencia (modo admin) |
-|---|---|---|
-| Método | Anonymous Auth | Email + contraseña (cuenta real) |
-| Se identifica como | Elige su nombre de una lista (`staff` collection) — dato de UI, no de autenticación | Su cuenta real, con custom claim `departamento` |
-| Puede | Leer `staff`/`sesiones`/`inscripciones`/`config`, crear `checkins` | Todo lo anterior + escribir en `sesiones`, `staff`, `config` |
-| Dónde se usa | Toda la app en uso normal (escanear, ver sesiones, dashboard) | Solo al entrar a la pestaña `Admin` dentro de la propia PWA (mismo sitio donde hoy la demo solo comprueba `Store.isInformatica()`) |
+## Estrategia offline (D18)
 
-Cambio concreto sobre la demo: al pulsar la pestaña `Admin`, si la sesión
-activa es anónima, la PWA debe pedir email+contraseña antes de mostrar el
-panel — sustituyendo la sesión anónima por la real mientras se está en
-modo admin. Para el resto del staff, cero cambios de UX.
+No hay persistencia offline nativa como la de Firestore — hay que
+mantenerla a mano, reutilizando lo que la demo ya tenía:
 
-El custom claim `departamento` se asigna con un script local
-(`scripts/set-claim.js`, usa `firebase-admin` con la service account key —
-nunca se sube al repo, va en `.gitignore`). Se ejecuta una vez por persona
-de Informática/Presidencia que necesite el claim. La misma cuenta sirve para
-el panel `/admin` de la web (D2), así que si esa persona ya tiene cuenta ahí,
-no hace falta crear una nueva — solo añadirle el claim.
+- Al escanear, si `navigator.onLine` es `false` (o la llamada `fetch`
+  falla), el check-in se guarda en una cola en `localStorage` en vez de
+  intentarse contra el Web App.
+- Al recuperar conexión (`window.addEventListener('online', ...)`), se
+  recorre la cola y se dispara `?action=checkin` por cada elemento
+  pendiente, en orden.
+- Duplicados: el chequeo de "ya registrado" se hace primero contra la
+  cola local (por si la misma persona se escaneó dos veces sin red desde
+  el mismo móvil) y luego, al sincronizar, el propio Web App vuelve a
+  comprobar contra `Checkins` con `LockService` antes de escribir — así
+  que un duplicado entre **dos móviles distintos** sin red se resuelve al
+  sincronizar (el segundo en llegar recibe `duplicado`), no antes.
+- La interfaz debe indicar cuántos check-ins están pendientes de
+  sincronizar (ya existe ese indicador en la demo — `queue-badge`).
 
-**Por qué no hace falta Cloud Functions para esto:** Firestore Security
-Rules pueden leer `request.auth.token.departamento` directamente sin ningún
-servidor intermedio. El deploy de rules (`firebase deploy --only
-firestore:rules`) funciona en el plan gratuito Spark — solo el deploy de
-Cloud Functions exige Blaze.
+## Seguridad (D17)
 
-## Estrategia offline (obligatoria, decidida el 07/07)
+Sin Firebase Auth, sin Firestore Rules. El Web App de Apps Script es
+público por URL — el control de acceso es "quién tiene la URL", igual que
+antes con el Atajo. Es un riesgo aceptado y consciente para una
+herramienta interna de bajo riesgo (peor caso: alguien sin autorización
+registra check-ins falsos, no hay DNIs ni datos sensibles expuestos por
+ese endpoint en concreto — `Inscripciones` con los DNIs no se sirve nunca
+completa, solo se valida un ID puntual). Si más adelante hiciera falta más
+control, se puede añadir un parámetro secreto compartido a las llamadas;
+no es prioridad ahora.
 
-Se usa la **persistencia offline nativa del SDK de Firestore para web**
-(`persistentLocalCache` / `enableIndexedDbPersistence` según versión del
-SDK), no una cola hecha a mano:
-
-- Lecturas: la app sirve datos de sesiones/asistentes desde la caché local
-  aunque no haya red.
-- Escrituras (`checkins`): se aplican de forma optimista en local y quedan
-  en cola; el SDK las sincroniza solo cuando vuelve la conexión, sin código
-  adicional.
-- El único trabajo manual es de UX: mostrar un indicador de "pendiente de
-  sincronizar" en los check-ins que aún no se confirmaron con el servidor
-  (Firestore expone `hasPendingWrites` en cada snapshot).
-
-**Limitación conocida y aceptada:** si dos móviles hacen check-in de la
-misma persona en la misma sesión mientras ambos están sin red, ninguno de
-los dos puede saber en el momento que el otro ya lo hizo — la comprobación
-de duplicados (`where sesionId == X && asistenteId == Y`) solo es fiable
-online. Mitigación: no se bloquea, pero el dashboard (ver `FLOWS.md`) marca
-como "posible duplicado" cualquier asistente con más de un `checkin` en la
-misma sesión, para revisión manual de Informática. Resolverlo de forma
-100% atómica requeriría un backend con Cloud Functions/transacciones
-server-side, que D3 descarta.
-
-## Estructura del repo (real, no hipotética)
+## Estructura del repo
 
 ```
 staff-ajapp-pwa/
+├── CLAUDE.md                   (instrucciones para Claude Code — LEER PRIMERO)
 ├── README.md
-├── index.html                 (ya existe — demo)
-├── manifest.webmanifest       (ya existe — demo)
-├── sw.js                      (ya existe — demo)
-├── css/
-│   └── app.css                 (ya existe — demo)
+├── index.html                  (demo — se recorta la navegación)
+├── manifest.webmanifest
+├── sw.js
+├── css/app.css
 ├── js/
-│   ├── demo-data.js            (ya existe — seed ficticio, se deja para modo demo/dev)
-│   ├── store.js                (ya existe — ÚNICO archivo a reescribir contra Firestore)
-│   ├── scanner.js              (ya existe — no cambia)
-│   ├── views.js                (ya existe — no cambia salvo login admin, D12)
-│   └── app.js                  (ya existe — no cambia)
-├── icons/                      (ya existe — demo)
+│   ├── demo-data.js             (se queda para modo demo/dev sin Sheet real)
+│   ├── store.js                 (REESCRIBIR: fetch al Web App en vez de Firestore/localStorage)
+│   ├── scanner.js                (sin cambios)
+│   ├── views.js                  (RECORTAR: solo Login + Escanear + Estadísticas)
+│   └── app.js                    (RECORTAR: quitar rutas Sesiones/Admin)
+├── icons/
 ├── docs/
-│   ├── DECISIONS.md
-│   ├── ARCHITECTURE.md   (este archivo)
-│   ├── FIRESTORE_SCHEMA.md
-│   ├── FLOWS.md
-│   └── PROJECT_SETUP.md
-├── firebase/
-│   ├── firestore.rules
-│   └── firebase.json        (a crear con `firebase init` — ver PROJECT_SETUP)
-├── apps-script/
-│   ├── Code.gs                (puente inscripción, se copia a Apps Script)
-│   └── appsscript.json
-└── scripts/
-    └── set-claim.js           (a escribir en Claude Code — asignar custom claim departamento)
+│   ├── DECISIONS.md              (histórico completo, incl. el pivote D13-D18)
+│   ├── ARCHITECTURE.md            (este archivo, vigente)
+│   ├── SHEET_SCHEMA.md            (vigente — sustituye a FIRESTORE_SCHEMA.md)
+│   ├── FIRESTORE_SCHEMA.md        (⚠️ superseded, solo histórico)
+│   ├── FLOWS.md                   (vigente, reescrito para Sheets)
+│   └── PROJECT_SETUP.md           (⚠️ mayormente superseded — ver aviso al inicio)
+├── firebase/                      (⚠️ superseded, solo histórico — no se despliega)
+└── apps-script/
+    ├── Code.gs                    (YA EXTENDIDO — script real de Pau + LockService/stats/staff/JSON)
+    └── appsscript.json
 ```
-
-El trabajo real en Claude Code es sobre todo: (1) reescribir `js/store.js`
-para hablar con Firestore (Auth anónima + SDK web) en vez de `localStorage`,
-manteniendo exactamente la misma interfaz pública que ya consume
-`views.js`/`app.js`; (2) añadir el login real de modo admin en `views.js`
-(D12); (3) escribir `scripts/set-claim.js`.

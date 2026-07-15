@@ -1,9 +1,29 @@
 # Puesta en marcha — checklist para Pau
 
-Pasos que solo se pueden hacer desde tu máquina / con acceso a la cuenta de
-Gmail de Alfil Juvenil. Nada de esto lo puede hacer Claude Code por ti (son
-acciones en consolas web o que requieren credenciales tuyas), pero puedes
-pegar esta lista en esa sesión para que sepa qué asumir como ya hecho.
+> ⚠️ **Mayormente superseded (2026-07-15, pivote D13-D18).** Los pasos 1-8
+> de abajo eran para el backend Firebase que se descartó. Se dejan tal
+> cual como registro de lo que ya se hizo (no hace falta deshacerlo, el
+> proyecto Firebase sigue existiendo por si la web lo quiere usar). **Lo
+> único que hace falta ahora está en la nueva sección 0, más abajo del
+> todo.**
+
+## 0. Lo que hace falta de verdad ahora (Sheets + Apps Script)
+
+- [ ] Confirmar que la hoja real ("MIEMBROS CURSO PROTOCOLO XXI" o su
+      copia para la XXII) tiene las pestañas `asistentes`, `Config`,
+      `asistencias` con la estructura de `docs/SHEET_SCHEMA.md`.
+- [ ] Abrir esa hoja → Extensiones → Apps Script → pegar
+      `apps-script/Code.gs` y `apps-script/appsscript.json`.
+- [ ] Implementar → Nueva implementación → Aplicación web → ejecutar como
+      "Yo", acceso "Cualquier usuario" → copiar la URL `.../exec`
+      resultante y pasársela a Claude Code (la necesita para conectar la
+      PWA a datos reales).
+- [ ] Confirmar si los números de `asistentes!A` de la XXII llevan ceros a
+      la izquierda o no (afecta a cómo se comparan en el script — ver
+      nota en `docs/SHEET_SCHEMA.md`).
+- [ ] Decidir/confirmar qué contiene la pestaña `tabla` de la hoja.
+
+## Pasos antiguos (Firebase, ya no bloquean nada) — histórico
 
 ## 1. Proyecto Firebase ✅ (hecho 2026-07-15)
 
