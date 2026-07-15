@@ -1,24 +1,22 @@
 /* ============================================================
    Staff AJapp — ARRANQUE Y NAVEGACIÓN
+   Login (sin contraseña) + 2 rutas (D14): escanear (por defecto) ·
+   estadisticas.
    ============================================================ */
 
 const App = (() => {
-  // Réplica de MainTabView.swift: Sesiones · Escanear (por defecto) · Dashboard
   const routes = {
     login: Views.vLogin,
     escanear: Views.vEscanear,
-    sesiones: Views.vSesiones,
-    dashboard: Views.vDashboard,
-    admin: Views.vAdmin
+    estadisticas: Views.vEstadisticas
   };
   let current = 'login';
 
   function go(route) {
     if (!routes[route]) route = 'escanear';
-    // al salir de una vista: apaga cámara, hojas, overlays y simulación en vivo
+    // al salir de una vista: apaga cámara, hojas, overlays y polling
     Scanner.stop();
-    Views.stopLive();
-    Views.cerrarModal();
+    Views.pararPolling();
     Views.cerrarCamara();
     Views.cerrarSheet();
     Views.quitarResultado();
@@ -32,7 +30,6 @@ const App = (() => {
     document.getElementById('topbar').classList.toggle('hidden', route === 'login');
     document.getElementById('tabbar').classList.toggle('hidden', route === 'login');
     document.querySelectorAll('#tabbar button').forEach((b) => b.classList.toggle('on', b.dataset.route === route));
-    document.getElementById('tab-admin').classList.toggle('hidden', !Store.isInformatica());
 
     routes[route]();
     actualizarChips();
@@ -49,9 +46,9 @@ const App = (() => {
       b.addEventListener('click', () => go(b.dataset.route))
     );
 
-    window.addEventListener('online', () => {
+    window.addEventListener('online', async () => {
       actualizarChips();
-      const r = Store.syncQueue();
+      const r = await Store.syncQueue();
       if (r.synced) Views.toast(`⇅ Conexión recuperada — ${r.synced} check-ins sincronizados`);
       if (current === 'escanear') Views.vEscanear();
     });
@@ -66,11 +63,10 @@ const App = (() => {
   return { go, init };
 })();
 
-/** Actualiza los indicadores de la barra superior (conexión, cola, usuario) */
+/** Actualiza los indicadores de la barra superior (conexión, cola) */
 function actualizarChips() {
   const net = document.getElementById('net-status');
   const qb = document.getElementById('queue-badge');
-  const uc = document.getElementById('user-chip');
   if (!net) return;
   const online = Store.isOnline();
   net.textContent = online ? '● en línea' : '○ sin conexión';
@@ -78,9 +74,6 @@ function actualizarChips() {
   const q = Store.getQueue().length;
   qb.textContent = '⇅ ' + q;
   qb.classList.toggle('hidden', q === 0);
-  const u = Store.currentUser();
-  uc.textContent = u ? '@' + u.username : '';
-  uc.classList.toggle('hidden', !u);
 }
 
 document.addEventListener('DOMContentLoaded', App.init);
