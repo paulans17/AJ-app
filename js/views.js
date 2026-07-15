@@ -40,8 +40,8 @@ const Views = (() => {
     view().innerHTML = `
       <div class="login-wrap">
         <div class="login-logo">♗</div>
-        <h1>Staff AJapp</h1>
-        <p class="login-sub">Curso de Protocolo<br>Elige tu nombre — sin contraseña</p>
+        <h1>STAFF</h1>
+        <p class="login-sub">Curso de Protocolo<br>¿Quién escanea?</p>
         ${Store.staff().map((nombre) => `
           <button class="staff-item" data-login="${esc(nombre)}">
             <span class="avatar">${iniciales(nombre)}</span>
@@ -119,7 +119,7 @@ const Views = (() => {
     view().innerHTML = `
       <div class="scan-screen">
         <div class="scan-header">
-          <div class="gold-caption">Staff AJapp</div>
+          <div class="gold-caption">Registro de Asistencias</div>
           <div class="session-name">Curso de Protocolo</div>
         </div>
 

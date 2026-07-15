@@ -25,16 +25,7 @@ const DEMO = (() => {
 
   /* ---------- staff (supuesto) ---------- */
   const staff = [
-    { username: 'pau',        nombreCompleto: 'Pau Navarro',        departamento: 'informatica',  activo: true },
-    { username: 'martagarcia',nombreCompleto: 'Marta García',       departamento: 'informatica',  activo: true },
-    { username: 'javierlopez',nombreCompleto: 'Javier López',       departamento: 'presidencia',  activo: true },
-    { username: 'saradiez',   nombreCompleto: 'Sara Díez',          departamento: 'presidencia',  activo: true },
-    { username: 'nachomoral', nombreCompleto: 'Nacho Moral',        departamento: 'cuentas',      activo: true },
-    { username: 'elenaruiz',  nombreCompleto: 'Elena Ruiz',         departamento: 'comunicacion', activo: true },
-    { username: 'davidsanz',  nombreCompleto: 'David Sanz',         departamento: 'comunicacion', activo: true },
-    { username: 'claraprieto',nombreCompleto: 'Clara Prieto',       departamento: 'redaccion',    activo: true },
-    { username: 'hugovega',   nombreCompleto: 'Hugo Vega',          departamento: 'diseno',       activo: true },
-    { username: 'ainhoacano', nombreCompleto: 'Ainhoa Cano',        departamento: 'diseno',       activo: false }
+    { username: 'PalaInformatica',        nombreCompleto: 'Paula Navarro',        departamento: 'informatica',  activo: true }
   ];
 
   /* ---------- sesiones: 5 días, 14 medias ponencias (supuestas) ---------- */
