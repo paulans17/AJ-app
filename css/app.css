@@ -3,7 +3,7 @@
    Portado de Components/Theme.swift:
      background #0B0B0B · card #1A1A1A · gold #C6A75E
      tab bar #111111 · success green · warning orange · error red
-   3 pantallas: Login · Escanear · Estadísticas.
+   2 pantallas, sin login: Escanear · Estadísticas.
    ============================================================ */
 :root {
   --background: #0B0B0B;
@@ -34,9 +34,9 @@ body {
 /* ---- topbar (estado conexión / usuario) ---- */
 #topbar { position: sticky; top: 0; z-index: 20; background: var(--background); }
 .topbar-inner { display: flex; align-items: center; gap: 8px; padding: 8px 16px 0; max-width: 760px; margin: 0 auto; }
-.brand { color: var(--gold); font-size: 15px; margin-right: auto; }
+.brand { display: flex; align-items: center; gap: 8px; color: var(--gold); font-size: 15px; margin-right: auto; }
 .brand strong { color: var(--text-primary); font-weight: 600; }
-.user-chip { font-size: 12px; color: var(--gold); background: var(--card); border: 1px solid rgba(198,167,94,0.25); padding: 3px 10px; border-radius: 999px; }
+.brand-logo { width: 24px; height: 24px; border-radius: 6px; object-fit: cover; }
 
 .pill { font-size: 11px; padding: 3px 8px; border-radius: 999px; border: 1px solid transparent; }
 .pill-ok { color: var(--success); border-color: rgba(52,199,89,0.5); }
@@ -223,25 +223,6 @@ label { font-size: 12px; color: var(--text-secondary); display: block; margin-bo
 .rate-row .rv { margin-left: auto; font-size: 22px; font-weight: 700; color: var(--gold); }
 .progress { height: 4px; border-radius: 2px; background: #3a3a3c; overflow: hidden; }
 .progress > div { height: 100%; background: var(--gold); border-radius: 2px; transition: width 0.4s ease; }
-
-/* ---- login ---- */
-.login-wrap { max-width: 380px; margin: 6vh auto 0; text-align: center; }
-.login-logo { font-size: 60px; color: var(--gold); }
-.login-wrap h1 { font-size: 28px; font-weight: 700; margin: 6px 0 4px; }
-.login-sub { color: var(--text-secondary); font-size: 14px; margin-bottom: 18px; }
-.staff-item {
-  display: flex; align-items: center; gap: 12px; width: 100%;
-  background: var(--card); border: 1px solid rgba(198,167,94,0.15);
-  padding: 12px 14px; margin-bottom: 10px; border-radius: var(--radius-card); text-align: left;
-}
-.staff-item:active { border-color: rgba(198,167,94,0.55); }
-.avatar {
-  width: 38px; height: 38px; border-radius: 50%; flex: none;
-  background: rgba(198,167,94,0.2); color: var(--gold);
-  display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px;
-}
-.staff-item .meta { flex: 1; }
-.staff-item .meta small { color: var(--text-secondary); display: block; font-size: 12px; }
 
 .muted { color: var(--text-secondary); font-size: 13px; }
 
