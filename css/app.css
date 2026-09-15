@@ -33,8 +33,12 @@ body {
 .hidden { display: none !important; }
 
 /* ---- topbar (estado conexión / usuario) ---- */
+/* padding-top con env(safe-area-inset-top): con viewport-fit=cover (PWA
+   instalada, sin barra de navegador) el contenido dibuja por debajo del
+   notch/isla dinámica si no se reserva ese hueco a propósito -- se veía
+   "Alfil Juvenil" tapado por la hora del sistema en el iPhone real. */
 #topbar { flex: none; background: var(--background); }
-.topbar-inner { display: flex; align-items: center; gap: 8px; padding: 8px 16px 0; max-width: 760px; margin: 0 auto; }
+.topbar-inner { display: flex; align-items: center; gap: 8px; padding: calc(8px + env(safe-area-inset-top)) 16px 8px; max-width: 760px; margin: 0 auto; }
 .brand { display: flex; align-items: center; gap: 8px; color: var(--gold); font-size: 15px; margin-right: auto; }
 .brand strong { color: var(--text-primary); font-weight: 600; }
 .brand-logo { width: 24px; height: 24px; border-radius: 6px; object-fit: cover; }

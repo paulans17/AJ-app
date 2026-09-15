@@ -264,5 +264,5 @@ const Views = (() => {
     pollTimer = setInterval(cargar, 7000);
   }
 
-  return { vEscanear, vEstadisticas, toast, toastSync, pararPolling, cerrarCamara, cerrarSheet, quitarResultado, quitarCargando };
+  return { vEscanear, vEstadisticas, toastSync, pararPolling, cerrarCamara, cerrarSheet, quitarResultado, quitarCargando };
 })();
