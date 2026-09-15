@@ -21,7 +21,7 @@ persona acreditada.
 
 | Columna | Contenido |
 |---|---|
-| A — NÚMERO | El número que lleva impreso/en el QR de la acreditación. En la hoja real aparece como número simple (`1`, `2`... `99`), sin ceros a la izquierda visibles en la celda — el script compara como string tal cual viene, así que el número que se escanee/teclee tiene que coincidir exactamente con lo que hay en la celda. |
+| A — NÚMERO | El número que lleva impreso/en el QR de la acreditación. **Confirmado en la hoja real (2026-09-15): sin ceros a la izquierda** (`1`, `2`, `3`... `120`...) — el script compara como string tal cual viene, así que el número que se escanee/teclee tiene que coincidir exactamente con lo que hay en la celda. |
 | B — NOMBRE | `Apellidos, Nombre` |
 
 ### `Config`
@@ -41,7 +41,15 @@ Sin columna de quién escaneó — el script original no la tiene, no se
 añade (D21).
 
 ### `tabla`
-Existe en la hoja real, contenido sin confirmar todavía.
+**Confirmado (2026-09-15):** es un pivote/resumen — una fila por asistente
+(NÚMERO, NOMBRE) y una columna por sesión (agrupadas por evento: "VIBRAS"
+→ Inicio/Descanso, "EIP" → Inicio...), con una casilla ✅ si esa persona
+asistió a esa sesión concreta. Es un informe de lectura para Pau/staff,
+probablemente con fórmulas que leen de `asistencias` — **la app no lo
+usa ni lo necesita**: Estadísticas ya calcula el recuento en vivo de la
+sesión activa directamente desde `asistencias` + `asistentes` (ver
+"Estadísticas — resuelto" más abajo), que es toda la información que
+hace falta para esa pantalla.
 
 ## El endpoint — exactamente como está, sin extensiones
 

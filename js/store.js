@@ -19,6 +19,7 @@ const Store = (() => {
   const STATS_URL = 'https://script.google.com/macros/s/AKfycbz7gRYm8EKaGoKgcpXRB94A63wHpGefMU1aFzfPxqU2MuCHf-ODdy-xuHaswtXjKxL6/exec';
 
   const KEY_QUEUE = 'ajapp-cola';
+  const KEY_STATS_CACHE = 'ajapp-stats-cache';
   const listeners = [];
   const onChange = (fn) => listeners.push(fn);
   const notify = () => listeners.forEach((fn) => fn());
@@ -137,16 +138,25 @@ const Store = (() => {
     return { synced, failed, pending: restantes.length };
   }
 
+  /** Último resultado de stats() guardado, para pintar algo al instante
+   * mientras llega el nuevo dato — Apps Script tarda varios segundos
+   * (medido: 3-9s) y con "Cargando…" a pantalla vacía se siente roto. */
+  function cachedStats() {
+    try { return JSON.parse(localStorage.getItem(KEY_STATS_CACHE)); } catch (e) { return null; }
+  }
+
   /** Sesión activa + recuento en vivo, para la pantalla Estadísticas (polling, D22). */
   async function stats() {
     const res = await fetch(STATS_URL);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return res.json();
+    const data = await res.json();
+    try { localStorage.setItem(KEY_STATS_CACHE, JSON.stringify(data)); } catch (e) { /* localStorage lleno o bloqueado, no es crítico */ }
+    return data;
   }
 
   return {
     onChange,
-    checkin, syncQueue, stats,
+    checkin, syncQueue, stats, cachedStats,
     getQueue, isOnline
   };
 })();

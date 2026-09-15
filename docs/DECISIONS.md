@@ -406,9 +406,10 @@ cálculo — tal como pidió Pau explícitamente.
 - Nombre definitivo del proyecto Firebase nuevo (propuesta en
   `PROJECT_SETUP.md`, a confirmar por Pau) — nota: ya no bloquea Staff
   AJapp (D13), solo relevante si `alfil-statics` lo reutiliza.
-- D26 (jsQR vendorizado) y D27 (service worker actualiza sin esperar 10
-  min) confirmados en real contra GitHub Pages (2026-09-15). D24 (CORS
-  del check-in): el código del fix sigue desplegado, pero falta una
-  prueba de check-in real de punta a punta (no se ha forzado a propósito
-  para no ensuciar la hoja real con datos de prueba) — confirmar la
-  próxima vez que se registre una asistencia real.
+- D24 (CORS), D26 (jsQR vendorizado) y D27 (service worker actualiza sin
+  esperar 10 min) confirmados en real contra GitHub Pages — Pau probó
+  varios check-ins reales (2026-09-15) y aparecen correctamente en
+  `asistencias`.
+- Números de `asistentes!A`: confirmado, sin ceros a la izquierda.
+  Contenido de la pestaña `tabla`: confirmado, pivote asistente×sesión de
+  solo lectura, la app no lo usa (ver `docs/SHEET_SCHEMA.md`).

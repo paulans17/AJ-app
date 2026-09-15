@@ -34,15 +34,10 @@ de Pau como icono (D29). Sin ningún mock/demo en el código (D30) — la
 de GitHub Pages: `node .claude/static-server.js` (puerto 8420) desde el
 repo, y en el móvil (misma Wi-Fi) abrir `http://<IP-portátil>:8420`.
 
-**Pendiente ahora:**
-- [ ] Probar un check-in real contra la hoja (escanear o escribir un
-      número de `asistentes!A`) y confirmar que aparece en `asistencias`
-      — el fix de CORS (D24) está desplegado pero no se ha forzado una
-      prueba real todavía para no ensuciar la hoja de producción.
-
-**Pendiente de confirmar (no bloqueante):**
-- [ ] Si los números de `asistentes!A` de la XXII llevan ceros a la
-      izquierda o no (afecta a cómo se comparan en el script — ver nota
-      en `docs/SHEET_SCHEMA.md`).
-- [ ] Qué contiene la pestaña `tabla` de la hoja.
+**Confirmado por Pau (2026-09-15): el check-in real funciona de punta a
+punta.** Probado varias veces contra la hoja real — aparece correctamente
+en `asistencias` (D24, el fix de CORS, queda confirmado en producción).
+Números sin ceros a la izquierda, y la pestaña `tabla` es un pivote de
+solo lectura que la app no necesita (ver `docs/SHEET_SCHEMA.md`) — las
+dos dudas pendientes quedan resueltas, nada bloqueante ahora mismo.
 
