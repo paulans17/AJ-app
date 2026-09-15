@@ -84,5 +84,5 @@ const Scanner = (() => {
     lastCode = ''; lastTime = 0;
   }
 
-  return { start, stop, get running() { return running; } };
+  return { start, stop };
 })();
