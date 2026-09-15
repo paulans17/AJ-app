@@ -98,13 +98,15 @@ const Views = (() => {
           <div class="session-name">Curso de Protocolo</div>
         </div>
 
-        <button class="scan-circle" id="btn-cam">
-          <span class="inner">${ICO.qr}<span>Escanear</span></span>
-        </button>
+        <div class="scan-middle">
+          <button class="scan-circle" id="btn-cam">
+            <span class="inner">${ICO.qr}<span>Escanear</span></span>
+          </button>
 
-        <div class="scan-hint">
-          <div class="h1">Escanea el QR de la acreditación</div>
-          <div class="h2">Pulsa el círculo para abrir la cámara</div>
+          <div class="scan-hint">
+            <div class="h1">Escanea el QR de la acreditación</div>
+            <div class="h2">Pulsa el círculo para abrir la cámara</div>
+          </div>
         </div>
 
         <div class="scan-bottom">
@@ -201,12 +203,41 @@ const Views = (() => {
   let pollEnVuelo = false;
   function pararPolling() { if (pollTimer) { clearInterval(pollTimer); pollTimer = null; } pollEnVuelo = false; }
 
+  /** HTML de las tarjetas de Estadísticas. esCache=true añade un aviso de
+   * que es el último dato conocido, no el actual. */
+  function pintarStats(s, esCache) {
+    const tasa = Number(s.tasa) || 0;
+    const anchoBarra = Math.max(0, Math.min(100, tasa)); // la tasa real puede salirse de 0-100 si la hoja tiene datos inconsistentes; el ancho visual no
+    return `
+      ${esCache ? '<p class="muted" style="margin-bottom:10px">Último dato conocido — actualizando…</p>' : ''}
+      <div class="card border-mid">
+        <div class="gold-caption" style="margin-bottom:8px">Sesión en curso</div>
+        <div style="font-size:20px;font-weight:700">${esc(s.session || 'No hay sesión activa')}</div>
+      </div>
+      <div class="gold-card">
+        <div class="gc-title">TOTAL REGISTRADOS</div>
+        <div class="gc-num">${s.registrados || 0}</div>
+        <div class="gc-sub">de ${s.total || 0} asistentes</div>
+      </div>
+      <div class="card">
+        <div class="rate-row">
+          <span class="rt">Tasa de Asistencia</span>
+          <span class="rv">${tasa.toFixed(1)}%</span>
+        </div>
+        <div class="progress"><div style="width:${anchoBarra}%"></div></div>
+      </div>`;
+  }
+
   async function vEstadisticas() {
     pararPolling();
+    // Pinta el último dato conocido al instante en vez de un "Cargando…" a
+    // pantalla vacía — Apps Script tarda varios segundos (D22, medido
+    // 3-9s), y sin esto la pantalla se siente rota cada vez que se abre.
+    const cache = Store.cachedStats();
     view().innerHTML = `
       <div class="title-kicker">Estadísticas</div>
       <div class="big-title" style="margin-bottom:20px">En vivo</div>
-      <div id="stats-body"><p class="muted">Cargando… (Apps Script puede tardar unos segundos)</p></div>`;
+      <div id="stats-body">${cache ? pintarStats(cache, true) : '<p class="muted">Cargando… (Apps Script puede tardar unos segundos)</p>'}</div>`;
 
     const cargar = async () => {
       // Apps Script puede tardar más que los 7s del intervalo (visto hasta
@@ -218,27 +249,12 @@ const Views = (() => {
       if (!body) { pollEnVuelo = false; return; } // ya no estamos en esta vista
       try {
         const s = await Store.stats();
-        const tasa = Number(s.tasa) || 0;
-        const anchoBarra = Math.max(0, Math.min(100, tasa)); // la tasa real puede salirse de 0-100 si la hoja tiene datos inconsistentes; el ancho visual no
-        body.innerHTML = `
-          <div class="card border-mid">
-            <div class="gold-caption" style="margin-bottom:8px">Sesión en curso</div>
-            <div style="font-size:20px;font-weight:700">${esc(s.session || 'No hay sesión activa')}</div>
-          </div>
-          <div class="gold-card">
-            <div class="gc-title">TOTAL REGISTRADOS</div>
-            <div class="gc-num">${s.registrados || 0}</div>
-            <div class="gc-sub">de ${s.total || 0} asistentes</div>
-          </div>
-          <div class="card">
-            <div class="rate-row">
-              <span class="rt">Tasa de Asistencia</span>
-              <span class="rv">${tasa.toFixed(1)}%</span>
-            </div>
-            <div class="progress"><div style="width:${anchoBarra}%"></div></div>
-          </div>`;
+        body.innerHTML = pintarStats(s, false);
       } catch (e) {
-        body.innerHTML = `<p class="muted">No se pudo conectar con la hoja. Reintentando…</p>`;
+        // Si ya había datos en pantalla (de caché o de una carga anterior),
+        // se dejan tal cual en vez de taparlos con un mensaje de error por
+        // un fallo puntual de un solo tick de polling.
+        if (!Store.cachedStats()) body.innerHTML = `<p class="muted">No se pudo conectar con la hoja. Reintentando…</p>`;
       } finally {
         pollEnVuelo = false;
       }

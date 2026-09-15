@@ -21,18 +21,19 @@
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-html, body { height: 100%; }
+html, body { height: 100%; overflow: hidden; overscroll-behavior: none; }
 body {
+  display: flex; flex-direction: column;
+  height: 100vh; height: 100dvh; /* dvh sigue el viewport visible real, sin fallback previo con vh puro */
   background: var(--background);
   color: var(--text-primary);
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
   font-size: 16px;
-  padding-bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom));
 }
 .hidden { display: none !important; }
 
 /* ---- topbar (estado conexión / usuario) ---- */
-#topbar { position: sticky; top: 0; z-index: 20; background: var(--background); }
+#topbar { flex: none; background: var(--background); }
 .topbar-inner { display: flex; align-items: center; gap: 8px; padding: 8px 16px 0; max-width: 760px; margin: 0 auto; }
 .brand { display: flex; align-items: center; gap: 8px; color: var(--gold); font-size: 15px; margin-right: auto; }
 .brand strong { color: var(--text-primary); font-weight: 600; }
@@ -43,8 +44,19 @@ body {
 .pill-off { color: var(--error); border-color: rgba(255,59,48,0.5); }
 .pill-warn { color: var(--warning); border-color: rgba(255,149,0,0.5); }
 
-/* ---- layout ---- */
-main { max-width: 760px; margin: 0 auto; padding: 20px 16px 28px; }
+/* ---- layout ----
+   #view ocupa exactamente el espacio entre topbar y tabbar (flex:1 dentro
+   del body en columna) -- así ninguna pantalla necesita scroll ni puede
+   "rebotar" (overscroll-behavior/overflow:hidden arriba). Si algún
+   contenido fuera alguna vez más alto de lo que cabe, se recorta en vez de
+   arrastrar toda la página -- es la consecuencia aceptada de que la
+   interfaz sea completamente estática, a propósito. */
+main {
+  flex: 1 1 auto; min-height: 0; overflow: hidden;
+  max-width: 760px; width: 100%; margin: 0 auto;
+  padding: 20px 16px 12px;
+  display: flex; flex-direction: column;
+}
 
 /* Cabecera de página: kicker dorado con tracking + título 34px bold */
 .title-kicker { font-size: 11px; font-weight: 600; color: rgba(198,167,94,0.75); letter-spacing: 2.5px; text-transform: uppercase; margin-bottom: 10px; }
@@ -102,14 +114,12 @@ label { font-size: 12px; color: var(--text-secondary); display: block; margin-bo
 /* ============================================================
    ESCANEAR — réplica de ScanView.swift
    ============================================================ */
-/* min-height con 100vh puro se recalcula cada vez que el navegador móvil
-   oculta/muestra la barra de direcciones al hacer scroll o tocar la
-   pantalla, y el botón "Registro Manual" (empujado con margin-top:auto)
-   salta de sitio en cada recálculo — "la interfaz se mueve". 100dvh sigue
-   el viewport visible real en cada momento, así que no hay salto; se deja
-   100vh como fallback para navegadores sin soporte de dvh. */
-.scan-screen { display: flex; flex-direction: column; align-items: center; gap: 28px; padding-top: 8px; min-height: calc(100vh - var(--tabbar-h) - 120px); min-height: calc(100dvh - var(--tabbar-h) - 120px); }
-.scan-header { text-align: center; }
+/* Llena el alto disponible de #view (flex, ver arriba) en vez de calcular
+   una altura mínima aparte -- así no hace falta reaccionar a cuánto mide
+   el viewport visible, solo ocupar el hueco que ya le da el padre. */
+.scan-screen { flex: 1; min-height: 0; display: flex; flex-direction: column; align-items: center; gap: 24px; }
+.scan-header { text-align: center; flex: none; }
+.scan-middle { flex: 1; min-height: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px; }
 .scan-header .session-name { font-size: 22px; font-weight: 700; color: var(--text-primary); margin-top: 10px; }
 
 /* Círculo grande: fill card + anillo exterior dorado 35% (10px) + anillo interior dorado (4px) */
@@ -133,7 +143,7 @@ label { font-size: 12px; color: var(--text-secondary); display: block; margin-bo
 .scan-hint .h1 { font-size: 17px; font-weight: 600; color: var(--text-primary); }
 .scan-hint .h2 { font-size: 15px; color: var(--text-secondary); margin-top: 6px; }
 
-.scan-bottom { width: 100%; margin-top: auto; }
+.scan-bottom { width: 100%; flex: none; }
 .scan-bottom .btn-outline svg { width: 18px; height: 18px; vertical-align: -3px; margin-right: 8px; stroke: var(--text-primary); }
 
 /* Cámara a pantalla completa (fullScreenCover) */
@@ -228,7 +238,7 @@ label { font-size: 12px; color: var(--text-secondary); display: block; margin-bo
 
 /* ---- tab bar (réplica UITabBar #111111) ---- */
 #tabbar {
-  position: fixed; bottom: 0; left: 0; right: 0; z-index: 30;
+  flex: none;
   display: flex; background: var(--tabbar-bg); border-top: 1px solid rgba(255,255,255,0.08);
   padding-bottom: env(safe-area-inset-bottom);
 }
