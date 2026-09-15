@@ -79,7 +79,7 @@ const Views = (() => {
 
   /* ============================================================
      RESULTADO — réplica de CheckinResultView.swift
-     Pantalla completa verde/naranja/roja, autocierre a los 1,5 s
+     Pantalla completa verde/naranja/roja, autocierre a los 2 s
      ============================================================ */
   function mostrarResultado(r) {
     quitarResultado();
@@ -102,7 +102,7 @@ const Views = (() => {
     div.addEventListener('click', quitarResultado);
     document.body.appendChild(div);
     if (navigator.vibrate) navigator.vibrate(tipo === 'success' ? 80 : [60, 60, 60]);
-    div._h = setTimeout(quitarResultado, 1500);
+    div._h = setTimeout(quitarResultado, 2000);
     actualizarChips();
   }
   function quitarResultado() {
@@ -115,7 +115,6 @@ const Views = (() => {
      ============================================================ */
   function vEscanear() {
     Scanner.stop();
-    const cola = Store.getQueue();
     view().innerHTML = `
       <div class="scan-screen">
         <div class="scan-header">
@@ -134,14 +133,6 @@ const Views = (() => {
 
         <div class="scan-bottom">
           <button class="btn-outline btn-block" id="btn-manual-sheet">${ICO.keyboard} Registro Manual por Número</button>
-          <div class="card" style="margin-top:14px;margin-bottom:0">
-            <div class="queue-row">
-              <span class="pill ${Store.isOnline() ? 'pill-ok' : 'pill-off'}">${Store.isOnline() ? '● en línea' : '○ sin conexión'}</span>
-              <span class="muted">${cola.length} en cola</span>
-              <button class="btn-sm btn-outline" id="btn-toggle-off">${Store.isSimOffline() ? 'Recuperar cobertura' : 'Simular sin cobertura'}</button>
-            </div>
-            ${cola.length ? `<button class="btn-gold btn-block btn-sm" id="btn-sync" style="margin-top:10px" ${Store.isOnline() ? '' : 'disabled'}>⇅ Sincronizar ${cola.length} check-ins</button>` : ''}
-          </div>
         </div>
       </div>`;
 
@@ -150,29 +141,12 @@ const Views = (() => {
       const r = await Store.checkin(codigo);
       quitarCargando();
       mostrarResultado(r);
-      if (r.status === 'offline_ok') setTimeout(() => vEscanear(), 1550);
+      if (r.status === 'offline_ok') setTimeout(() => vEscanear(), 2050);
     };
 
     $('#btn-cam').addEventListener('click', () => abrirCamara(procesa));
 
     $('#btn-manual-sheet').addEventListener('click', () => abrirSheetManual(procesa));
-
-    $('#btn-toggle-off').addEventListener('click', async () => {
-      Store.setSimOffline(!Store.isSimOffline());
-      if (!Store.isSimOffline() && Store.getQueue().length) {
-        const r = await Store.syncQueue();
-        toastSync(r);
-      } else {
-        toast(Store.isSimOffline() ? 'Modo sin cobertura activado' : 'Cobertura recuperada');
-      }
-      vEscanear();
-    });
-    const bs = $('#btn-sync');
-    if (bs) bs.addEventListener('click', async () => {
-      const r = await Store.syncQueue();
-      toastSync(r);
-      vEscanear();
-    });
   }
 
   /* Cámara a pantalla completa (fullScreenCover de iOS) */

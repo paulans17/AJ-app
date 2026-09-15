@@ -1,13 +1,11 @@
 # Arquitectura — Staff AJapp (PWA)
 
-> ⚠️ Este documento fue reescrito el 2026-07-15 tras el pivote D13-D18
-> (ver `DECISIONS.md`): se abandonó Firestore en favor de Google Sheets +
-> Apps Script. Corregido de nuevo el mismo día (D21): **el script de Apps
-> Script se usa tal cual, sin extensiones** (nada de `LockService`,
-> columna `staff`, acción `stats` ni JSON). Si ves referencias a
-> Firebase/Firestore en otro sitio del repo (`docs/FIRESTORE_SCHEMA.md`,
-> `firebase/`), están marcadas como superseded — la versión vigente es
-> esta.
+> Actualizado 2026-07-15 tras la limpieza post-pivote: sin Firebase/Firestore
+> en ningún sitio del repo (se borraron `firebase/` y
+> `docs/FIRESTORE_SCHEMA.md` — el histórico de esa vía descartada queda en
+> `docs/DECISIONS.md`). El script de Apps Script se usa tal cual, sin
+> extensiones (nada de `LockService`, columna `staff`, acción `stats` ni
+> JSON — D21).
 
 Ver decisiones y motivos completos en `DECISIONS.md`. Este documento
 describe el **cómo**, ya con las decisiones tomadas.
@@ -27,7 +25,7 @@ equipo, no solo el móvil de una persona.
 Excel/scripts que Pau ya usa; fuera de alcance de este repo, D20)
 
 ┌─────────────────────────────────────────────┐
-│  Google Sheet "MIEMBROS CURSO PROTOCOLO XXII" │
+│  Google Sheet "MIEMBROS CURSO PROTOCOLO XXI"  │
 │  ┌────────────┐ ┌────────┐ ┌─────────────┐   │
 │  │ asistentes │ │ Config │ │ asistencias │   │
 │  └────────────┘ └────────┘ └─────────────┘   │
@@ -54,43 +52,24 @@ Sin Firebase, sin backend propio, sin servidor que mantener — Google Sheets
 + Apps Script como en la edición anterior, solo que ahora detrás de una
 interfaz compartida por todo el equipo en vez de un Atajo personal.
 
-## Ya construido (demo, 07/07) — qué se reutiliza y qué no
-
-La demo original (`index.html`, `css/app.css`,
-`js/{demo-data,store,scanner,views,app}.js`, `sw.js`,
-`manifest.webmanifest`, `icons/`) sigue siendo la base, pero con **menos
-alcance** que antes de este pivote:
-
-- **Se reutiliza tal cual:** `js/scanner.js` (escaneo QR), el service
-  worker, el manifest, los iconos, y buena parte de `css/app.css`.
-- **Se reescribe:** `js/store.js` — en vez de hablar con Firestore (que ya
-  no existe en este proyecto), hace `fetch()` al Web App de Apps Script.
-  La cola offline que ya tenía (`getQueue`/`setQueue`/`syncQueue`) se
-  queda casi igual, pero ahora "sincronizar" significa disparar la
-  llamada HTTP real, no escribir en un array local (D18).
-- **Se recorta:** `js/views.js`/`app.js` pierden las pestañas Sesiones y
-  Admin (D14/D15) — se quedan Escanear y Estadísticas, más el login. Todo
-  lo que hacían esas dos pestañas (activar sesión, alta de staff, import
-  Excel, informes) se mueve a la propia hoja de cálculo y a menús de
-  Apps Script.
-
 ## Stack
 
-- **Frontend:** el mismo HTML/CSS/JS vanilla de la demo, recortado.
-- **Escaneo QR:** `BarcodeDetector` nativo con fallback `jsQR` — sin
-  cambios, ya funciona.
+- **Frontend:** HTML/CSS/JS vanilla, sin build step ni framework. Módulos
+  con IIFE (`Store`, `Scanner`, `Views`, `App`).
+- **Escaneo QR:** `BarcodeDetector` nativo con fallback a `jsQR`
+  (vendorizado en `js/vendor/jsQR.min.js` — la URL de cdnjs para esta
+  versión devuelve 404, por eso se sirve local en vez de CDN).
 - **Backend:** Google Apps Script, container-bound a la hoja de cálculo,
   publicado como Web App (`Ejecutar como: yo`, `Acceso: cualquier
   usuario`). Un único endpoint, `?num=X`, tal cual lo tenía Pau — sin
-  tocar (D21, ver `docs/SHEET_SCHEMA.md`).
+  tocar (D21, ver `docs/SHEET_SCHEMA.md`). Las estadísticas viven en un
+  segundo proyecto de Apps Script separado, de solo lectura (D22).
 - **Almacén de datos:** Google Sheets. Sin base de datos NoSQL/SQL
   externa, sin proyecto Firebase.
-- **Hosting de la PWA:** puede ser cualquier cosa que sirva archivos
-  estáticos por HTTPS — GitHub Pages, Firebase Hosting (el proyecto
-  `alfiljuvenil-protocolo` ya existe y sigue siendo válido solo para
-  esto, servir el HTML/CSS/JS, aunque ya no aloje Firestore/Auth para
-  esta app), o cualquier hosting estático. A decidir cuando llegue el
-  momento, no bloquea el desarrollo.
+- **Hosting de la PWA:** cualquier cosa que sirva archivos estáticos por
+  HTTPS — GitHub Pages, Firebase Hosting, o cualquier hosting estático. A
+  decidir cuando llegue el momento, no bloquea el desarrollo (ver
+  `docs/PROJECT_SETUP.md`).
 
 ## Por qué peticiones GET simples (y no POST con JSON)
 
@@ -103,17 +82,25 @@ que es donde suelen fallar las integraciones de Apps Script Web Apps
 llamadas desde JS de cliente. Para `?num=X`, GET con query string es
 suficiente y ya está probado (es literalmente lo que hacía el Atajo).
 
+La respuesta del check-in es HTML de una línea envuelto en el loader
+sandboxed de Apps Script (`goog.script.init`), no JSON — `js/store.js`
+desescapa y parsea ese texto (ver `parseCheckinHtml`). Las estadísticas sí
+devuelven JSON limpio.
+
 ## Estrategia offline (D18)
 
-No hay persistencia offline nativa como la de Firestore — hay que
-mantenerla a mano, reutilizando lo que la demo ya tenía:
+No hay persistencia offline nativa como la de Firestore — se mantiene a
+mano con una cola en `localStorage`:
 
 - Al escanear, si `navigator.onLine` es `false` (o la llamada `fetch`
-  falla), el check-in se guarda en una cola en `localStorage` en vez de
-  intentarse contra el Web App.
+  falla), el check-in se guarda en la cola en vez de intentarse contra el
+  Web App.
 - Al recuperar conexión (`window.addEventListener('online', ...)`), se
   recorre la cola y se dispara `?num=X` por cada elemento pendiente, en
-  orden.
+  orden. Solo se quita de la cola si la respuesta confirma un estado
+  resuelto (`ok`/`duplicado`); cualquier otro resultado (`sin_sesion`,
+  `no_encontrado`, error de hoja) se queda pendiente para no perder el
+  check-in en silencio.
 - Duplicados: el chequeo de "ya registrado" se hace primero contra la
   cola local (por si la misma persona se escaneó dos veces sin red desde
   el mismo móvil) y luego, al sincronizar, el propio Web App vuelve a
@@ -124,8 +111,12 @@ mantenerla a mano, reutilizando lo que la demo ya tenía:
   explícitamente), así que en el caso límite de dos sincronizaciones
   llegando exactamente a la vez hay una ventana de carrera teórica sin
   cerrar — aceptado.
-- La interfaz debe indicar cuántos check-ins están pendientes de
-  sincronizar (ya existe ese indicador en la demo — `queue-badge`).
+- La topbar indica cuántos check-ins están pendientes de sincronizar
+  (`queue-badge`).
+
+Mientras se resuelve un check-in (online u offline) se muestra un overlay
+bloqueante (`#loading-cover`) para que no se pueda tocar nada más de la
+interfaz hasta que llegue la respuesta.
 
 ## Seguridad (D17)
 
@@ -138,32 +129,36 @@ nombre, sin DNI ni otros datos sensibles). Si más adelante hiciera falta
 más control, se puede añadir algo — pero no modificando `Code.gs` sin que
 Pau lo pida (D21).
 
+El login de staff (elegir nombre de una lista fija en `js/store.js`) es
+igualmente solo atribución, no autenticación real — cualquiera con el
+móvil puede elegir el nombre de otra persona.
+
 ## Estructura del repo
 
 ```
 staff-ajapp-pwa/
 ├── CLAUDE.md                   (instrucciones para Claude Code — LEER PRIMERO)
 ├── README.md
-├── index.html                  (demo — se recorta la navegación)
+├── index.html
 ├── manifest.webmanifest
 ├── sw.js
 ├── css/app.css
 ├── js/
-│   ├── demo-data.js             (se queda para modo demo/dev sin Sheet real)
-│   ├── store.js                 (REESCRIBIR: fetch al Web App en vez de Firestore/localStorage)
-│   ├── scanner.js                (sin cambios)
-│   ├── views.js                  (RECORTAR: solo Login + Escanear + Estadísticas)
-│   └── app.js                    (RECORTAR: quitar rutas Sesiones/Admin)
+│   ├── store.js                 (capa de datos: fetch a los 2 Web Apps + cola offline)
+│   ├── scanner.js                (BarcodeDetector + fallback jsQR)
+│   ├── views.js                  (Login + Escanear + Estadísticas)
+│   ├── app.js                    (arranque y navegación)
+│   └── vendor/jsQR.min.js        (vendorizado, ver Stack)
 ├── icons/
 ├── docs/
-│   ├── DECISIONS.md              (histórico completo, incl. el pivote D13-D18)
+│   ├── DECISIONS.md              (histórico completo de decisiones, D1 en adelante)
 │   ├── ARCHITECTURE.md            (este archivo, vigente)
-│   ├── SHEET_SCHEMA.md            (vigente — sustituye a FIRESTORE_SCHEMA.md)
-│   ├── FIRESTORE_SCHEMA.md        (⚠️ superseded, solo histórico)
-│   ├── FLOWS.md                   (vigente, reescrito para Sheets)
-│   └── PROJECT_SETUP.md           (⚠️ mayormente superseded — ver aviso al inicio)
-├── firebase/                      (⚠️ superseded, solo histórico — no se despliega)
+│   ├── SHEET_SCHEMA.md            (vigente — estructura real de la hoja)
+│   ├── FLOWS.md                   (vigente, diagramas de los flujos)
+│   ├── DEPLOY_URLS.md             (URLs reales de los 2 Web Apps desplegados)
+│   └── PROJECT_SETUP.md           (checklist de infraestructura, vigente)
 └── apps-script/
     ├── Code.gs                    (script real de Pau, TAL CUAL — no tocar sin permiso, D21)
-    └── appsscript.json
+    ├── appsscript.json
+    └── stats-readonly/            (proyecto standalone aparte, solo lectura, D22)
 ```

@@ -6,7 +6,8 @@
 
 # Modelo de datos — Google Sheet (script original, sin tocar)
 
-Sustituye a `docs/FIRESTORE_SCHEMA.md` (superseded). Hoja real:
+Sustituye al esquema de Firestore original, descartado en el pivote D13
+(ver histórico en `docs/DECISIONS.md`). Hoja real:
 ["MIEMBROS CURSO PROTOCOLO XXI"](https://docs.google.com/spreadsheets/d/1YDADLLWwA92Gm-_WYPYY4qGxTt5Wx-RIjM7Ju8z9FHE/edit?usp=sharing),
 pestañas `asistentes`, `Config`, `asistencias`, `tabla`. Se usa **esta
 misma hoja, tal cual, para las pruebas** — no una copia ni una hoja nueva

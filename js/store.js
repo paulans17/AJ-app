@@ -37,10 +37,7 @@ const Store = (() => {
   function currentUser() { return localStorage.getItem(KEY_SESSION); }
 
   /* ---------- conexión ---------- */
-  let simOffline = false;
-  const setSimOffline = (v) => { simOffline = v; notify(); };
-  const isOnline = () => navigator.onLine && !simOffline;
-  const isSimOffline = () => simOffline;
+  const isOnline = () => navigator.onLine;
 
   /* ---------- cola offline (D18) ---------- */
   function getQueue() {
@@ -195,6 +192,6 @@ const Store = (() => {
     onChange,
     staff, login, logout, currentUser,
     checkin, syncQueue, stats,
-    getQueue, isOnline, setSimOffline, isSimOffline
+    getQueue, isOnline
   };
 })();
