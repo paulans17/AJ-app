@@ -5,7 +5,7 @@
    si este archivo no cambia byte a byte, el navegador nunca detecta que
    hay una versión nueva y los móviles se quedan con el código viejo
    cacheado indefinidamente (bug real encontrado probando en iPhone). */
-const CACHE = 'ajapp-v5';
+const CACHE = 'ajapp-v6';
 const SHELL = [
   './',
   './index.html',
@@ -16,7 +16,6 @@ const SHELL = [
   './js/views.js',
   './js/app.js',
   './js/vendor/jsQR.min.js',
-  './icons/icon.svg',
   './icons/icon-192.png',
   './icons/icon-512.png'
 ];

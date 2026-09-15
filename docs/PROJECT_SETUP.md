@@ -23,19 +23,22 @@
       obtenida y guardada en `docs/DEPLOY_URLS.md`.
 
 **Hecho (D23, 2026-07-15):** `js/store.js`/`views.js`/`app.js`/
-`index.html`/`css/app.css`/`sw.js` ya están conectados a las dos URLs y
-recortados a Login+Escanear+Estadísticas. Para probar en local sin
-esperar al hosting: `node .claude/static-server.js` (puerto 8420) desde
-el repo, y en el móvil (misma Wi-Fi) abrir `http://<IP-portátil>:8420`.
+`index.html`/`css/app.css`/`sw.js` conectados a las dos URLs, recortados
+a Escanear+Estadísticas.
+
+**Hecho (2026-09-15):** publicada en GitHub Pages
+(`https://paulans17.github.io/AJ-app/`), instalable como PWA desde ahí.
+Sin login ni roster de staff (D28) — no importa quién escanea. Logo real
+de Pau como icono (D29). Sin ningún mock/demo en el código (D30) — la
+única base de datos es la hoja real. Para probar en local sin depender
+de GitHub Pages: `node .claude/static-server.js` (puerto 8420) desde el
+repo, y en el móvil (misma Wi-Fi) abrir `http://<IP-portátil>:8420`.
 
 **Pendiente ahora:**
-- [ ] Sustituir el roster placeholder (`STAFF` en `js/store.js`, 10
-      nombres de ejemplo) por los ~20 nombres reales del equipo.
 - [ ] Probar un check-in real contra la hoja (escanear o escribir un
-      número de `asistentes!A`) y confirmar que aparece en `asistencias`.
-- [ ] Resolver hosting público (GitHub Pages / Firebase Hosting) para
-      poder instalar la PWA en el móvil desde una URL fija, no solo en
-      local.
+      número de `asistentes!A`) y confirmar que aparece en `asistencias`
+      — el fix de CORS (D24) está desplegado pero no se ha forzado una
+      prueba real todavía para no ensuciar la hoja de producción.
 
 **Pendiente de confirmar (no bloqueante):**
 - [ ] Si los números de `asistentes!A` de la XXII llevan ceros a la

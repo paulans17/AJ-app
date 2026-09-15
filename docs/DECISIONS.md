@@ -370,12 +370,45 @@ registrado). Se cambia a *network-first* con caché solo como respaldo sin
 conexión (`CACHE` sube a `v4`), y se deja anotado en el propio `sw.js`
 que hay que subir el número de versión en cada cambio de JS/CSS/HTML.
 
+## 2026-09-15 (novena vuelta — logo real, y se quita el login)
+
+**D28. Se quita la pantalla de Login y el concepto de "staff" por
+completo — no importa quién escanea.** Pau lo confirma de forma
+definitiva (ya lo había apuntado antes, ahora se ejecuta): sin roster,
+sin `Store.login`/`logout`/`currentUser`, sin lista `STAFF` placeholder,
+sin chip de "cerrar sesión" en la topbar. La app pasa a abrir
+directamente en Escanear — de las "2 pantallas + login" de D14 queda
+solo **2 pantallas, sin paso previo**. `apps-script/Code.gs` no tenía
+columna de atribución igualmente (D21), así que esto no pierde ningún
+dato que ya se estuviera guardando.
+
+**D29. Logo real de Pau (`icons/logo.png`, monograma "AJ") sustituye al
+bishop-Unicode-sobre-texto anterior.** El icono viejo (`icons/icon.svg`)
+dependía de que el motor de renderizado tuviera un glifo de ajedrez ♗
+decente — comprobado con `sips` en este mismo repo, lo pintaba como una
+corona, no un alfil (bug de fuente, no de diseño). El PNG de Pau es
+autocontenido (sin depender de ninguna fuente) y se usa tal cual para
+generar `icons/icon-192.png`/`icons/icon-512.png`; `icons/icon.svg`
+se borra. También aparece ahora en miniatura en la topbar junto al
+nombre.
+
+**D30. Limpieza final del mock/demo local en `js/store.js`.** El
+`MOCK_CHECKIN`/`MOCK_STATS` con datos de prueba embebidos (para trabajar
+sin las URLs reales desplegadas) ya no hace falta — las dos URLs llevan
+semanas desplegadas y confirmadas (D23). Se borra junto con el resto de
+código muerto: `js/demo-data.js` ya estaba borrado (limpieza de
+2026-07-15); esta vuelta confirma que no queda ningún otro rastro de
+datos ficticios en el repo. La única fuente de datos real es la hoja de
+cálculo — tal como pidió Pau explícitamente.
+
 ## Pendiente de decidir (no bloqueante para empezar)
 
 - Nombre definitivo del proyecto Firebase nuevo (propuesta en
   `PROJECT_SETUP.md`, a confirmar por Pau) — nota: ya no bloquea Staff
   AJapp (D13), solo relevante si `alfil-statics` lo reutiliza.
-- Roster real de ~20 miembros de staff (nombres) para sustituir el
-  placeholder de `js/store.js` (D23).
-- Confirmar en el móvil que D24 (CORS), D26 (jsQR vendorizado) y D27
-  (service worker) quedan resueltos tras la reinstalación limpia.
+- D26 (jsQR vendorizado) y D27 (service worker actualiza sin esperar 10
+  min) confirmados en real contra GitHub Pages (2026-09-15). D24 (CORS
+  del check-in): el código del fix sigue desplegado, pero falta una
+  prueba de check-in real de punta a punta (no se ha forzado a propósito
+  para no ensuciar la hoja real con datos de prueba) — confirmar la
+  próxima vez que se registre una asistencia real.

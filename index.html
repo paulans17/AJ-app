@@ -4,8 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#0B0B0B">
-  <title>Staff AJapp — Curso de Protocolo</title>
-  <meta name="description" content="App del staff de Alfil Juvenil para el control de asistencia del Curso de Protocolo.">
+  <title>Alfil Juvenil — Registro de Asistencias</title>
+  <meta name="description" content="Registro de asistencias del Curso de Protocolo de Alfil Juvenil, por QR o número manual.">
   <!-- CSP: script-src es solo 'self' (jsQR va vendorizado en js/vendor/, sin CDN externo
        -- ver más abajo). style-src sí necesita 'unsafe-inline' porque las vistas generan
        estilos inline dinámicos (barras de progreso, etc). connect-src incluye
@@ -13,26 +13,25 @@
        302 a ese dominio. -->
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://script.google.com https://script.googleusercontent.com; media-src 'self' blob:; base-uri 'self'; form-action 'self'; frame-ancestors 'none'">
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="icon" href="icons/icon-192.png" type="image/png">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="stylesheet" href="css/app.css">
 </head>
 <body>
-  <header id="topbar" class="hidden">
+  <header id="topbar">
     <div class="topbar-inner">
-      <span class="brand">  <strong>Alfil Juvenil</strong></span>
+      <span class="brand"><img src="icons/icon-192.png" alt="" class="brand-logo"><strong>Alfil Juvenil</strong></span>
       <span id="net-status" class="pill pill-ok" title="Estado de conexión">● en línea</span>
       <span id="queue-badge" class="pill pill-warn hidden" title="Check-ins pendientes de sincronizar">⇅ 0</span>
-      <button id="user-chip" class="user-chip hidden" title="Cerrar sesión"></button>
     </div>
   </header>
 
   <main id="view"></main>
 
-  <!-- Tab bar: 2 pantallas (D14) — Escanear · Estadísticas -->
-  <nav id="tabbar" class="hidden">
+  <!-- Tab bar: 2 pantallas (D14/D28) — Escanear · Estadísticas -->
+  <nav id="tabbar">
     <button data-route="escanear">
       <svg viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8V5a2 2 0 0 1 2-2h3M16 3h3a2 2 0 0 1 2 2v3M21 16v3a2 2 0 0 1-2 2h-3M8 21H5a2 2 0 0 1-2-2v-3"/><rect x="7.5" y="7.5" width="3.4" height="3.4" rx="0.6"/><rect x="13.1" y="7.5" width="3.4" height="3.4" rx="0.6"/><rect x="7.5" y="13.1" width="3.4" height="3.4" rx="0.6"/><path d="M13.5 13.5h1.4M15.8 15.8h.7"/></svg>
       Escanear

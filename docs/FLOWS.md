@@ -1,34 +1,15 @@
-> ⚠️ Reescrito 2026-07-15 (pivote D13-D18, corregido en D21): flujos
-> basados en Google Sheets + Apps Script, usando el script real de Pau
-> **tal cual**, sin extensiones (ni LockService, ni columna `staff`, ni
-> acción `stats`, ni JSON — ver D21).
+> ⚠️ Reescrito 2026-09-15 (D28): sin pantalla de Login — la app abre
+> directamente en Escanear, no importa quién escanee. Sigue basado en
+> Google Sheets + Apps Script, con el script real de Pau **tal cual**, sin
+> extensiones (ni LockService, ni columna `staff`, ni acción `stats`, ni
+> JSON — ver D21).
 
 # Flujos — Staff AJapp (PWA)
 
-Diagramas en Mermaid. Base: `apps-script/Code.gs` (extensión del script
-real `NO-PIN vFinal`) y `docs/SHEET_SCHEMA.md`.
+Diagramas en Mermaid. Base: `apps-script/Code.gs` (script real
+`NO-PIN vFinal`, sin extensiones) y `docs/SHEET_SCHEMA.md`.
 
-## 1. Login (staff general)
-
-Sin cambios de fondo respecto a lo decidido antes del pivote: sin
-contraseña, se elige el nombre de una lista. Lo único que cambia es de
-dónde sale esa lista — antes de una colección Firestore, ahora puede ser
-tan simple como una lista fija en el propio código de la PWA (no hace
-falta una llamada al Web App solo para esto, ~20 nombres no cambian cada
-día). Si se prefiere que salga de la hoja, se puede añadir un
-`action=staff` al Web App más adelante — no es necesario para el primer
-lanzamiento.
-
-```mermaid
-flowchart TD
-    A[Abrir PWA] --> B{Nombre guardado<br/>en local?}
-    B -- sí --> C[Ir a Escanear]
-    B -- no --> D[Elegir nombre de una lista]
-    D --> E[Guardar staffUsername en local]
-    E --> C
-```
-
-## 2. Escanear / check-in (con offline)
+## 1. Escanear / check-in (con offline)
 
 ```mermaid
 sequenceDiagram
@@ -68,10 +49,13 @@ flowchart TD
     B --> C{Cola vacía?}
     C -- sí --> Z[Nada que hacer]
     C -- no --> D[Por cada elemento, en orden:<br/>GET .../exec?num=X]
-    D --> E[Quitar de la cola tras la respuesta]
-    E --> F{Quedan elementos?}
-    F -- sí --> D
-    F -- no --> G[Toast: 'N check-ins sincronizados']
+    D --> E{Respuesta ok / duplicado?}
+    E -- sí --> F[Quitar de la cola]
+    E -- no, sin_sesion/no_encontrado/error --> G[Se queda en la cola]
+    F --> H{Quedan elementos?}
+    G --> H
+    H -- sí --> D
+    H -- no --> I[Toast: 'N sincronizados, M pendientes']
 ```
 
 **Duplicados entre dos móviles distintos sin red:** si ambos escanean al
@@ -83,7 +67,7 @@ sincronizaciones lleguen exactamente a la vez existe una ventana de
 carrera teórica. No se ha resuelto porque Pau pidió no tocar el script;
 queda anotado por si en algún momento se decide lo contrario.
 
-## 3. Estadísticas (polling contra un Web App aparte, D22)
+## 2. Estadísticas (polling contra un Web App aparte, D22)
 
 ```mermaid
 flowchart TD
@@ -99,7 +83,7 @@ flowchart TD
 (`apps-script/stats-readonly/`), distinta de la de check-in. No lleva
 parámetros — siempre devuelve el estado de la sesión activa actual.
 
-## 4. Activar/cerrar sesión (fuera de la app — D15)
+## 3. Activar/cerrar sesión (fuera de la app — D15)
 
 ```mermaid
 flowchart LR
@@ -112,7 +96,7 @@ No hay ninguna pantalla ni login especial para esto en la app — es
 exactamente como funcionaba con el Atajo de iPhone, solo que ahora varias
 personas leen el mismo `Config!B2` en vez de una sola.
 
-## 5. Inscripción / roster — fuera de alcance de este repo
+## 4. Inscripción / roster — fuera de alcance de este repo
 
 La construcción de la lista `asistentes` (números + nombres) y cualquier
 proceso de inscripción/registro con datos completos (DNI, menú, email...)

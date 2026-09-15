@@ -1,10 +1,10 @@
-# Staff AJapp (PWA)
+# Alfil Juvenil — Registro de Asistencias (PWA)
 
-App del staff de Alfil Juvenil para el control de asistencia del Curso de
-Protocolo: escaneo de QR o registro manual por número, y una pantalla de
+App para el control de asistencia del Curso de Protocolo de Alfil
+Juvenil: escaneo de QR o registro manual por número, y una pantalla de
 estadísticas en vivo. Evolución directa de un Atajo de iPhone que Pau ya
 usaba en la edición pasada, ahora como PWA para que la use todo el equipo
-a la vez desde sus móviles.
+a la vez desde sus móviles. Sin login — no importa quién escanea.
 
 ## Empezar por aquí (antes de tocar código)
 
@@ -33,19 +33,17 @@ portátil en vez de `localhost`.
 > La cámara solo funciona en `localhost` o HTTPS (requisito de los
 > navegadores). Sin cámara, usa el botón **"Registro Manual por Número"**.
 
-## Las 3 pantallas
+## Las 2 pantallas
 
-1. **Login** — sin contraseña, eliges tu nombre de una lista fija
-   (`STAFF` en `js/store.js`). Solo identifica quién ha abierto la app en
-   ese móvil, no es autenticación real.
-2. **Escanear** (por defecto) — escanea el QR de la acreditación o
-   introduce el número a mano. La sesión activa se lee de `Config!B2` en
-   la hoja (se edita ahí directamente, no hay pantalla para esto). Mientras
-   se resuelve el check-in se ve un overlay de carga; el resultado se
-   muestra a pantalla completa (verde/naranja/rojo) durante 2 segundos.
-   Sin conexión, el check-in se guarda en una cola local y se sincroniza
-   solo al recuperar cobertura.
-3. **Estadísticas** — sesión en curso, total registrados y tasa de
+1. **Escanear** (siempre, es lo primero que se ve al abrir la app) —
+   escanea el QR de la acreditación o introduce el número a mano. La
+   sesión activa se lee de `Config!B2` en la hoja (se edita ahí
+   directamente, no hay pantalla para esto). Mientras se resuelve el
+   check-in se ve un overlay de carga; el resultado se muestra a pantalla
+   completa (verde/naranja/rojo) durante 2 segundos. Sin conexión, el
+   check-in se guarda en una cola local y se sincroniza solo al recuperar
+   cobertura.
+2. **Estadísticas** — sesión en curso, total registrados y tasa de
    asistencia, actualizado por *polling* cada pocos segundos contra un
    segundo Web App de solo lectura.
 
@@ -57,7 +55,9 @@ portátil en vez de `localhost`.
 - **Estadísticas**: `apps-script/stats-readonly/`, proyecto standalone
   aparte, solo lectura.
 - El roster de asistentes (`asistentes` en la hoja) lo gestiona Pau con
-  su Excel/scripts de siempre, fuera de este repo (D20).
+  su Excel/scripts de siempre, fuera de este repo (D20). Es la **única**
+  base de datos de la app — no hay ningún dato de ejemplo ni mock en el
+  código.
 
 ## Piezas relacionadas (fuera de este repo)
 

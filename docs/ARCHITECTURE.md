@@ -1,11 +1,11 @@
 # Arquitectura — Staff AJapp (PWA)
 
-> Actualizado 2026-07-15 tras la limpieza post-pivote: sin Firebase/Firestore
-> en ningún sitio del repo (se borraron `firebase/` y
-> `docs/FIRESTORE_SCHEMA.md` — el histórico de esa vía descartada queda en
-> `docs/DECISIONS.md`). El script de Apps Script se usa tal cual, sin
-> extensiones (nada de `LockService`, columna `staff`, acción `stats` ni
-> JSON — D21).
+> Actualizado 2026-09-15: sin Firebase/Firestore en ningún sitio del repo
+> (se borraron `firebase/` y `docs/FIRESTORE_SCHEMA.md` — el histórico de
+> esa vía descartada queda en `docs/DECISIONS.md`). El script de Apps
+> Script se usa tal cual, sin extensiones (nada de `LockService`, columna
+> `staff`, acción `stats` ni JSON — D21). Sin login ni roster de staff
+> (D28) — no importa quién escanea.
 
 Ver decisiones y motivos completos en `DECISIONS.md`. Este documento
 describe el **cómo**, ya con las decisiones tomadas.
@@ -42,8 +42,8 @@ Excel/scripts que Pau ya usa; fuera de alcance de este repo, D20)
                         │ fetch (GET, sin headers custom)
                         │
 ┌───────────────────────┴───────────────────────┐
-│   Staff AJapp (PWA) — móvil de cada staff        │
-│   Login (elegir nombre) → Escanear → Estadísticas │
+│   Staff AJapp (PWA) — móvil de cualquier persona del equipo │
+│   Escanear (por defecto) ↔ Estadísticas, sin login   │
 │   Cola local si no hay conexión, reintenta al volver │
 └─────────────────────────────────────────────────┘
 ```
@@ -129,9 +129,8 @@ nombre, sin DNI ni otros datos sensibles). Si más adelante hiciera falta
 más control, se puede añadir algo — pero no modificando `Code.gs` sin que
 Pau lo pida (D21).
 
-El login de staff (elegir nombre de una lista fija en `js/store.js`) es
-igualmente solo atribución, no autenticación real — cualquiera con el
-móvil puede elegir el nombre de otra persona.
+No hay ningún tipo de login ni atribución de quién escanea (D28) —
+decisión explícita de Pau, no un olvido.
 
 ## Estructura del repo
 
@@ -146,10 +145,10 @@ staff-ajapp-pwa/
 ├── js/
 │   ├── store.js                 (capa de datos: fetch a los 2 Web Apps + cola offline)
 │   ├── scanner.js                (BarcodeDetector + fallback jsQR)
-│   ├── views.js                  (Login + Escanear + Estadísticas)
+│   ├── views.js                  (Escanear + Estadísticas, sin login)
 │   ├── app.js                    (arranque y navegación)
 │   └── vendor/jsQR.min.js        (vendorizado, ver Stack)
-├── icons/
+├── icons/                        (logo.png es la fuente; icon-192/512.png derivados)
 ├── docs/
 │   ├── DECISIONS.md              (histórico completo de decisiones, D1 en adelante)
 │   ├── ARCHITECTURE.md            (este archivo, vigente)

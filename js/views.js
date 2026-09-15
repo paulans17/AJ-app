@@ -1,15 +1,15 @@
 /* ============================================================
    Staff AJapp — VISTAS
-   Login (sin contraseña) + 2 pantallas (D14): Escanear · Estadísticas.
-   Sin Sesiones/Admin — la sesión activa y el roster se gestionan a mano
-   en la hoja (D15). Réplica visual de ScanView.swift / DashboardView.swift.
+   2 pantallas (D14/D28): Escanear · Estadísticas. Sin login ni roster de
+   staff (D28) — no importa quién escanea. Sin Sesiones/Admin — la sesión
+   activa se gestiona a mano en la hoja (D15). Réplica visual de
+   ScanView.swift / DashboardView.swift.
    ============================================================ */
 
 const Views = (() => {
   const $ = (sel) => document.querySelector(sel);
   const view = () => $('#view');
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-  const iniciales = (n) => n.split(' ').map((x) => x[0]).slice(0, 2).join('').toUpperCase();
 
   // Iconos inline estilo SF Symbols
   const ICO = {
@@ -31,30 +31,6 @@ const Views = (() => {
     else if (r.synced) toast(`⇅ ${r.synced} check-ins sincronizados`);
     else if (r.failed) toast(`⚠ ${r.failed} check-ins no se pudieron registrar — revisa la hoja`, true);
     else toast('Nada que sincronizar');
-  }
-
-  /* ============================================================
-     LOGIN — sin contraseña, lista fija en el código (ver js/store.js)
-     ============================================================ */
-  function vLogin() {
-    view().innerHTML = `
-      <div class="login-wrap">
-        <div class="login-logo">♗</div>
-        <h1>STAFF</h1>
-        <p class="login-sub">Curso de Protocolo<br>¿Quién escanea?</p>
-        ${Store.staff().map((nombre) => `
-          <button class="staff-item" data-login="${esc(nombre)}">
-            <span class="avatar">${iniciales(nombre)}</span>
-            <span class="meta">${esc(nombre)}</span>
-          </button>`).join('')}
-        <p class="muted" style="margin-top:12px">Solo identifica quién ha abierto la app en este móvil.</p>
-      </div>`;
-    view().querySelectorAll('[data-login]').forEach((b) =>
-      b.addEventListener('click', () => {
-        const nombre = Store.login(b.dataset.login);
-        if (nombre) { toast(`Hola, ${nombre}`); App.go('escanear'); }
-      })
-    );
   }
 
   /* ============================================================
@@ -272,5 +248,5 @@ const Views = (() => {
     pollTimer = setInterval(cargar, 7000);
   }
 
-  return { vLogin, vEscanear, vEstadisticas, toast, toastSync, pararPolling, cerrarCamara, cerrarSheet, quitarResultado, quitarCargando };
+  return { vEscanear, vEstadisticas, toast, toastSync, pararPolling, cerrarCamara, cerrarSheet, quitarResultado, quitarCargando };
 })();
