@@ -222,18 +222,24 @@ const Views = (() => {
      cambios en vivo (ver docs/FLOWS.md §3)
      ============================================================ */
   let pollTimer = null;
-  function pararPolling() { if (pollTimer) { clearInterval(pollTimer); pollTimer = null; } }
+  let pollEnVuelo = false;
+  function pararPolling() { if (pollTimer) { clearInterval(pollTimer); pollTimer = null; } pollEnVuelo = false; }
 
   async function vEstadisticas() {
     pararPolling();
     view().innerHTML = `
       <div class="title-kicker">Estadísticas</div>
       <div class="big-title" style="margin-bottom:20px">En vivo</div>
-      <div id="stats-body"><p class="muted">Cargando…</p></div>`;
+      <div id="stats-body"><p class="muted">Cargando… (Apps Script puede tardar unos segundos)</p></div>`;
 
     const cargar = async () => {
+      // Apps Script puede tardar más que los 7s del intervalo (visto hasta
+      // 6-12s en real) — sin esta guarda, cada tick lanzaba una petición
+      // nueva encima de la anterior sin terminar, y se amontonaban.
+      if (pollEnVuelo) return;
+      pollEnVuelo = true;
       const body = $('#stats-body');
-      if (!body) return; // ya no estamos en esta vista
+      if (!body) { pollEnVuelo = false; return; } // ya no estamos en esta vista
       try {
         const s = await Store.stats();
         const tasa = Number(s.tasa) || 0;
@@ -257,6 +263,8 @@ const Views = (() => {
           </div>`;
       } catch (e) {
         body.innerHTML = `<p class="muted">No se pudo conectar con la hoja. Reintentando…</p>`;
+      } finally {
+        pollEnVuelo = false;
       }
     };
 
