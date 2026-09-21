@@ -1,9 +1,10 @@
 /* ============================================================
    Staff AJapp — VISTAS
-   2 pantallas (D14/D28): Escanear · Estadísticas. Sin login ni roster de
-   staff (D28) — no importa quién escanea. Sin Sesiones/Admin — la sesión
-   activa se gestiona a mano en la hoja (D15). Réplica visual de
-   ScanView.swift / DashboardView.swift.
+   3 pantallas (D14/D28/D31): Escanear · Estadísticas · Horarios. Sin
+   login ni roster de staff (D28) — no importa quién escanea. Sin
+   Sesiones/Admin — la sesión activa y los horarios se gestionan a mano
+   en la hoja (D15/D31). Réplica visual de ScanView.swift /
+   DashboardView.swift.
    ============================================================ */
 
 const Views = (() => {
@@ -14,7 +15,8 @@ const Views = (() => {
   // Iconos inline estilo SF Symbols
   const ICO = {
     qr: `<svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8V5a2 2 0 0 1 2-2h3M16 3h3a2 2 0 0 1 2 2v3M21 16v3a2 2 0 0 1-2 2h-3M8 21H5a2 2 0 0 1-2-2v-3"/><rect x="7.5" y="7.5" width="3.4" height="3.4" rx="0.6"/><rect x="13.1" y="7.5" width="3.4" height="3.4" rx="0.6"/><rect x="7.5" y="13.1" width="3.4" height="3.4" rx="0.6"/><path d="M13.5 13.5h1.4M15.8 15.8h.7M13.5 16.2v-1.2"/></svg>`,
-    keyboard: `<svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round"><rect x="2.5" y="6.5" width="19" height="11" rx="2"/><path d="M6 10h.01M9.5 10h.01M13 10h.01M16.5 10h.01M6 13.5h.01M9.5 13.5h.01M13 13.5h.01M16.5 13.5h.01M8 16h8" stroke-width="2"/></svg>`
+    keyboard: `<svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round"><rect x="2.5" y="6.5" width="19" height="11" rx="2"/><path d="M6 10h.01M9.5 10h.01M13 10h.01M16.5 10h.01M6 13.5h.01M9.5 13.5h.01M13 13.5h.01M16.5 13.5h.01M8 16h8" stroke-width="2"/></svg>`,
+    chevron: `<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>`
   };
 
   function toast(msg, isErr) {
@@ -264,5 +266,70 @@ const Views = (() => {
     pollTimer = setInterval(cargar, 7000);
   }
 
-  return { vEscanear, vEstadisticas, toastSync, pararPolling, cerrarCamara, cerrarSheet, quitarResultado, quitarCargando };
+  /* ============================================================
+     HORARIOS — horarios del equipo, pestaña "Horarios" de la hoja (D31).
+     Se editan cambiando celdas ahí, no aquí (mismo criterio que
+     Config!B2 para la sesión activa). No hace polling como Estadísticas
+     -- no cambia mientras alguien está mirando la app -- pero sí usa el
+     mismo patrón de caché para pintar algo al instante.
+     ============================================================ */
+  function pintarHorarios(data, esCache) {
+    const dias = (data && data.dias) || [];
+    if (!dias.length) {
+      return `<p class="muted">Todavía no hay horarios cargados en la hoja.</p>`;
+    }
+    return `
+      ${esCache ? '<p class="muted" style="margin-bottom:10px">Último dato conocido — actualizando…</p>' : ''}
+      ${dias.map((d, i) => `
+        <div class="horario-day${i === 0 ? ' open' : ''}">
+          <button class="horario-day-head" data-idx="${i}">
+            <span>${esc(d.dia)}</span>
+            ${ICO.chevron}
+          </button>
+          <div class="horario-day-body">
+            ${d.franjas.map((f) => `
+              <div class="horario-item">
+                <div class="horario-hora">${esc(f.hora)}</div>
+                <div class="horario-info">
+                  <div class="horario-actividad">${esc(f.actividad)}</div>
+                  ${f.notas ? `<div class="horario-notas">${esc(f.notas)}</div>` : ''}
+                </div>
+              </div>`).join('')}
+          </div>
+        </div>`).join('')}`;
+  }
+
+  function bindHorarioToggles() {
+    document.querySelectorAll('.horario-day-head').forEach((btn) => {
+      btn.addEventListener('click', () => btn.closest('.horario-day').classList.toggle('open'));
+    });
+  }
+
+  async function vHorarios() {
+    const cache = Store.cachedHorarios();
+    view().innerHTML = `
+      <div class="horarios-screen">
+        <div class="horarios-header">
+          <div class="title-kicker">Horarios</div>
+          <div class="big-title">Equipo</div>
+        </div>
+        <div id="horarios-body" class="horarios-body">${cache ? pintarHorarios(cache, true) : '<p class="muted">Cargando…</p>'}</div>
+      </div>`;
+    bindHorarioToggles();
+
+    try {
+      const data = await Store.horarios();
+      const body = $('#horarios-body');
+      if (!body) return; // ya no estamos en esta vista
+      body.innerHTML = pintarHorarios(data, false);
+      bindHorarioToggles();
+    } catch (e) {
+      if (!Store.cachedHorarios()) {
+        const body = $('#horarios-body');
+        if (body) body.innerHTML = `<p class="muted">No se pudo conectar con la hoja.</p>`;
+      }
+    }
+  }
+
+  return { vEscanear, vEstadisticas, vHorarios, toastSync, pararPolling, cerrarCamara, cerrarSheet, quitarResultado, quitarCargando };
 })();

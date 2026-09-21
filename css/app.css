@@ -3,7 +3,7 @@
    Portado de Components/Theme.swift:
      background #0B0B0B · card #1A1A1A · gold #C6A75E
      tab bar #111111 · success green · warning orange · error red
-   2 pantallas, sin login: Escanear · Estadísticas.
+   3 pantallas, sin login: Escanear · Estadísticas · Horarios (D31).
    ============================================================ */
 :root {
   --background: #0B0B0B;
@@ -239,6 +239,36 @@ label { font-size: 12px; color: var(--text-secondary); display: block; margin-bo
 .progress > div { height: 100%; background: var(--gold); border-radius: 2px; transition: width 0.4s ease; }
 
 .muted { color: var(--text-secondary); font-size: 13px; }
+
+/* ============================================================
+   HORARIOS — horarios del equipo, desplegable por día (D31).
+   Única pantalla con contenido que puede no caber en el alto fijo del
+   móvil (varios días x varias franjas) -- a diferencia del resto de la
+   app, aquí SÍ se deja hacer scroll, pero solo dentro de la lista: la
+   cabecera y el marco general (topbar/tabbar) se quedan fijos igual que
+   en las otras 2 pantallas.
+   ============================================================ */
+.horarios-screen { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.horarios-header { flex: none; margin-bottom: 16px; }
+.horarios-body { flex: 1; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+
+.horario-day {
+  border: 1px solid rgba(198,167,94,0.15); border-radius: var(--radius-card);
+  margin-bottom: 12px; overflow: hidden; background: var(--card);
+}
+.horario-day-head {
+  width: 100%; display: flex; align-items: center; justify-content: space-between;
+  background: transparent; padding: 16px; font-weight: 700; font-size: 16px; color: var(--text-primary);
+}
+.horario-day-head svg { width: 18px; height: 18px; stroke: var(--gold); flex: none; transition: transform 0.2s ease; }
+.horario-day.open .horario-day-head svg { transform: rotate(180deg); }
+.horario-day-body { max-height: 0; overflow: hidden; transition: max-height 0.25s ease; }
+.horario-day.open .horario-day-body { max-height: 2000px; }
+.horario-item { display: flex; gap: 14px; padding: 12px 16px; border-top: 1px solid rgba(198,167,94,0.1); }
+.horario-item:first-child { border-top: none; }
+.horario-hora { flex: none; width: 92px; font-size: 13px; font-weight: 600; color: var(--gold); }
+.horario-actividad { font-size: 15px; font-weight: 600; }
+.horario-notas { font-size: 13px; color: var(--text-secondary); margin-top: 2px; }
 
 /* ---- tab bar (réplica UITabBar #111111) ---- */
 #tabbar {

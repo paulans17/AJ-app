@@ -1,5 +1,5 @@
 /**
- * Web App de SOLO LECTURA para la pantalla Estadísticas.
+ * Web App de SOLO LECTURA para las pantallas Estadísticas y Horarios.
  *
  * Proyecto de Apps Script SEPARADO del check-in (apps-script/Code.gs no
  * se toca — D21). No comparte deploy ni URL con él. Se crea como un
@@ -12,11 +12,20 @@
  *    carpeta) como el manifest del proyecto.
  * 3. Implementar → Nueva implementación → Aplicación web → ejecutar
  *    como "Yo", acceso "Cualquier usuario" → esa URL .../exec es la que
- *    usa la PWA solo para la pantalla Estadísticas (distinta de la URL
- *    de check-in).
+ *    usa la PWA para Estadísticas y Horarios (distinta de la URL de
+ *    check-in). Si ya tenías este proyecto desplegado (D22), solo hace
+ *    falta pegar la versión nueva del archivo y crear una nueva versión
+ *    de la implementación existente (Implementar → Gestionar
+ *    implementaciones → lápiz → Nueva versión) — la URL no cambia.
  *
  * Ejemplo: https://script.google.com/macros/s/ID_DISTINTO/exec
- * Devuelve JSON: {"session": "...", "total": 99, "registrados": 12, "tasa": 12.1}
+ * Por defecto (sin parámetros) devuelve JSON de Estadísticas:
+ *   {"session": "...", "total": 99, "registrados": 12, "tasa": 12.1}
+ * Con ?tipo=horarios (D31) devuelve JSON de Horarios, agrupado por día
+ * en el mismo orden en que aparecen las filas en la hoja:
+ *   {"dias": [{"dia": "Jueves 25", "franjas": [
+ *     {"hora": "09:00–10:30", "actividad": "Recepción", "notas": "..."}
+ *   ]}]}
  */
 
 const SPREADSHEET_ID = '1YDADLLWwA92Gm-_WYPYY4qGxTt5Wx-RIjM7Ju8z9FHE'; // MIEMBROS CURSO PROTOCOLO XXI — cambiar si se usa otra copia
@@ -24,9 +33,14 @@ const SHEET_ASISTENTES = 'asistentes';
 const SHEET_ASISTENCIAS = 'asistencias';
 const SHEET_CONFIG = 'Config';
 const CELL_CURRENT_SESSION = 'B2';
+const SHEET_HORARIOS = 'Horarios';
 
 function doGet(e) {
   const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+
+  if (e && e.parameter && e.parameter.tipo === 'horarios') {
+    return jsonOut(getHorarios(ss));
+  }
 
   const cfg = ss.getSheetByName(SHEET_CONFIG);
   const session = cfg ? cfg.getRange(CELL_CURRENT_SESSION).getDisplayValue().trim() : '';
@@ -47,7 +61,37 @@ function doGet(e) {
 
   const tasa = total > 0 ? Math.round((registrados / total) * 1000) / 10 : 0;
 
-  const payload = { session, total, registrados, tasa };
+  return jsonOut({ session, total, registrados, tasa });
+}
+
+/** Lee la pestaña Horarios (Día/Hora/Actividad/Notas) y agrupa filas
+ * consecutivas del mismo día — el orden de la hoja es el orden de salida,
+ * no se reordena nada (D31, mismo criterio que Config!B2: edita celdas,
+ * no hace falta tocar código). */
+function getHorarios(ss) {
+  const sh = ss.getSheetByName(SHEET_HORARIOS);
+  const last = sh ? sh.getLastRow() : 0;
+  if (!sh || last < 2) return { dias: [] };
+
+  const filas = sh.getRange(2, 1, last - 1, 4).getDisplayValues();
+  const dias = [];
+  let actual = null;
+  filas.forEach((r) => {
+    const dia = String(r[0]).trim();
+    const hora = String(r[1]).trim();
+    const actividad = String(r[2]).trim();
+    const notas = String(r[3]).trim();
+    if (!dia && !hora && !actividad) return; // fila vacía, se ignora
+    if (!actual || actual.dia !== dia) {
+      actual = { dia, franjas: [] };
+      dias.push(actual);
+    }
+    actual.franjas.push({ hora, actividad, notas });
+  });
+  return { dias };
+}
+
+function jsonOut(payload) {
   return ContentService
     .createTextOutput(JSON.stringify(payload))
     .setMimeType(ContentService.MimeType.JSON);
