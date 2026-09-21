@@ -401,6 +401,35 @@ código muerto: `js/demo-data.js` ya estaba borrado (limpieza de
 datos ficticios en el repo. La única fuente de datos real es la hoja de
 cálculo — tal como pidió Pau explícitamente.
 
+**D31. Nueva pantalla Horarios (3ª pestaña) — horarios del equipo,
+pestaña `Horarios` de la misma hoja, leída por el mismo Web App de
+solo lectura de Estadísticas (`apps-script/stats-readonly/Code.gs`).**
+Pau pide un sitio para que todo el equipo tenga a mano los horarios,
+que se pueda actualizar sin tocar código ni redistribuir la app, y en
+desplegable por día en vez de un bloque corrido de texto. Se reutiliza
+el mismo proyecto de Apps Script de Estadísticas (D22) en vez de crear
+un tercero: `doGet` ahora distingue por `?tipo=horarios` (sin ese
+parámetro, sigue devolviendo Estadísticas tal cual, sin cambios de
+comportamiento para lo que ya había). La hoja gana una pestaña
+`Horarios` con columnas Día/Hora/Actividad/Notas — se edita ahí
+directamente, mismo criterio que `Config!B2` para la sesión activa.
+Es la única pantalla con contenido que puede no caber en el alto fijo
+del móvil (varios días, cada uno con varias franjas), así que rompe a
+propósito la regla de "sin scroll" de D14/D18: el marco general
+(topbar/tabbar) sigue fijo, pero la lista de horarios sí puede
+desplazarse internamente si no cabe entera. Mismo patrón de caché en
+`localStorage` que Estadísticas (D22) para pintar el último dato
+conocido al instante.
+
+**Pendiente de que Pau lo active de verdad:** el `Code.gs` de este repo
+ya tiene el código nuevo, pero el proyecto de Apps Script REAL de Pau
+en script.google.com todavía tiene la versión anterior (D22) — hay que
+pegar el archivo actualizado ahí y crear una nueva versión de la
+implementación existente (la URL no cambia). Hasta que eso pase, la
+pantalla Horarios se ve vacía ("Todavía no hay horarios cargados en la
+hoja") en vez de dar error, porque el JSON viejo no trae el campo
+`dias` — degradación intencionada, no un fallo.
+
 ## Pendiente de decidir (no bloqueante para empezar)
 
 - Nombre definitivo del proyecto Firebase nuevo (propuesta en

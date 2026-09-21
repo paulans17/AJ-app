@@ -41,3 +41,21 @@ Números sin ceros a la izquierda, y la pestaña `tabla` es un pivote de
 solo lectura que la app no necesita (ver `docs/SHEET_SCHEMA.md`) — las
 dos dudas pendientes quedan resueltas, nada bloqueante ahora mismo.
 
+## 1. Pendiente: activar Horarios (D31)
+
+La pantalla nueva ya está en el código (`js/views.js`, ruta `horarios`),
+pero necesita dos cosas que solo puede hacer Pau, fuera de este repo:
+
+- [ ] Crear la pestaña `Horarios` en la hoja real, con columnas
+      Día/Hora/Actividad/Notas (ver `docs/SHEET_SCHEMA.md`) y rellenarla
+      con los horarios del equipo.
+- [ ] Pegar la versión actualizada de `apps-script/stats-readonly/Code.gs`
+      en el proyecto de Apps Script ya desplegado (script.google.com →
+      abrir el proyecto de Estadísticas → reemplazar `Code.gs` →
+      Implementar → Gestionar implementaciones → lápiz en la
+      implementación activa → Nueva versión → Implementar). La URL no
+      cambia, así que no hace falta tocar `docs/DEPLOY_URLS.md`.
+
+Hasta que se haga lo segundo, la pantalla Horarios se ve vacía sin dar
+error — el script viejo sigue respondiendo lo mismo de siempre.
+

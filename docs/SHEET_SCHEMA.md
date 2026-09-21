@@ -9,7 +9,8 @@
 Sustituye al esquema de Firestore original, descartado en el pivote D13
 (ver histórico en `docs/DECISIONS.md`). Hoja real:
 ["MIEMBROS CURSO PROTOCOLO XXI"](https://docs.google.com/spreadsheets/d/1YDADLLWwA92Gm-_WYPYY4qGxTt5Wx-RIjM7Ju8z9FHE/edit?usp=sharing),
-pestañas `asistentes`, `Config`, `asistencias`, `tabla`. Se usa **esta
+pestañas `asistentes`, `Config`, `asistencias`, `tabla`, `Horarios` (D31).
+Se usa **esta
 misma hoja, tal cual, para las pruebas** — no una copia ni una hoja nueva
 para la XXII (decisión de Pau, 2026-07-15).
 
@@ -50,6 +51,22 @@ usa ni lo necesita**: Estadísticas ya calcula el recuento en vivo de la
 sesión activa directamente desde `asistencias` + `asistentes` (ver
 "Estadísticas — resuelto" más abajo), que es toda la información que
 hace falta para esa pantalla.
+
+### `Horarios` (D31)
+Fila 1 = cabecera. Desde la fila 2: una fila por franja horaria. Se edita
+a mano en la propia hoja — no hay pantalla en la app para esto, igual
+que `Config!B2`.
+
+| Columna | Contenido |
+|---|---|
+| A — Día | Texto libre (ej. "Jueves 25"). Las filas del mismo día deben ir seguidas y escribir el texto exactamente igual — la app agrupa por este valor tal cual, sin normalizar. |
+| B — Hora | Texto libre (ej. "09:00–10:30") |
+| C — Actividad | Texto libre |
+| D — Notas | Texto libre, puede quedar vacío |
+
+El orden de salida es el orden de las filas en la hoja — no se reordena
+por hora ni por nada, igual que el resto de este documento no reordena
+nada por iniciativa propia.
 
 ## El endpoint — exactamente como está, sin extensiones
 
@@ -92,6 +109,13 @@ Devuelve JSON: `{"session": "...", "total": N, "registrados": N, "tasa": N}`.
 filas de `asistencias` cuya columna B coincide con la sesión activa
 (`Config!B2`). La PWA hace *polling* a esta URL cada 5-10s mientras la
 pantalla Estadísticas está abierta.
+
+**Horarios (D31):** el mismo `doGet` de este proyecto, llamado con
+`?tipo=horarios`, devuelve en cambio
+`{"dias": [{"dia": "...", "franjas": [{"hora": "...", "actividad": "...", "notas": "..."}]}]}`,
+leyendo la pestaña `Horarios` de arriba. Sin ese parámetro, el
+comportamiento de Estadísticas no cambia. No hace polling — se pide una
+vez al abrir la pantalla.
 
 ## Qué NO se hace (revertido en D21)
 

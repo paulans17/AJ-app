@@ -33,7 +33,7 @@ portátil en vez de `localhost`.
 > La cámara solo funciona en `localhost` o HTTPS (requisito de los
 > navegadores). Sin cámara, usa el botón **"Registro Manual por Número"**.
 
-## Las 2 pantallas
+## Las 3 pantallas
 
 1. **Escanear** (siempre, es lo primero que se ve al abrir la app) —
    escanea el QR de la acreditación o introduce el número a mano. La
@@ -46,14 +46,19 @@ portátil en vez de `localhost`.
 2. **Estadísticas** — sesión en curso, total registrados y tasa de
    asistencia, actualizado por *polling* cada pocos segundos contra un
    segundo Web App de solo lectura.
+3. **Horarios** (D31) — horarios del equipo, agrupados por día en un
+   desplegable. Se editan cambiando celdas en la pestaña `Horarios` de la
+   hoja, igual que la sesión activa en `Config!B2` — no hay pantalla para
+   editarlos en la app.
 
 ## Backend: Google Sheets + Apps Script, sin servidor propio
 
 - **Check-in**: `apps-script/Code.gs`, el script real de Pau, sin ninguna
   extensión (ver `docs/DECISIONS.md` D21) — **no se toca sin permiso
   explícito**.
-- **Estadísticas**: `apps-script/stats-readonly/`, proyecto standalone
-  aparte, solo lectura.
+- **Estadísticas y Horarios**: `apps-script/stats-readonly/`, proyecto
+  standalone aparte, solo lectura — un único `doGet` que distingue por el
+  parámetro `?tipo=horarios` (D31).
 - El roster de asistentes (`asistentes` en la hoja) lo gestiona Pau con
   su Excel/scripts de siempre, fuera de este repo (D20). Es la **única**
   base de datos de la app — no hay ningún dato de ejemplo ni mock en el

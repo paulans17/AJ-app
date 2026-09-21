@@ -18,10 +18,11 @@ a una URL de Apps Script con el número, la hoja de cálculo registra la
 asistencia. Ahora es una PWA para que la use todo el equipo (~20
 personas) a la vez desde sus móviles, no solo un Atajo personal.
 
-**La app tiene 2 pantallas, sin login ni ningún paso previo (D28):**
-**Escanear** y **Estadísticas**. No importa quién escanea — no hay
-roster de staff en ningún sitio. Activar la sesión en curso se hace
-editando una celda directamente en la hoja de cálculo, fuera de la app.
+**La app tiene 3 pantallas, sin login ni ningún paso previo (D28):**
+**Escanear**, **Estadísticas** y **Horarios** (D31). No importa quién
+escanea — no hay roster de staff en ningún sitio. Activar la sesión en
+curso y editar los horarios del equipo se hace editando celdas
+directamente en la hoja de cálculo, fuera de la app.
 
 ## Orden de lectura obligatorio
 
@@ -60,17 +61,18 @@ editando una celda directamente en la hoja de cálculo, fuera de la app.
   parsea el HTML de respuesta (el script real no devuelve JSON — busca
   "Ya estaba registrado", "no está en", "Config!B2 vacío", o "Registrado"
   limpio). `stats()` hace `fetch` a la URL del Web App de solo lectura
-  (JSON directo). Cola offline en `localStorage` (`getQueue`/`syncQueue`):
-  solo se quita un check-in de la cola si el servidor confirma `ok` o
-  `duplicado`, nunca en silencio.
-- `js/views.js` / `js/app.js` — Escanear (ruta por defecto) y
-  Estadísticas, sin ninguna pantalla de login. Overlay de carga bloqueante
-  mientras se resuelve un check-in (`#loading-cover`). Pantalla de
-  resultado verde/naranja/roja, autocierre a los 2s.
+  (JSON directo); `horarios()` hace `fetch` al mismo Web App con
+  `?tipo=horarios` (D31). Cola offline en `localStorage`
+  (`getQueue`/`syncQueue`): solo se quita un check-in de la cola si el
+  servidor confirma `ok` o `duplicado`, nunca en silencio.
+- `js/views.js` / `js/app.js` — Escanear (ruta por defecto), Estadísticas
+  y Horarios (D31), sin ninguna pantalla de login. Overlay de carga
+  bloqueante mientras se resuelve un check-in (`#loading-cover`).
+  Pantalla de resultado verde/naranja/roja, autocierre a los 2s.
 - `js/scanner.js` — `BarcodeDetector` nativo con fallback a `jsQR`
   (vendorizado en `js/vendor/`, no CDN — la URL de cdnjs para esa versión
   da 404, D26).
-- `css/app.css` — solo las reglas que usan las 2 pantallas reales; sin
+- `css/app.css` — solo las reglas que usan las 3 pantallas reales; sin
   restos de Login/Sesiones/Admin/modal/hero.
 - `icons/logo.png` — logo real de Pau (monograma "AJ"), fuente de
   `icons/icon-192.png`/`icon-512.png` (D29). No hay `icon.svg`.

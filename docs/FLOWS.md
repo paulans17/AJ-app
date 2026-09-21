@@ -83,7 +83,23 @@ flowchart TD
 (`apps-script/stats-readonly/`), distinta de la de check-in. No lleva
 parámetros — siempre devuelve el estado de la sesión activa actual.
 
-## 3. Activar/cerrar sesión (fuera de la app — D15)
+## 3. Horarios (mismo Web App que Estadísticas, con parámetro — D31)
+
+```mermaid
+flowchart TD
+    A[Abrir pantalla Horarios] --> B[Pintar último dato en caché, si hay]
+    B --> C[GET url-stats/exec?tipo=horarios]
+    C --> D[Pintar días agrupados, desplegable]
+    D --> E[Tocar un día para abrir/cerrar]
+```
+
+Sin polling — a diferencia de Estadísticas, los horarios no cambian
+mientras alguien tiene la app abierta, así que se piden solo una vez al
+entrar en la pantalla. Se edita cambiando celdas en la pestaña
+`Horarios` de la hoja (ver `docs/SHEET_SCHEMA.md`), igual que la sesión
+activa se edita en `Config!B2` (flujo 4, abajo).
+
+## 4. Activar/cerrar sesión (fuera de la app — D15)
 
 ```mermaid
 flowchart LR
@@ -96,7 +112,7 @@ No hay ninguna pantalla ni login especial para esto en la app — es
 exactamente como funcionaba con el Atajo de iPhone, solo que ahora varias
 personas leen el mismo `Config!B2` en vez de una sola.
 
-## 4. Inscripción / roster — fuera de alcance de este repo
+## 5. Inscripción / roster — fuera de alcance de este repo
 
 La construcción de la lista `asistentes` (números + nombres) y cualquier
 proceso de inscripción/registro con datos completos (DNI, menú, email...)

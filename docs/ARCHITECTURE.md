@@ -29,21 +29,22 @@ Excel/scripts que Pau ya usa; fuera de alcance de este repo, D20)
 │  ┌────────────┐ ┌────────┐ ┌─────────────┐   │
 │  │ asistentes │ │ Config │ │ asistencias │   │
 │  └────────────┘ └────────┘ └─────────────┘   │
-│  ┌───────┐                                    │
-│  │ tabla │  (informe, contenido por confirmar) │
-│  └───────┘                                    │
+│  ┌───────┐  ┌──────────┐                     │
+│  │ tabla │  │ Horarios │  (D31, equipo)       │
+│  └───────┘  └──────────┘                     │
 │                                               │
 │  Apps Script #1 (container-bound, Code.gs)    │
 │  GET .../exec?num=...  ← check-in, tal cual (D21) │
 │                                               │
 │  Apps Script #2 (standalone, stats-readonly/) │
 │  GET .../exec  ← solo lectura, stats (D22)    │
+│  GET .../exec?tipo=horarios ← horarios (D31)  │
 └──────────────────────▲────────────────────────┘
                         │ fetch (GET, sin headers custom)
                         │
 ┌───────────────────────┴───────────────────────┐
 │   Staff AJapp (PWA) — móvil de cualquier persona del equipo │
-│   Escanear (por defecto) ↔ Estadísticas, sin login   │
+│   Escanear (por defecto) ↔ Estadísticas ↔ Horarios, sin login │
 │   Cola local si no hay conexión, reintenta al volver │
 └─────────────────────────────────────────────────┘
 ```
@@ -145,7 +146,7 @@ staff-ajapp-pwa/
 ├── js/
 │   ├── store.js                 (capa de datos: fetch a los 2 Web Apps + cola offline)
 │   ├── scanner.js                (BarcodeDetector + fallback jsQR)
-│   ├── views.js                  (Escanear + Estadísticas, sin login)
+│   ├── views.js                  (Escanear + Estadísticas + Horarios, sin login)
 │   ├── app.js                    (arranque y navegación)
 │   └── vendor/jsQR.min.js        (vendorizado, ver Stack)
 ├── icons/                        (logo.png es la fuente; icon-192/512.png derivados)

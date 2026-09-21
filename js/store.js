@@ -1,11 +1,13 @@
 /* ============================================================
-   Staff AJapp — CAPA DE DATOS (D21/D22/D28)
+   Staff AJapp — CAPA DE DATOS (D21/D22/D28/D31)
    Dos Web Apps de Apps Script distintos, ninguno tocado por este repo:
    - CHECKIN_URL -> apps-script/Code.gs, TAL CUAL (script real de Pau,
      "NO-PIN vFinal"). Responde HTML de una línea, no JSON — hay que
      parsear el texto (D21).
    - STATS_URL -> apps-script/stats-readonly/Code.gs, proyecto standalone
-     aparte, solo lectura. Responde JSON (D22).
+     aparte, solo lectura. Responde JSON: sin parámetros, Estadísticas
+     (D22); con ?tipo=horarios, los horarios del equipo, pestaña Horarios
+     de la misma hoja (D31) — se edita ahí, no aquí.
    Sin login ni roster de staff (D28) — no importa quién escanea. La
    única "base de datos" es la hoja de Google Sheets real; no hay mock
    ni datos de demo en ningún sitio de este archivo.
@@ -20,6 +22,7 @@ const Store = (() => {
 
   const KEY_QUEUE = 'ajapp-cola';
   const KEY_STATS_CACHE = 'ajapp-stats-cache';
+  const KEY_HORARIOS_CACHE = 'ajapp-horarios-cache';
   const listeners = [];
   const onChange = (fn) => listeners.push(fn);
   const notify = () => listeners.forEach((fn) => fn());
@@ -154,9 +157,23 @@ const Store = (() => {
     return data;
   }
 
+  /** Último resultado de horarios() guardado — mismo motivo que cachedStats(). */
+  function cachedHorarios() {
+    try { return JSON.parse(localStorage.getItem(KEY_HORARIOS_CACHE)); } catch (e) { return null; }
+  }
+
+  /** Horarios del equipo, pestaña Horarios de la hoja (D31). */
+  async function horarios() {
+    const res = await fetch(`${STATS_URL}?tipo=horarios`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    try { localStorage.setItem(KEY_HORARIOS_CACHE, JSON.stringify(data)); } catch (e) { /* localStorage lleno o bloqueado, no es crítico */ }
+    return data;
+  }
+
   return {
     onChange,
-    checkin, syncQueue, stats, cachedStats,
+    checkin, syncQueue, stats, cachedStats, horarios, cachedHorarios,
     getQueue, isOnline
   };
 })();
