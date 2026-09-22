@@ -52,7 +52,7 @@ sesión activa directamente desde `asistencias` + `asistentes` (ver
 "Estadísticas — resuelto" más abajo), que es toda la información que
 hace falta para esa pantalla.
 
-### `Horarios` (D31)
+### `Horarios` (D31/D32)
 Fila 1 = cabecera. Desde la fila 2: una fila por franja horaria. Se edita
 a mano en la propia hoja — no hay pantalla en la app para esto, igual
 que `Config!B2`.
@@ -63,6 +63,7 @@ que `Config!B2`.
 | B — Hora | Texto libre (ej. "09:00–10:30") |
 | C — Actividad | Texto libre |
 | D — Notas | Texto libre, puede quedar vacío |
+| E — Responsable | Texto libre — nombre o departamento (D32), puede quedar vacío |
 
 El orden de salida es el orden de las filas en la hoja — no se reordena
 por hora ni por nada, igual que el resto de este documento no reordena
@@ -110,9 +111,9 @@ filas de `asistencias` cuya columna B coincide con la sesión activa
 (`Config!B2`). La PWA hace *polling* a esta URL cada 5-10s mientras la
 pantalla Estadísticas está abierta.
 
-**Horarios (D31):** el mismo `doGet` de este proyecto, llamado con
+**Horarios (D31/D32):** el mismo `doGet` de este proyecto, llamado con
 `?tipo=horarios`, devuelve en cambio
-`{"dias": [{"dia": "...", "franjas": [{"hora": "...", "actividad": "...", "notas": "..."}]}]}`,
+`{"dias": [{"dia": "...", "franjas": [{"hora": "...", "actividad": "...", "notas": "...", "responsable": "..."}]}]}`,
 leyendo la pestaña `Horarios` de arriba. Sin ese parámetro, el
 comportamiento de Estadísticas no cambia. No hace polling — se pide una
 vez al abrir la pantalla.

@@ -21,10 +21,10 @@
  * Ejemplo: https://script.google.com/macros/s/ID_DISTINTO/exec
  * Por defecto (sin parámetros) devuelve JSON de Estadísticas:
  *   {"session": "...", "total": 99, "registrados": 12, "tasa": 12.1}
- * Con ?tipo=horarios (D31) devuelve JSON de Horarios, agrupado por día
- * en el mismo orden en que aparecen las filas en la hoja:
+ * Con ?tipo=horarios (D31/D32) devuelve JSON de Horarios, agrupado por
+ * día en el mismo orden en que aparecen las filas en la hoja:
  *   {"dias": [{"dia": "Jueves 25", "franjas": [
- *     {"hora": "09:00–10:30", "actividad": "Recepción", "notas": "..."}
+ *     {"hora": "09:00–10:30", "actividad": "Recepción", "notas": "...", "responsable": "..."}
  *   ]}]}
  */
 
@@ -64,16 +64,16 @@ function doGet(e) {
   return jsonOut({ session, total, registrados, tasa });
 }
 
-/** Lee la pestaña Horarios (Día/Hora/Actividad/Notas) y agrupa filas
- * consecutivas del mismo día — el orden de la hoja es el orden de salida,
- * no se reordena nada (D31, mismo criterio que Config!B2: edita celdas,
- * no hace falta tocar código). */
+/** Lee la pestaña Horarios (Día/Hora/Actividad/Notas/Responsable) y
+ * agrupa filas consecutivas del mismo día — el orden de la hoja es el
+ * orden de salida, no se reordena nada (D31/D32, mismo criterio que
+ * Config!B2: edita celdas, no hace falta tocar código). */
 function getHorarios(ss) {
   const sh = ss.getSheetByName(SHEET_HORARIOS);
   const last = sh ? sh.getLastRow() : 0;
   if (!sh || last < 2) return { dias: [] };
 
-  const filas = sh.getRange(2, 1, last - 1, 4).getDisplayValues();
+  const filas = sh.getRange(2, 1, last - 1, 5).getDisplayValues();
   const dias = [];
   let actual = null;
   filas.forEach((r) => {
@@ -81,12 +81,13 @@ function getHorarios(ss) {
     const hora = String(r[1]).trim();
     const actividad = String(r[2]).trim();
     const notas = String(r[3]).trim();
+    const responsable = String(r[4]).trim();
     if (!dia && !hora && !actividad) return; // fila vacía, se ignora
     if (!actual || actual.dia !== dia) {
       actual = { dia, franjas: [] };
       dias.push(actual);
     }
-    actual.franjas.push({ hora, actividad, notas });
+    actual.franjas.push({ hora, actividad, notas, responsable });
   });
   return { dias };
 }

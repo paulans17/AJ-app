@@ -430,6 +430,15 @@ pantalla Horarios se ve vacía ("Todavía no hay horarios cargados en la
 hoja") en vez de dar error, porque el JSON viejo no trae el campo
 `dias` — degradación intencionada, no un fallo.
 
+**D32. Horarios gana una 5ª columna, Responsable.** Pau pide poder poner
+un nombre o un departamento por franja. Misma mecánica que el resto de
+columnas de `Horarios` (D31): se edita en la hoja, sin pantalla en la
+app para esto. Se añade como columna E (después de Notas) para no
+reordenar lo que Pau ya hubiera rellenado en A-D. Como es opcional, si
+se deja vacía simplemente no se pinta esa línea en la app. Esto exige
+volver a pegar `apps-script/stats-readonly/Code.gs` en el proyecto real
+y redesplegar — mismo procedimiento que D31, no cambia la URL.
+
 ## Pendiente de decidir (no bloqueante para empezar)
 
 - Nombre definitivo del proyecto Firebase nuevo (propuesta en

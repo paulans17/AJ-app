@@ -292,6 +292,7 @@ const Views = (() => {
                 <div class="horario-hora">${esc(f.hora)}</div>
                 <div class="horario-info">
                   <div class="horario-actividad">${esc(f.actividad)}</div>
+                  ${f.responsable ? `<div class="horario-responsable">${esc(f.responsable)}</div>` : ''}
                   ${f.notas ? `<div class="horario-notas">${esc(f.notas)}</div>` : ''}
                 </div>
               </div>`).join('')}
