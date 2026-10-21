@@ -112,7 +112,23 @@ No hay ninguna pantalla ni login especial para esto en la app — es
 exactamente como funcionaba con el Atajo de iPhone, solo que ahora varias
 personas leen el mismo `Config!B2` en vez de una sola.
 
-## 5. Inscripción / roster — fuera de alcance de este repo
+## 5. Avisos push (D33)
+
+```mermaid
+flowchart TD
+    A[Pau edita Config!B2<br/>o marca la casilla Config!B3] --> B[Trigger onEdit del script avisador]
+    B --> C{¿Cambio real?}
+    C -- no --> X[No hace nada]
+    C -- sí --> D[POST api.onesignal.com/notifications]
+    D --> E[Notificación en los móviles con avisos activados]
+    E --> F[Tocar abre la app en #escanear o #horarios]
+```
+
+El script avisador (`apps-script/notificador/`) no tiene URL pública y
+guarda la clave de OneSignal en sus propiedades. Cada persona activa los
+avisos una vez con la campana de la barra superior.
+
+## 6. Inscripción / roster — fuera de alcance de este repo
 
 La construcción de la lista `asistentes` (números + nombres) y cualquier
 proceso de inscripción/registro con datos completos (DNI, menú, email...)

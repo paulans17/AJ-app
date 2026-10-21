@@ -439,6 +439,39 @@ se deja vacía simplemente no se pinta esa línea en la app. Esto exige
 volver a pegar `apps-script/stats-readonly/Code.gs` en el proyecto real
 y redesplegar — mismo procedimiento que D31, no cambia la URL.
 
+**D33. Avisos push (notificaciones) al cambiar la sesión activa o los
+horarios, con OneSignal.** Pau quiere que al cambiar `Config!B2` el
+equipo reciba una notificación ("ya podéis pasar asistencia"), y lo mismo
+cuando se actualicen los horarios. Un aviso dentro de la app solo
+funciona con la app abierta, y no sirve con el móvil en el bolsillo; para
+push de verdad hace falta un servicio que gestione las suscripciones y el
+envío (Web Push exige firmas VAPID/ES256 y cifrado que Apps Script no trae
+de serie). Se elige OneSignal (plan gratuito, a confirmar al crear la
+cuenta) frente a montar un servidor propio (D13: sin backend propio).
+Decisiones de diseño, tomadas con Pau:
+- **Script avisador aparte** (`apps-script/notificador/`, tercer proyecto
+  standalone, SIN despliegue web ni URL pública, solo triggers). La clave
+  secreta de OneSignal vive solo en sus "Propiedades del script" — no en
+  el repo, no en el chat, y no en el Web App público de Estadísticas, que
+  sigue siendo estrictamente de solo lectura (D22). `apps-script/Code.gs`
+  (check-in) sigue intacto.
+- **Sesión:** trigger instalable `onEdit` sobre `Config!B2`; avisa si el
+  valor cambia de verdad (no si se vacía ni si se reelige el mismo).
+- **Horarios: aviso MANUAL con casilla** (`Config!B3`), no automático — con
+  una revisión automática saltarían avisos mientras se rellena la tabla.
+  Se marca la casilla, el script avisa y la desmarca.
+- Al tocar la notificación se abre la app en `#escanear` o `#horarios`.
+Limitaciones asumidas: en iPhone solo funciona con la app instalada en
+pantalla de inicio y iOS 16.4+, aceptando el permiso desde la propia app;
+el SDK de OneSignal es código de terceros dentro de la app (excepción a
+`script-src 'self'`, hay que ampliar la CSP a `cdn.onesignal.com` y su
+API); los triggers solo saltan con ediciones manuales en la hoja.
+**Estado:** fase 0 hecha (script avisador escrito y probado con simulación
+en local). Pendiente: Pau crea la cuenta/app en OneSignal y pasa el App ID
+(público); después, fase 1 (SDK + campana "Activar avisos" + `sw.js` + CSP)
+y prueba real en su iPhone. Lo de menciones con inicio de sesión queda
+aparcado para después de esto (reabriría D28).
+
 ## Pendiente de decidir (no bloqueante para empezar)
 
 - Nombre definitivo del proyecto Firebase nuevo (propuesta en

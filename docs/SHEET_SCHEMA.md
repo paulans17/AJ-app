@@ -27,7 +27,11 @@ persona acreditada.
 
 ### `Config`
 - **`B2`** = sesión activa en este momento (texto libre). Se edita a mano
-  en la propia hoja — no hay pantalla en la app para esto.
+  en la propia hoja — no hay pantalla en la app para esto. Al cambiarla
+  salta un aviso push al equipo (D33).
+- **`A3`/`B3`** = `AVISAR_HORARIOS` + casilla de verificación (D33). Al
+  marcarla, el script avisador manda el aviso "Horarios actualizados" y
+  la desmarca sola.
 
 ### `asistencias`
 Fila 1 = cabecera. Desde la fila 2: una fila por cada escaneo válido.

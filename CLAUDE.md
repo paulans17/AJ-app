@@ -53,6 +53,10 @@ directamente en la hoja de cálculo, fuera de la app.
 - `apps-script/stats-readonly/` — igual de intocable salvo petición
   explícita; es el proyecto de solo lectura para Estadísticas (D22).
 
+- `apps-script/notificador/` — tercer proyecto, solo triggers y sin URL
+  pública, para los avisos push (D33). La clave de OneSignal es secreta:
+  jamás en el repo ni en el chat. Mantenerlo separado de los otros dos.
+
 ## Estado actual del código (ya construido)
 
 - `js/store.js` — capa de datos, sin login ni mock/demo de ningún tipo
