@@ -469,8 +469,13 @@ API); los triggers solo saltan con ediciones manuales en la hoja.
 **Estado:** fase 0 hecha (script avisador escrito y probado con simulación
 en local). Pendiente: Pau crea la cuenta/app en OneSignal y pasa el App ID
 (público); después, fase 1 (SDK + campana "Activar avisos" + `sw.js` + CSP)
-y prueba real en su iPhone. Lo de menciones con inicio de sesión queda
-aparcado para después de esto (reabriría D28).
+y prueba real en su iPhone. Lo de menciones con inicio de sesión se
+aparcó, y después se descartó (D34).
+
+**D34. Se descartan definitivamente las menciones y el inicio de sesión.**
+Pau lo pensó mejor: para avisar a personas concretas ya está el grupo de
+WhatsApp del equipo, así que no se construye nada de login ni menciones.
+D28 (sin login ni roster de staff) sigue vigente, sin excepciones.
 
 ## Pendiente de decidir (no bloqueante para empezar)
 
