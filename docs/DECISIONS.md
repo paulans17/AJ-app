@@ -477,6 +477,23 @@ Pau lo pensó mejor: para avisar a personas concretas ya está el grupo de
 WhatsApp del equipo, así que no se construye nada de login ni menciones.
 D28 (sin login ni roster de staff) sigue vigente, sin excepciones.
 
+**D35. Arreglos de la cola offline (2026-10-22).** Pau probó con la
+sesión "SAMY IBERIA - INICIO" y al escanear el 1 salía "ya registrado,
+está en la cola". Causa: un check-in anterior del 1 había fallado por un
+fallo puntual de Apps Script (con el móvil "en línea") y se quedó en la
+cola; `checkin()` rechazaba cualquier número ya encolado sin preguntar al
+servidor, y la cola solo se reintentaba con el evento `online`, que no
+salta si nunca se pierde la red. Cambios: (1) con conexión, `checkin()`
+pregunta siempre al servidor y, si responde `ok`/`duplicado`, saca el
+número de la cola; el aviso de "ya está en la cola" queda solo para
+cuando no hay forma de preguntar; (2) la cola se reintenta al abrir la
+app, al volver a ella y cada 30 s mientras haya cola; (3) `syncQueue()`
+ya no corre dos veces a la vez ni reescribe la cola con una copia
+antigua (perdía los check-ins encolados mientras sincronizaba). Límite
+que sigue igual (D18/D21): un check-in encolado se registra en la sesión
+activa en el momento de sincronizar, no en la del escaneo, porque el
+script de check-in solo recibe el número.
+
 ## Pendiente de decidir (no bloqueante para empezar)
 
 - Nombre definitivo del proyecto Firebase nuevo (propuesta en
