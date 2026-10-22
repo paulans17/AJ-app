@@ -72,6 +72,18 @@ const Store = (() => {
     return { status, mensaje: texto };
   }
 
+  function encolar(num) {
+    const q = getQueue();
+    q.push({ num, ts: Date.now() });
+    setQueue(q);
+  }
+
+  function quitarDeCola(num) {
+    const q = getQueue();
+    const resto = q.filter((c) => c.num !== num);
+    if (resto.length !== q.length) setQueue(resto);
+  }
+
   /**
    * Registra un check-in. Devuelve {status, mensaje, num}.
    * status: ok | duplicado | no_encontrado | sin_sesion | offline_ok | error
@@ -80,25 +92,27 @@ const Store = (() => {
     const num = String(codigo).trim();
     if (!num) return { status: 'no_encontrado', mensaje: 'Código vacío', num };
 
-    if (getQueue().some((c) => c.num === num)) {
-      return { status: 'duplicado', mensaje: 'Ya está en la cola de este móvil, pendiente de sincronizar', num };
-    }
+    // Un número que ya espera en la cola solo bloquea mientras no haya forma
+    // de preguntar al servidor. Con conexión se pregunta siempre: si no, un
+    // check-in que quedó atascado (fallo puntual de Apps Script) daba
+    // "ya está en la cola" para siempre, incluso en otra sesión.
+    const enCola = getQueue().some((c) => c.num === num);
+    const avisoEnCola = { status: 'duplicado', mensaje: 'Ya está en la cola de este móvil, pendiente de sincronizar', num };
 
     if (!isOnline()) {
-      const q = getQueue();
-      q.push({ num, ts: Date.now() });
-      setQueue(q);
+      if (enCola) return avisoEnCola;
+      encolar(num);
       return { status: 'offline_ok', mensaje: 'Guardado sin conexión — se sincronizará', num };
     }
 
     try {
-      const html = await fetchCheckinHtml(num);
-      return { ...parseCheckinHtml(html), num };
+      const r = parseCheckinHtml(await fetchCheckinHtml(num));
+      if (r.status === 'ok' || r.status === 'duplicado') quitarDeCola(num);
+      return { ...r, num };
     } catch (e) {
       // Falla el fetch pese a isOnline() (CORS, timeout, Web App caído) -> a la cola
-      const q = getQueue();
-      q.push({ num, ts: Date.now() });
-      setQueue(q);
+      if (enCola) return avisoEnCola;
+      encolar(num);
       return { status: 'offline_ok', mensaje: 'No se pudo contactar con la hoja — guardado sin conexión', num };
     }
   }
@@ -117,28 +131,34 @@ const Store = (() => {
    * para no perder el check-in en silencio si p. ej. nadie ha activado
    * todavía la sesión en Config!B2.
    */
+  let sincronizando = false;
   async function syncQueue() {
-    if (!isOnline()) return { synced: 0, failed: 0, pending: getQueue().length };
-    const q = getQueue();
-    let synced = 0;
-    let failed = 0;
-    const restantes = [];
-    for (const item of q) {
-      try {
-        const html = await fetchCheckinHtml(item.num);
-        const r = parseCheckinHtml(html);
-        if (r.status === 'ok' || r.status === 'duplicado') {
-          synced++;
-        } else {
-          failed++;
-          restantes.push(item);
-        }
-      } catch (e) {
-        restantes.push(item);
+    if (sincronizando || !isOnline()) return { synced: 0, failed: 0, pending: getQueue().length };
+    sincronizando = true;
+    try {
+      let synced = 0;
+      let failed = 0;
+      const resueltos = new Set();
+      for (const item of getQueue()) {
+        try {
+          const r = parseCheckinHtml(await fetchCheckinHtml(item.num));
+          if (r.status === 'ok' || r.status === 'duplicado') {
+            synced++;
+            resueltos.add(item.num);
+          } else {
+            failed++;
+          }
+        } catch (e) { /* se queda en la cola, se reintenta */ }
       }
+      // Se quitan solo los resueltos de la cola ACTUAL: durante el bucle
+      // (varios segundos) pueden haberse encolado check-ins nuevos, y
+      // reescribir la cola con una copia antigua los perdería.
+      const pending = getQueue().filter((c) => !resueltos.has(c.num));
+      setQueue(pending);
+      return { synced, failed, pending: pending.length };
+    } finally {
+      sincronizando = false;
     }
-    setQueue(restantes);
-    return { synced, failed, pending: restantes.length };
   }
 
   /** Último resultado de stats() guardado, para pintar algo al instante

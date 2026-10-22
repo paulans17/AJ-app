@@ -50,6 +50,18 @@ const App = (() => {
     });
     window.addEventListener('offline', actualizarChips);
 
+    // 'online' solo salta al recuperar red; un fallo puntual de Apps Script con
+    // el móvil "en línea" dejaba el check-in en la cola para siempre. Se
+    // reintenta al abrir, al volver a la app y cada 30 s mientras haya cola.
+    const reintentarCola = async () => {
+      if (!Store.getQueue().length) return;
+      const r = await Store.syncQueue();
+      if (r.synced) Views.toastSync(r);
+    };
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) reintentarCola(); });
+    setInterval(reintentarCola, 30000);
+    reintentarCola();
+
     Store.onChange(actualizarChips);
 
     const hash = location.hash.replace('#', '');
