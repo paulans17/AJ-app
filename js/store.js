@@ -23,6 +23,7 @@ const Store = (() => {
   const KEY_QUEUE = 'ajapp-cola';
   const KEY_STATS_CACHE = 'ajapp-stats-cache';
   const KEY_HORARIOS_CACHE = 'ajapp-horarios-cache';
+  const KEY_HORARIOS_QUIEN = 'ajapp-horarios-quien';
   const listeners = [];
   const onChange = (fn) => listeners.push(fn);
   const notify = () => listeners.forEach((fn) => fn());
@@ -191,9 +192,21 @@ const Store = (() => {
     return data;
   }
 
+  /** Quién es esta persona en Horarios ("Soy Maialen"), por móvil (D36). */
+  function getHorariosQuien() {
+    try { return localStorage.getItem(KEY_HORARIOS_QUIEN) || ''; } catch (e) { return ''; }
+  }
+  function setHorariosQuien(nombre) {
+    try {
+      if (nombre) localStorage.setItem(KEY_HORARIOS_QUIEN, nombre);
+      else localStorage.removeItem(KEY_HORARIOS_QUIEN);
+    } catch (e) { /* localStorage bloqueado: solo se pierde la preferencia */ }
+  }
+
   return {
     onChange,
     checkin, syncQueue, stats, cachedStats, horarios, cachedHorarios,
+    getHorariosQuien, setHorariosQuien,
     getQueue, isOnline
   };
 })();
