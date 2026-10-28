@@ -46,10 +46,11 @@ portátil en vez de `localhost`.
 2. **Estadísticas** — sesión en curso, total registrados y tasa de
    asistencia, actualizado por *polling* cada pocos segundos contra un
    segundo Web App de solo lectura.
-3. **Horarios** (D31) — horarios del equipo, agrupados por día en un
-   desplegable. Se editan cambiando celdas en la pestaña `Horarios` de la
-   hoja, igual que la sesión activa en `Config!B2` — no hay pantalla para
-   editarlos en la app.
+3. **Horarios** (D31/D36) — lista del día con la hora a la izquierda, tipo
+   de actividad por colores, botones "Soy…" para ver solo lo propio, línea
+   de "ahora" y aviso de coche del día. Se editan cambiando celdas en la
+   pestaña `Horarios` de la hoja (una fila por cosa que pasa), igual que la
+   sesión activa en `Config!B2` — no hay pantalla para editarlos en la app.
 
 ## Backend: Google Sheets + Apps Script, sin servidor propio
 

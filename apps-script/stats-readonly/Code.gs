@@ -21,10 +21,11 @@
  * Ejemplo: https://script.google.com/macros/s/ID_DISTINTO/exec
  * Por defecto (sin parámetros) devuelve JSON de Estadísticas:
  *   {"session": "...", "total": 99, "registrados": 12, "tasa": 12.1}
- * Con ?tipo=horarios (D31/D32) devuelve JSON de Horarios, agrupado por
- * día en el mismo orden en que aparecen las filas en la hoja:
- *   {"dias": [{"dia": "Jueves 25", "franjas": [
- *     {"hora": "09:00–10:30", "actividad": "Recepción", "notas": "...", "responsable": "..."}
+ * Con ?tipo=horarios (D31/D36) devuelve JSON de Horarios, agrupado por
+ * día en el orden en que aparece cada día en la hoja:
+ *   {"dias": [{"dia": "Lunes", "coche": "Maialen + Carolina", "eventos": [
+ *     {"hora": "09:00", "tipo": "Recogida", "actividad": "Recogida de Sami",
+ *      "personas": ["Berta", "Maialen"], "sorteo": "", "notas": ""}
  *   ]}]}
  */
 
@@ -64,32 +65,42 @@ function doGet(e) {
   return jsonOut({ session, total, registrados, tasa });
 }
 
-/** Lee la pestaña Horarios (Día/Hora/Actividad/Notas/Responsable) y
- * agrupa filas consecutivas del mismo día — el orden de la hoja es el
- * orden de salida, no se reordena nada (D31/D32, mismo criterio que
- * Config!B2: edita celdas, no hace falta tocar código). */
+/** Lee la pestaña Horarios (A Día · B Hora · C Tipo · D Actividad ·
+ * E Personas · F Sorteo · G Notas), una fila por cosa que pasa (D36).
+ * Una fila con Tipo "Coche del día" no es un evento: su Personas (o su
+ * Actividad) pasa a ser el aviso del día. Una fila con solo el Día crea
+ * ese día vacío. No se ordena nada aquí: la app ordena por hora. */
 function getHorarios(ss) {
   const sh = ss.getSheetByName(SHEET_HORARIOS);
   const last = sh ? sh.getLastRow() : 0;
   if (!sh || last < 2) return { dias: [] };
 
-  const filas = sh.getRange(2, 1, last - 1, 5).getDisplayValues();
+  const filas = sh.getRange(2, 1, last - 1, 7).getDisplayValues();
   const dias = [];
-  let actual = null;
+  const porDia = {};
   filas.forEach((r) => {
-    const dia = String(r[0]).trim();
-    const hora = String(r[1]).trim();
-    const actividad = String(r[2]).trim();
-    const notas = String(r[3]).trim();
-    const responsable = String(r[4]).trim();
-    if (!dia && !hora && !actividad) return; // fila vacía, se ignora
-    if (!actual || actual.dia !== dia) {
-      actual = { dia, franjas: [] };
-      dias.push(actual);
+    const [dia, hora, tipo, actividad, personas, sorteo, notas] = r.map((c) => String(c).trim());
+    if (!dia) return;
+    if (!porDia[dia]) {
+      porDia[dia] = { dia, coche: '', eventos: [] };
+      dias.push(porDia[dia]);
     }
-    actual.franjas.push({ hora, actividad, notas, responsable });
+    if (!hora && !tipo && !actividad && !personas) return; // solo el día: queda vacío
+    if (normalizar(tipo) === 'coche del dia') {
+      porDia[dia].coche = personas || actividad;
+      return;
+    }
+    porDia[dia].eventos.push({
+      hora, tipo, actividad,
+      personas: personas.split(/\s*(?:[+,]|\s+y\s+)\s*/).filter(Boolean),
+      sorteo, notas
+    });
   });
   return { dias };
+}
+
+function normalizar(s) {
+  return String(s).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
 }
 
 function jsonOut(payload) {

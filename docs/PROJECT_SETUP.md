@@ -47,7 +47,19 @@ Pestaña `Horarios` creada en la hoja real (Día/Hora/Actividad/Notas/
 Responsable) y `apps-script/stats-readonly/Code.gs` actualizado y
 redesplegado. Confirmado por Pau en pruebas reales (2026-10).
 
-## 2. Pendiente: avisos push (D33)
+## 2. Pendiente: pasar Horarios al formato nuevo (D36)
+
+- [ ] Pegar el `apps-script/stats-readonly/Code.gs` actualizado en el
+      proyecto de Estadísticas y crear una nueva versión de la
+      implementación (como en D31, la URL no cambia).
+- [ ] Reorganizar la pestaña `Horarios` con las columnas Día / Hora / Tipo /
+      Actividad / Personas / Sorteo / Notas (ver `docs/SHEET_SCHEMA.md`),
+      una fila por cosa que pasa, y una fila `Coche del día` por día.
+- [ ] Desplegable en `Día` y en `Tipo`, y formato Hora en `Hora`.
+
+Hasta hacerlo, la pantalla Horarios sale sin actividades.
+
+## 3. Pendiente: avisos push (D33)
 
 Orden de trabajo, con lo que hace falta de Pau en cada paso:
 

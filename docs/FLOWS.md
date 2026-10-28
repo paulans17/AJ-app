@@ -83,21 +83,21 @@ flowchart TD
 (`apps-script/stats-readonly/`), distinta de la de check-in. No lleva
 parámetros — siempre devuelve el estado de la sesión activa actual.
 
-## 3. Horarios (mismo Web App que Estadísticas, con parámetro — D31)
+## 3. Horarios (mismo Web App que Estadísticas, con parámetro — D31/D36)
 
 ```mermaid
 flowchart TD
     A[Abrir pantalla Horarios] --> B[Pintar último dato en caché, si hay]
     B --> C[GET url-stats/exec?tipo=horarios]
-    C --> D[Pintar días agrupados, desplegable]
-    D --> E[Tocar un día para abrir/cerrar]
+    C --> D[Elegir día: hoy si coincide, si no el primero]
+    D --> E[Lista del día ordenada por hora<br/>+ línea de ahora si es hoy]
+    E --> F[Tocar Soy ... para ver solo lo propio<br/>se recuerda en ese móvil]
 ```
 
-Sin polling — a diferencia de Estadísticas, los horarios no cambian
-mientras alguien tiene la app abierta, así que se piden solo una vez al
-entrar en la pantalla. Se edita cambiando celdas en la pestaña
-`Horarios` de la hoja (ver `docs/SHEET_SCHEMA.md`), igual que la sesión
-activa se edita en `Config!B2` (flujo 4, abajo).
+Sin pedir datos de nuevo mientras se mira: lo único que se repite cada
+minuto es repintar la línea de "ahora". Se edita cambiando celdas en la
+pestaña `Horarios` de la hoja (ver `docs/SHEET_SCHEMA.md`), igual que la
+sesión activa se edita en `Config!B2` (flujo 4, abajo).
 
 ## 4. Activar/cerrar sesión (fuera de la app — D15)
 

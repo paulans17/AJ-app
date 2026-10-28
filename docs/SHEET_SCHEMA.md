@@ -9,7 +9,7 @@
 Sustituye al esquema de Firestore original, descartado en el pivote D13
 (ver histórico en `docs/DECISIONS.md`). Hoja real:
 ["MIEMBROS CURSO PROTOCOLO XXI"](https://docs.google.com/spreadsheets/d/1YDADLLWwA92Gm-_WYPYY4qGxTt5Wx-RIjM7Ju8z9FHE/edit?usp=sharing),
-pestañas `asistentes`, `Config`, `asistencias`, `tabla`, `Horarios` (D31).
+pestañas `asistentes`, `Config`, `asistencias`, `tabla`, `Horarios` (D31/D36).
 Se usa **esta
 misma hoja, tal cual, para las pruebas** — no una copia ni una hoja nueva
 para la XXII (decisión de Pau, 2026-07-15).
@@ -56,22 +56,26 @@ sesión activa directamente desde `asistencias` + `asistentes` (ver
 "Estadísticas — resuelto" más abajo), que es toda la información que
 hace falta para esa pantalla.
 
-### `Horarios` (D31/D32)
-Fila 1 = cabecera. Desde la fila 2: una fila por franja horaria. Se edita
+### `Horarios` (D31/D36)
+Fila 1 = cabecera. Desde la fila 2: **una fila por cosa que pasa**. Se edita
 a mano en la propia hoja — no hay pantalla en la app para esto, igual
-que `Config!B2`.
+que `Config!B2`. (Hasta D32 eran Día/Hora/Actividad/Notas/Responsable;
+D36 lo cambió al formato de abajo — la hoja vieja ya no se lee bien.)
 
 | Columna | Contenido |
 |---|---|
-| A — Día | Texto libre (ej. "Jueves 25"). Las filas del mismo día deben ir seguidas y escribir el texto exactamente igual — la app agrupa por este valor tal cual, sin normalizar. |
-| B — Hora | Texto libre (ej. "09:00–10:30") |
-| C — Actividad | Texto libre |
-| D — Notas | Texto libre, puede quedar vacío |
-| E — Responsable | Texto libre — nombre o departamento (D32), puede quedar vacío |
+| A — Día | Texto libre ("Lunes", "Martes 2"). Cada valor distinto es un día; salen en el orden en que aparecen por primera vez, aunque sus filas no estén seguidas. Los botones de día de la app enseñan sus 3 primeras letras. Una fila con solo el día crea ese día vacío. |
+| B — Hora | Una sola hora, formato Hora (09:30). Vacía solo en la fila "Coche del día". La app ordena por esta columna. |
+| C — Tipo | Desplegable recomendado: `Llegada Alfil` (naranja), `Recogida` (amarillo, también llegadas de ponentes y trenes), `Alumnos` (gris), `Ponencia` (azul), `Sorteo` (violeta), `Comida` (verde). Un tipo distinto se muestra igual, sin color. Sin tildes ni mayúsculas importa poco. |
+| D — Actividad | Texto libre |
+| E — Personas | Nombres separados por `+`, coma o " y " (`Berta + Maialen`). De aquí salen solos los botones "Soy…" de la app. Vacía = es para todos. "Álvaro" y "Alvaro" cuentan como la misma persona. |
+| F — Sorteo | El premio, solo en filas con sorteo. Sale como etiqueta. |
+| G — Notas | Texto libre (tren, a quién anunciar, lugar) |
 
-El orden de salida es el orden de las filas en la hoja — no se reordena
-por hora ni por nada, igual que el resto de este documento no reordena
-nada por iniciativa propia.
+**Fila "Coche del día":** Tipo = `Coche del día` y Personas (o Actividad) =
+quién lleva el coche ese día. No es un evento: se muestra como aviso
+arriba del día (a todos, o solo a quien aparece en él si se ha elegido un
+nombre).
 
 ## El endpoint — exactamente como está, sin extensiones
 
@@ -115,9 +119,9 @@ filas de `asistencias` cuya columna B coincide con la sesión activa
 (`Config!B2`). La PWA hace *polling* a esta URL cada 5-10s mientras la
 pantalla Estadísticas está abierta.
 
-**Horarios (D31/D32):** el mismo `doGet` de este proyecto, llamado con
+**Horarios (D31/D36):** el mismo `doGet` de este proyecto, llamado con
 `?tipo=horarios`, devuelve en cambio
-`{"dias": [{"dia": "...", "franjas": [{"hora": "...", "actividad": "...", "notas": "...", "responsable": "..."}]}]}`,
+`{"dias": [{"dia": "...", "coche": "...", "eventos": [{"hora": "...", "tipo": "...", "actividad": "...", "personas": ["..."], "sorteo": "...", "notas": "..."}]}]}`,
 leyendo la pestaña `Horarios` de arriba. Sin ese parámetro, el
 comportamiento de Estadísticas no cambia. No hace polling — se pide una
 vez al abrir la pantalla.

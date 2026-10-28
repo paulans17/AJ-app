@@ -494,6 +494,31 @@ que sigue igual (D18/D21): un check-in encolado se registra en la sesión
 activa en el momento de sincronizar, no en la del escaneo, porque el
 script de check-in solo recibe el número.
 
+**D36. Horarios pasa a una lista por día, una fila por cosa (opción A).**
+Pau enseñó el horario real del presidente: una cuadrícula con días en
+columnas, horas en filas y colores pintados a mano, con las personas
+dentro del texto ("Recogida Sami Iberia (Berta + Maialen)"), sorteos con
+premio y un coche por día. En el móvil eso obliga a hacer zoom y a
+buscarse, y el desplegable por día de D31 no ayudaba con tantas filas
+casi minuto a minuto. De tres propuestas (lista compacta, línea de tiempo,
+"lo siguiente primero") Pau eligió la **A, lista compacta**: hora a la
+izquierda, tipo con color, personas, etiqueta de sorteo, línea de "ahora"
+(solo si el día elegido es hoy; lo ya pasado se atenúa), aviso de coche del
+día, botones de día y botones "Soy…" que filtran a lo propio más lo que es
+para todos y se recuerdan en el móvil (`localStorage`). Los botones de
+persona salen solos de la columna Personas, sin tildes ni mayúsculas.
+Cambios: la hoja `Horarios` pasa de Día/Hora/Actividad/Notas/Responsable
+(D31/D32) a Día/Hora/Tipo/Actividad/Personas/Sorteo/Notas, con una fila
+especial "Coche del día" (ver `docs/SHEET_SCHEMA.md`); el JSON de
+`?tipo=horarios` pasa de `dias[].franjas` a `dias[].eventos` + `coche`.
+**Transición:** el formato nuevo exige que Pau pegue el `Code.gs` nuevo de
+`apps-script/stats-readonly/` y reorganice la pestaña `Horarios`. Hasta
+entonces la pantalla se ve sin actividades (no da error). Los colores de
+Llegada Alfil, Recogida, Alumnos y Comida son los que ya usa el
+presidente; Ponencia (azul) y Sorteo (violeta) no tenían y se añadieron.
+Límite aceptado: la persona se reconoce solo por nombre de pila escrito
+igual en la hoja (dos personas con el mismo nombre serían una).
+
 ## Pendiente de decidir (no bloqueante para empezar)
 
 - Nombre definitivo del proyecto Firebase nuevo (propuesta en

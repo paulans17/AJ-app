@@ -1,6 +1,6 @@
 /* ============================================================
    Staff AJapp — VISTAS
-   3 pantallas (D14/D28/D31): Escanear · Estadísticas · Horarios. Sin
+   3 pantallas (D14/D28/D31/D36): Escanear · Estadísticas · Horarios. Sin
    login ni roster de staff (D28) — no importa quién escanea. Sin
    Sesiones/Admin — la sesión activa y los horarios se gestionan a mano
    en la hoja (D15/D31). Réplica visual de ScanView.swift /
@@ -15,8 +15,7 @@ const Views = (() => {
   // Iconos inline estilo SF Symbols
   const ICO = {
     qr: `<svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8V5a2 2 0 0 1 2-2h3M16 3h3a2 2 0 0 1 2 2v3M21 16v3a2 2 0 0 1-2 2h-3M8 21H5a2 2 0 0 1-2-2v-3"/><rect x="7.5" y="7.5" width="3.4" height="3.4" rx="0.6"/><rect x="13.1" y="7.5" width="3.4" height="3.4" rx="0.6"/><rect x="7.5" y="13.1" width="3.4" height="3.4" rx="0.6"/><path d="M13.5 13.5h1.4M15.8 15.8h.7M13.5 16.2v-1.2"/></svg>`,
-    keyboard: `<svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round"><rect x="2.5" y="6.5" width="19" height="11" rx="2"/><path d="M6 10h.01M9.5 10h.01M13 10h.01M16.5 10h.01M6 13.5h.01M9.5 13.5h.01M13 13.5h.01M16.5 13.5h.01M8 16h8" stroke-width="2"/></svg>`,
-    chevron: `<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>`
+    keyboard: `<svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round"><rect x="2.5" y="6.5" width="19" height="11" rx="2"/><path d="M6 10h.01M9.5 10h.01M13 10h.01M16.5 10h.01M6 13.5h.01M9.5 13.5h.01M13 13.5h.01M16.5 13.5h.01M8 16h8" stroke-width="2"/></svg>`
   };
 
   function toast(msg, isErr) {
@@ -267,67 +266,135 @@ const Views = (() => {
   }
 
   /* ============================================================
-     HORARIOS — horarios del equipo, pestaña "Horarios" de la hoja (D31).
-     Se editan cambiando celdas ahí, no aquí (mismo criterio que
-     Config!B2 para la sesión activa). No hace polling como Estadísticas
-     -- no cambia mientras alguien está mirando la app -- pero sí usa el
-     mismo patrón de caché para pintar algo al instante.
+     HORARIOS — pestaña "Horarios" de la hoja, una fila por cosa que pasa
+     (D36). Lista por día con "Soy…" para ver solo lo propio, línea de
+     "ahora" cuando el día elegido es hoy y aviso de coche del día. Se edita
+     en la hoja, no aquí. Pinta primero la caché y actualiza en segundo
+     plano (mismo patrón que Estadísticas).
      ============================================================ */
-  function pintarHorarios(data, esCache) {
-    const dias = (data && data.dias) || [];
-    if (!dias.length) {
-      return `<p class="muted">Todavía no hay horarios cargados en la hoja.</p>`;
-    }
-    return `
-      ${esCache ? '<p class="muted" style="margin-bottom:10px">Último dato conocido — actualizando…</p>' : ''}
-      ${dias.map((d, i) => `
-        <div class="horario-day${i === 0 ? ' open' : ''}">
-          <button class="horario-day-head" data-idx="${i}">
-            <span>${esc(d.dia)}</span>
-            ${ICO.chevron}
-          </button>
-          <div class="horario-day-body">
-            ${d.franjas.map((f) => `
-              <div class="horario-item">
-                <div class="horario-hora">${esc(f.hora)}</div>
-                <div class="horario-info">
-                  <div class="horario-actividad">${esc(f.actividad)}</div>
-                  ${f.responsable ? `<div class="horario-responsable">${esc(f.responsable)}</div>` : ''}
-                  ${f.notas ? `<div class="horario-notas">${esc(f.notas)}</div>` : ''}
-                </div>
-              </div>`).join('')}
-          </div>
-        </div>`).join('')}`;
+  const TIPO_COLOR = { 'llegada alfil': '#F0875A', recogida: '#F2C230', alumnos: '#9AA0A8', ponencia: '#5B9BD5', sorteo: '#C77DD4', comida: '#7CC46B' };
+  const DIA_SEMANA = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'];
+  // sin tildes ni mayúsculas: "Álvaro" y "Alvaro" son la misma persona
+  const norm = (s) => String(s == null ? '' : s).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+  const aMinutos = (h) => { const m = /(\d{1,2})[:.](\d{2})/.exec(h); return m ? Number(m[1]) * 60 + Number(m[2]) : null; };
+  const hhmm = (m) => String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0');
+
+  function personasDe(dias) {
+    const vistas = new Map();
+    // si la hoja escribe un nombre con y sin tilde, se muestra la versión con tilde
+    dias.forEach((d) => (d.eventos || []).forEach((x) => (x.personas || []).forEach((p) => {
+      const k = norm(p);
+      const actual = vistas.get(k);
+      if (!actual || (actual === p.normalize('NFD').replace(/[̀-ͯ]/g, '') && actual !== p)) vistas.set(k, p);
+    })));
+    return [...vistas.values()].sort((a, b) => a.localeCompare(b, 'es'));
   }
 
-  function bindHorarioToggles() {
-    document.querySelectorAll('.horario-day-head').forEach((btn) => {
-      btn.addEventListener('click', () => btn.closest('.horario-day').classList.toggle('open'));
+  function filaHorario(x, st, pasado) {
+    const color = TIPO_COLOR[norm(x.tipo)] || 'var(--text-secondary)';
+    const suyo = st.quien && (x.personas || []).some((p) => norm(p) === norm(st.quien));
+    const quien = (x.personas || []).length ? ' · ' + esc(x.personas.join(' + ')) : '';
+    return `
+      <div class="h-row${pasado ? ' past' : ''}" style="--t:${color}">
+        <div class="h-time">${x.m == null ? '—' : esc(hhmm(x.m))}</div>
+        <div class="h-main">
+          <div class="h-act">${esc(x.actividad)}</div>
+          <div class="h-sub">${x.tipo ? `<span class="h-tag">${esc(x.tipo)}</span>` : ''}${quien}</div>
+          ${x.sorteo ? `<span class="h-gift">Sorteo · ${esc(x.sorteo)}</span>` : ''}
+          ${x.notas ? `<div class="h-nota">${esc(x.notas)}</div>` : ''}
+          ${suyo ? '<span class="h-yo">Te toca</span>' : ''}
+        </div>
+      </div>`;
+  }
+
+  /** Cabecera (título, días y "Soy…") y cuerpo (lista del día elegido). */
+  function pintarHorarios(st) {
+    const dias = (st.datos && st.datos.dias) || [];
+    const head = $('#horarios-head');
+    const body = $('#horarios-body');
+    if (!head || !body) return;
+    const prev = { chips: 0, body: body.scrollTop };
+    const c = head.querySelector('.h-chips');
+    if (c) prev.chips = c.scrollLeft;
+
+    if (!dias.length) {
+      head.innerHTML = '<div class="title-kicker">Horarios</div><div class="big-title">Equipo</div>';
+      body.innerHTML = `<p class="muted" style="margin-top:16px">${st.datos ? 'Todavía no hay horarios cargados en la hoja.' : 'Cargando…'}</p>`;
+      return;
+    }
+
+    const hoy = new Date();
+    const dHoy = dias.find((d) => norm(d.dia).startsWith(DIA_SEMANA[hoy.getDay()]));
+    const dSel = dias.find((d) => d.dia === st.dia) || dHoy || dias[0];
+    st.dia = dSel.dia;
+    const personas = personasDe(dias);
+    const quien = personas.find((p) => norm(p) === norm(st.quien)) || '';
+    st.quien = quien; // si ya no aparece en la hoja, se muestra todo (sin borrar la preferencia guardada)
+
+    const todos = (dSel.eventos || [])
+      .map((x) => ({ ...x, m: aMinutos(x.hora) }))
+      .sort((a, b) => (a.m == null ? 1e9 : a.m) - (b.m == null ? 1e9 : b.m));
+    const lista = quien ? todos.filter((x) => !(x.personas || []).length || x.personas.some((p) => norm(p) === norm(quien))) : todos;
+    const ocultas = todos.length - lista.length;
+    const ahora = hoy.getHours() * 60 + hoy.getMinutes();
+    const esHoy = dSel === dHoy;
+
+    let filas = '';
+    let puesta = false;
+    const lineaAhora = `<div class="h-now"><span>Ahora · ${hhmm(ahora)}</span></div>`;
+    lista.forEach((x) => {
+      if (esHoy && !puesta && x.m != null && x.m >= ahora) { filas += lineaAhora; puesta = true; }
+      filas += filaHorario(x, st, esHoy && x.m != null && x.m < ahora);
     });
+    if (esHoy && lista.length && !puesta) filas += lineaAhora;
+
+    const coche = dSel.coche && (!quien || norm(dSel.coche).includes(norm(quien)));
+    const vacio = lista.length ? '' : `<p class="muted" style="margin-top:16px">${todos.length ? 'No hay nada para ti este día.' : 'Todavía no hay actividades cargadas este día.'}</p>`;
+
+    head.innerHTML = `
+      <div class="title-kicker">Horarios</div>
+      <div class="big-title">${esc(quien || 'Equipo')}</div>
+      <div class="h-days">${dias.map((d) => `<button data-dia="${esc(d.dia)}" class="${d === dSel ? 'on' : ''}" aria-pressed="${d === dSel}">${esc(d.dia.slice(0, 3))}</button>`).join('')}</div>
+      <div class="h-chips">
+        <button data-quien="" class="${quien ? '' : 'on'}" aria-pressed="${!quien}">Todos</button>
+        ${personas.map((p) => `<button data-quien="${esc(p)}" class="${p === quien ? 'on' : ''}" aria-pressed="${p === quien}">Soy ${esc(p)}</button>`).join('')}
+      </div>`;
+    body.innerHTML = `
+      ${st.cache ? '<p class="muted" style="margin-bottom:8px">Último dato conocido — actualizando…</p>' : ''}
+      ${coche ? `<div class="h-coche">Coche del día · ${esc(dSel.coche)}</div>` : ''}
+      ${filas}${vacio}
+      ${ocultas ? `<p class="h-oculto">${ocultas} ${ocultas === 1 ? 'actividad de otra persona oculta' : 'actividades de otras personas ocultas'}</p>` : ''}`;
+    head.querySelector('.h-chips').scrollLeft = prev.chips;
+    body.scrollTop = prev.body;
   }
 
   async function vHorarios() {
-    const cache = Store.cachedHorarios();
+    pararPolling();
+    const st = { datos: Store.cachedHorarios(), dia: '', quien: Store.getHorariosQuien(), cache: true };
     view().innerHTML = `
       <div class="horarios-screen">
-        <div class="horarios-header">
-          <div class="title-kicker">Horarios</div>
-          <div class="big-title">Equipo</div>
-        </div>
-        <div id="horarios-body" class="horarios-body">${cache ? pintarHorarios(cache, true) : '<p class="muted">Cargando…</p>'}</div>
+        <div id="horarios-head" class="horarios-header"></div>
+        <div id="horarios-body" class="horarios-body"></div>
       </div>`;
-    bindHorarioToggles();
+    $('.horarios-screen').addEventListener('click', (ev) => {
+      const t = ev.target.closest('[data-dia],[data-quien]');
+      if (!t) return;
+      if (t.dataset.dia != null) st.dia = t.dataset.dia;
+      if (t.dataset.quien != null) { st.quien = t.dataset.quien; Store.setHorariosQuien(st.quien); }
+      pintarHorarios(st);
+    });
+    pintarHorarios(st);
+    // la línea de "ahora" avanza sola con la hora, sin volver a pedir nada a la hoja
+    pollTimer = setInterval(() => pintarHorarios(st), 60000);
 
     try {
-      const data = await Store.horarios();
-      const body = $('#horarios-body');
-      if (!body) return; // ya no estamos en esta vista
-      body.innerHTML = pintarHorarios(data, false);
-      bindHorarioToggles();
+      st.datos = await Store.horarios();
+      st.cache = false;
+      pintarHorarios(st);
     } catch (e) {
       if (!Store.cachedHorarios()) {
         const body = $('#horarios-body');
-        if (body) body.innerHTML = `<p class="muted">No se pudo conectar con la hoja.</p>`;
+        if (body) body.innerHTML = '<p class="muted" style="margin-top:16px">No se pudo conectar con la hoja.</p>';
       }
     }
   }
