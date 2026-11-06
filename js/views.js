@@ -291,18 +291,18 @@ const Views = (() => {
   }
 
   function filaHorario(x, st, pasado) {
-    const color = TIPO_COLOR[norm(x.tipo)] || 'var(--text-secondary)';
-    const suyo = st.quien && (x.personas || []).some((p) => norm(p) === norm(st.quien));
-    const quien = (x.personas || []).length ? ' · ' + esc(x.personas.join(' + ')) : '';
+    const color = TIPO_COLOR[norm(x.tipo)] || 'var(--text-primary)';
+    const quien = (x.personas || []).length ? esc(x.personas.join(' + ')) : '';
+    // el tipo no se escribe: solo da el color a la actividad (si no hay actividad, el tipo hace de título)
+    const titulo = x.actividad || x.tipo;
     return `
       <div class="h-row${pasado ? ' past' : ''}" style="--t:${color}">
         <div class="h-time">${x.m == null ? '—' : esc(hhmm(x.m))}</div>
         <div class="h-main">
-          <div class="h-act">${esc(x.actividad)}</div>
-          <div class="h-sub">${x.tipo ? `<span class="h-tag">${esc(x.tipo)}</span>` : ''}${quien}</div>
+          <div class="h-act">${esc(titulo)}</div>
+          ${quien ? `<div class="h-sub">${quien}</div>` : ''}
           ${x.sorteo ? `<span class="h-gift">Sorteo · ${esc(x.sorteo)}</span>` : ''}
           ${x.notas ? `<div class="h-nota">${esc(x.notas)}</div>` : ''}
-          ${suyo ? '<span class="h-yo">Te toca</span>' : ''}
         </div>
       </div>`;
   }
@@ -334,7 +334,8 @@ const Views = (() => {
     const todos = (dSel.eventos || [])
       .map((x) => ({ ...x, m: aMinutos(x.hora) }))
       .sort((a, b) => (a.m == null ? 1e9 : a.m) - (b.m == null ? 1e9 : b.m));
-    const lista = quien ? todos.filter((x) => !(x.personas || []).length || x.personas.some((p) => norm(p) === norm(quien))) : todos;
+    // con "Soy…" solo sale lo que lleva su nombre; lo que no lleva a nadie es "para todos" y se ve solo en "Todos"
+    const lista = quien ? todos.filter((x) => (x.personas || []).some((p) => norm(p) === norm(quien))) : todos;
     const ocultas = todos.length - lista.length;
     const ahora = hoy.getHours() * 60 + hoy.getMinutes();
     const esHoy = dSel === dHoy;
@@ -363,7 +364,7 @@ const Views = (() => {
       ${st.cache ? '<p class="muted" style="margin-bottom:8px">Último dato conocido — actualizando…</p>' : ''}
       ${coche ? `<div class="h-coche">Coche del día · ${esc(dSel.coche)}</div>` : ''}
       ${filas}${vacio}
-      ${ocultas ? `<p class="h-oculto">${ocultas} ${ocultas === 1 ? 'actividad de otra persona oculta' : 'actividades de otras personas ocultas'}</p>` : ''}`;
+      ${ocultas ? `<p class="h-oculto">${ocultas} ${ocultas === 1 ? 'actividad que no es tuya oculta' : 'actividades que no son tuyas ocultas'}</p>` : ''}`;
     head.querySelector('.h-chips').scrollLeft = prev.chips;
     body.scrollTop = prev.body;
   }
