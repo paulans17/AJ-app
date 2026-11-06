@@ -519,6 +519,27 @@ presidente; Ponencia (azul) y Sorteo (violeta) no tenían y se añadieron.
 Límite aceptado: la persona se reconoce solo por nombre de pila escrito
 igual en la hoja (dos personas con el mismo nombre serían una).
 
+**D37. Pestaña `Horarios` cargada con el Cronograma Protocolo XXII
+(2026-11-06).** Pau pasó la captura del cronograma definitivo (Lunes a
+Viernes, "grados") y se reemplazó el horario de ejemplo de la pestaña
+`Horarios` por su contenido, con colores de fila por Tipo (naranja Llegada
+Alfil, ámbar Recogida, gris Alumnos, azul Ponencia, violeta Sorteo, verde
+Comida, amarillo Coche del día). Se hizo editando la hoja, sin tocar código.
+Cosas deducidas de la captura, a revisar por Pau: las filas sin hora en la
+columna izquierda (inicio de ponencia de la tarde) se pusieron a las 16:00;
+"Llevar a Héctor a la estación (Tren 20:18)" a las 19:45; el "Fin de
+ponencia + sorteo" del miércoles a las 12:40; "Coche de Carolina" se
+copió como coche de los 5 días. En Personas solo van las personas con
+nombre (no "presidencia"). Los resaltados amarillos sueltos del martes por
+la tarde no tienen tipo propio y no se copiaron.
+Mismo día, cambio en la app: Horarios ya no escribe el Tipo (se repetía
+con la Actividad, p. ej. "Llegada Alfil" dos veces); el tipo solo da el
+color del título de la actividad. Si una fila no trae Actividad, el tipo
+hace de título. Además, "Soy…" ahora filtra SOLO a lo que lleva el nombre
+de esa persona (antes también enseñaba lo "para todos", D36): lo que no
+tiene Personas se ve solo en "Todos". Se quita la marca "Te toca", que
+sobraba. `sw.js` a ajapp-v14.
+
 ## Pendiente de decidir (no bloqueante para empezar)
 
 - Nombre definitivo del proyecto Firebase nuevo (propuesta en

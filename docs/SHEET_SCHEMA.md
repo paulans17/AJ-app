@@ -68,7 +68,7 @@ D36 lo cambió al formato de abajo — la hoja vieja ya no se lee bien.)
 | B — Hora | Una sola hora, formato Hora (09:30). Vacía solo en la fila "Coche del día". La app ordena por esta columna. |
 | C — Tipo | Desplegable recomendado: `Llegada Alfil` (naranja), `Recogida` (amarillo, también llegadas de ponentes y trenes), `Alumnos` (gris), `Ponencia` (azul), `Sorteo` (violeta), `Comida` (verde). Un tipo distinto se muestra igual, sin color. Sin tildes ni mayúsculas importa poco. |
 | D — Actividad | Texto libre |
-| E — Personas | Nombres separados por `+`, coma o " y " (`Berta + Maialen`). De aquí salen solos los botones "Soy…" de la app. Vacía = es para todos. "Álvaro" y "Alvaro" cuentan como la misma persona. |
+| E — Personas | Nombres separados por `+`, coma o " y " (`Berta + Maialen`). De aquí salen solos los botones "Soy…" de la app. Vacía = es para todos: se ve en "Todos", pero no al elegir "Soy…" (ahí solo sale lo que lleva el nombre). "Álvaro" y "Alvaro" cuentan como la misma persona. |
 | F — Sorteo | El premio, solo en filas con sorteo. Sale como etiqueta. |
 | G — Notas | Texto libre (tren, a quién anunciar, lugar) |
 

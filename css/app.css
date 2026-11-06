@@ -268,13 +268,10 @@ label { font-size: 12px; color: var(--text-secondary); display: block; margin-bo
 .h-row.past { opacity: 0.42; }
 .h-time { flex: none; width: 44px; font-size: 13px; font-weight: 600; color: var(--gold); font-variant-numeric: tabular-nums; }
 .h-main { min-width: 0; }
-.h-act { font-size: 15px; font-weight: 600; line-height: 1.25; }
+.h-act { font-size: 15px; font-weight: 600; line-height: 1.25; color: var(--t); }
 .h-sub { font-size: 12.5px; color: var(--text-secondary); margin-top: 2px; }
-.h-tag { color: var(--t); font-weight: 600; }
-.h-tag::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--t); margin-right: 5px; vertical-align: 1px; }
 .h-gift { display: inline-block; margin-top: 5px; font-size: 11.5px; font-weight: 600; color: #E4B6EC; background: rgba(199,125,212,0.16); border-radius: 999px; padding: 2px 9px; }
 .h-nota { font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
-.h-yo { display: inline-block; margin-top: 5px; font-size: 11px; font-weight: 600; color: var(--gold); background: rgba(198,167,94,0.13); border-radius: 999px; padding: 2px 8px; }
 .h-now { display: flex; align-items: center; gap: 8px; margin: 8px 0; color: var(--gold); font-size: 10.5px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; }
 .h-now::before, .h-now::after { content: ""; flex: 1; height: 1px; background: var(--gold); opacity: 0.7; }
 .h-oculto { font-size: 12px; color: var(--text-secondary); text-align: center; padding: 12px 0 2px; }
