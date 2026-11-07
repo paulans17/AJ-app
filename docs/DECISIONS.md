@@ -554,6 +554,18 @@ esos colores a `TIPO_COLOR` (teal, rosa, índigo, lima, cian, arena y
 rojo suave). `sw.js` a ajapp-v15. Sin resolver: personas de Entrepanes,
 qué Paula va a la comida del jueves y quiénes van "dentro".
 
+**D39. Tipos de `Horarios` reducidos a 6 categorías (2026-11-07).** Los
+13 colores de D38 no se distinguían bien entre sí, así que Pau fusionó:
+`Tarea` absorbe Ordenador, Lista, Desayuno, Regalo, Montaje, Informática,
+Cafe, Colocar Lanyard/Merchan, Presentacion y Display; `Llegadas` absorbe
+Alumnos y Llegada Alfil. Quedan Ponencia (azul), Sorteo (violeta),
+Recogida (ámbar), Comida (verde), Llegadas (naranja) y Tarea (gris, la
+más numerosa, para que destaque el resto), más la fila "Coche del día".
+Las filas que usaban el Tipo como título (Cafe, Colocar Lanyard/Merchan)
+pasaron a llevar ese texto en Actividad. Se añadió además "Preparar
+asistencia" un minuto después de cada "Poner ponencia en el ordenador".
+`sw.js` a ajapp-v16.
+
 ## Pendiente de decidir (no bloqueante para empezar)
 
 - Nombre definitivo del proyecto Firebase nuevo (propuesta en
