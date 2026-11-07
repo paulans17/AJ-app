@@ -540,6 +540,20 @@ de esa persona (antes también enseñaba lo "para todos", D36): lo que no
 tiene Personas se ve solo en "Todos". Se quita la marca "Te toca", que
 sobraba. `sw.js` a ajapp-v14.
 
+**D38. Tareas del equipo en `Horarios`, con su Tipo y su color
+(2026-11-07).** Se añadieron a la hoja las filas de tareas (llamar a
+audiovisuales, preparar escaneo/cartel/música, desayuno y su montaje,
+montaje de la cata, pasar lista al inicio de cada ponencia, informática,
+recoger regalo, poner la ponencia en el ordenador 2 min antes) y se
+ordenó la hoja por día y hora. Cada grupo tiene su propio Tipo: `Tarea`,
+`Desayuno`, `Montaje`, `Lista`, `Informática`, `Regalo` y `Ordenador`. En
+la hoja el color sale de reglas de formato condicional por la columna
+Tipo (rango A2:G177; Desayuno quedó con relleno manual), así que si el
+equipo cambia el Tipo de una fila el color la sigue. En la app se añaden
+esos colores a `TIPO_COLOR` (teal, rosa, índigo, lima, cian, arena y
+rojo suave). `sw.js` a ajapp-v15. Sin resolver: personas de Entrepanes,
+qué Paula va a la comida del jueves y quiénes van "dentro".
+
 ## Pendiente de decidir (no bloqueante para empezar)
 
 - Nombre definitivo del proyecto Firebase nuevo (propuesta en
