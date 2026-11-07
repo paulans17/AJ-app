@@ -272,8 +272,7 @@ const Views = (() => {
      en la hoja, no aquí. Pinta primero la caché y actualiza en segundo
      plano (mismo patrón que Estadísticas).
      ============================================================ */
-  const TIPO_COLOR = { 'llegada alfil': '#F0875A', recogida: '#F2C230', alumnos: '#9AA0A8', ponencia: '#5B9BD5', sorteo: '#C77DD4', comida: '#7CC46B',
-    tarea: '#4DB6AC', desayuno: '#F06292', montaje: '#7986CB', lista: '#C0CA33', informatica: '#4DD0E1', regalo: '#D7B98E', ordenador: '#E57373' };
+  const TIPO_COLOR = { ponencia: '#5B9BD5', sorteo: '#C77DD4', recogida: '#F2C230', comida: '#7CC46B', llegadas: '#F0875A', tarea: '#9AA0A8' };
   const DIA_SEMANA = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'];
   // sin tildes ni mayúsculas: "Álvaro" y "Alvaro" son la misma persona
   const norm = (s) => String(s == null ? '' : s).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
