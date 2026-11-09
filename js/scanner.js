@@ -12,33 +12,47 @@ const Scanner = (() => {
   let lastCode = '';
   let lastTime = 0;
   let detector = null;
+  // Cada start() abre una "generación". Cualquier bucle o petición de una
+  // generación anterior (stop() no cancelaba el setTimeout ni el detect() en
+  // vuelo) queda invalidado y no puede disparar un segundo callback.
+  let gen = 0;
+  let timer = null;
+  let fired = false;
 
   async function start(videoEl, callback) {
     stop();
+    const myGen = ++gen;
+    fired = false;
     video = videoEl;
     onCode = callback;
+    let s;
     try {
-      stream = await navigator.mediaDevices.getUserMedia({
+      s = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: 'environment', width: { ideal: 1280 } },
         audio: false
       });
     } catch (e) {
       return { ok: false, error: 'No se pudo acceder a la cámara. Concede el permiso o usa la entrada manual.' };
     }
+    // Si mientras llegaba el permiso se llamó a stop()/start() otra vez
+    // (doble toque en el círculo), esta apertura ya no vale: se libera la cámara.
+    if (myGen !== gen) { s.getTracks().forEach((t) => t.stop()); return { ok: false, cancelled: true }; }
+    stream = s;
     video.srcObject = stream;
     video.setAttribute('playsinline', 'true'); // iOS
-    await video.play();
+    try { await video.play(); } catch (e) { /* el elemento pudo retirarse */ }
+    if (myGen !== gen) return { ok: false, cancelled: true };
 
     if ('BarcodeDetector' in window) {
       try { detector = new BarcodeDetector({ formats: ['qr_code'] }); } catch (e) { detector = null; }
     }
     running = true;
-    loop();
+    loop(myGen);
     return { ok: true, motor: detector ? 'BarcodeDetector (nativo)' : (window.jsQR ? 'jsQR' : 'ninguno') };
   }
 
-  async function loop() {
-    if (!running || !video) return;
+  async function loop(myGen) {
+    if (myGen !== gen || !running || !video) return;
     try {
       let found = null;
       // Safari en iOS a veces expone BarcodeDetector pero no detecta nada
@@ -62,12 +76,18 @@ const Scanner = (() => {
         const code = window.jsQR(img.data, w, h, { inversionAttempts: 'dontInvert' });
         if (code && code.data) found = code.data;
       }
-      if (found) emit(found);
+      // detect() es asíncrono: si mientras esperaba se paró o reinició el
+      // escáner, este resultado es de una generación vieja y se descarta.
+      if (found && myGen === gen) emit(found);
     } catch (e) { /* frame perdido, seguimos */ }
-    if (running) setTimeout(() => requestAnimationFrame(loop), 180);
+    if (running && myGen === gen) timer = setTimeout(() => requestAnimationFrame(() => loop(myGen)), 180);
   }
 
   function emit(data) {
+    // Un solo código por apertura de cámara: la app cierra la cámara al
+    // recibirlo, así que cualquier segundo disparo es un duplicado.
+    if (fired) return;
+    fired = true;
     const now = Date.now();
     // anti-rebote: el mismo QR delante de la cámara no dispara 10 veces seguidas
     if (data === lastCode && now - lastTime < 2500) return;
@@ -79,6 +99,8 @@ const Scanner = (() => {
 
   function stop() {
     running = false;
+    gen++; // invalida bucles y aperturas pendientes
+    if (timer) { clearTimeout(timer); timer = null; }
     if (stream) { stream.getTracks().forEach((t) => t.stop()); stream = null; }
     if (video) { video.srcObject = null; video = null; }
     lastCode = ''; lastTime = 0;

@@ -115,12 +115,23 @@ const Views = (() => {
         </div>
       </div>`;
 
+    // Cerrojo: mientras un check-in está en vuelo no se admite otro. Evita
+    // que un doble disparo (cámara o doble toque) mande dos peticiones
+    // simultáneas al Web App, que no tiene LockService (D21) y podría
+    // registrar dos filas o devolver "Ya registrado" en el primer escaneo.
+    let procesando = false;
     const procesa = async (codigo) => {
-      mostrarCargando();
-      const r = await Store.checkin(codigo);
-      quitarCargando();
-      mostrarResultado(r);
-      if (r.status === 'offline_ok') setTimeout(() => vEscanear(), 2050);
+      if (procesando) return;
+      procesando = true;
+      try {
+        mostrarCargando();
+        const r = await Store.checkin(codigo);
+        quitarCargando();
+        mostrarResultado(r);
+        if (r.status === 'offline_ok') setTimeout(() => vEscanear(), 2050);
+      } finally {
+        procesando = false;
+      }
     };
 
     $('#btn-cam').addEventListener('click', () => abrirCamara(procesa));
@@ -130,6 +141,7 @@ const Views = (() => {
 
   /* Cámara a pantalla completa (fullScreenCover de iOS) */
   async function abrirCamara(onCode) {
+    if ($('#cam-cover')) return; // ya hay una cámara abierta: ignora el doble toque
     cerrarCamara();
     const div = document.createElement('div');
     div.id = 'cam-cover';
@@ -144,6 +156,7 @@ const Views = (() => {
       cerrarCamara();
       onCode(code);
     });
+    if (res.cancelled) return; // apertura sustituida por otra, no es un error
     if (!res.ok) {
       cerrarCamara();
       toast(res.error, true);
