@@ -1,22 +1,20 @@
 /* ============================================================
-   Staff AJapp — CAPA DE DATOS (D21/D22/D28/D31)
+   Staff AJapp — CAPA DE DATOS
    Dos Web Apps de Apps Script distintos, ninguno tocado por este repo:
-   - CHECKIN_URL -> apps-script/Code.gs, TAL CUAL (script real de Pau,
+   - CHECKIN_URL -> apps-script/Code.gs, TAL CUAL (script original,
      "NO-PIN vFinal"). Responde HTML de una línea, no JSON — hay que
-     parsear el texto (D21).
+     parsear el texto.
    - STATS_URL -> apps-script/stats-readonly/Code.gs, proyecto standalone
-     aparte, solo lectura. Responde JSON: sin parámetros, Estadísticas
-     (D22); con ?tipo=horarios, los horarios del equipo, pestaña Horarios
-     de la misma hoja (D31) — se edita ahí, no aquí.
-   Sin login ni roster de staff (D28) — no importa quién escanea. La
+     aparte, solo lectura. Responde JSON:
+     sin parámetros, Estadísticas; con ?tipo=horarios, los horarios del equipo, pestaña Horarios
+     de la misma hoja — se edita ahí, no aquí.
+   Sin login ni roster de staff — no importa quién escanea. La
    única "base de datos" es la hoja de Google Sheets real; no hay mock
    ni datos de demo en ningún sitio de este archivo.
    ============================================================ */
 
 const Store = (() => {
-  // URLs reales, desplegadas sobre "MIEMBROS CURSO PROTOCOLO XXI" — ver
-  // docs/DEPLOY_URLS.md (fuente de verdad, no las cambies aquí sin actualizar
-  // también ese archivo).
+  // URLs de los dos Web Apps desplegados.
   const CHECKIN_URL = 'https://script.google.com/macros/s/AKfycbz3sICmCU9bvVtYH0ocQVVOpRDTdDq0IiMOtSbwy62tvtHw_4ZDQ97u3F8A3qlQwDoi/exec';
   const STATS_URL = 'https://script.google.com/macros/s/AKfycbz7gRYm8EKaGoKgcpXRB94A63wHpGefMU1aFzfPxqU2MuCHf-ODdy-xuHaswtXjKxL6/exec';
 
@@ -31,7 +29,7 @@ const Store = (() => {
   /* ---------- conexión ---------- */
   const isOnline = () => navigator.onLine;
 
-  /* ---------- cola offline (D18) ---------- */
+  /* ---------- cola offline ---------- */
   function getQueue() {
     try { return JSON.parse(localStorage.getItem(KEY_QUEUE)) || []; } catch (e) { return []; }
   }
@@ -40,10 +38,9 @@ const Store = (() => {
     notify();
   }
 
-  /* ---------- parseo de la respuesta HTML del check-in (D21: texto, no JSON) ----------
+  /* ---------- parseo de la respuesta HTML del check-in ----------
      El script real responde siempre HTML de una línea, mensajes que acaban en
-     "(NO-PIN vFinal)". No hay campo status estructurado — se decide por texto,
-     tal como pide docs/SHEET_SCHEMA.md. */
+     "(NO-PIN vFinal)". No hay campo status estructurado — se decide por texto, */
   function parseCheckinHtml(html) {
     // Apps Script sirve HtmlService envuelto en un loader sandboxed
     // (goog.script.init) en vez de HTML plano cuando se le hace fetch()
@@ -169,7 +166,7 @@ const Store = (() => {
     try { return JSON.parse(localStorage.getItem(KEY_STATS_CACHE)); } catch (e) { return null; }
   }
 
-  /** Sesión activa + recuento en vivo, para la pantalla Estadísticas (polling, D22). */
+  /** Sesión activa + recuento en vivo, para la pantalla Estadísticas. */
   async function stats() {
     const res = await fetch(STATS_URL);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -183,7 +180,7 @@ const Store = (() => {
     try { return JSON.parse(localStorage.getItem(KEY_HORARIOS_CACHE)); } catch (e) { return null; }
   }
 
-  /** Horarios del equipo, pestaña Horarios de la hoja (D31). */
+  /** Horarios del equipo, pestaña Horarios de la hoja. */
   async function horarios() {
     const res = await fetch(`${STATS_URL}?tipo=horarios`);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -192,7 +189,7 @@ const Store = (() => {
     return data;
   }
 
-  /** Quién es esta persona en Horarios ("Soy Maialen"), por móvil (D36). */
+  /** Quién es esta persona en Horarios ("Soy Maialen"), por móvil. */
   function getHorariosQuien() {
     try { return localStorage.getItem(KEY_HORARIOS_QUIEN) || ''; } catch (e) { return ''; }
   }

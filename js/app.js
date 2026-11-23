@@ -1,6 +1,6 @@
 /* ============================================================
    Staff AJapp — ARRANQUE Y NAVEGACIÓN
-   3 rutas (D14/D28/D31), sin login: escanear (por defecto) ·
+   3 rutas, sin login: escanear (por defecto) ·
    estadisticas · horarios.
    ============================================================ */
 

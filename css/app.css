@@ -3,7 +3,7 @@
    Portado de Components/Theme.swift:
      background #0B0B0B · card #1A1A1A · gold #C6A75E
      tab bar #111111 · success green · warning orange · error red
-   3 pantallas, sin login: Escanear · Estadísticas · Horarios (D31).
+   3 pantallas, sin login: Escanear · Estadísticas · Horarios.
    ============================================================ */
 :root {
   --background: #0B0B0B;
@@ -241,7 +241,7 @@ label { font-size: 12px; color: var(--text-secondary); display: block; margin-bo
 .muted { color: var(--text-secondary); font-size: 13px; }
 
 /* ============================================================
-   HORARIOS — lista por día, "Soy…" y línea de ahora (D36).
+   HORARIOS — lista por día, "Soy…" y línea de ahora.
    Única pantalla con contenido que puede no caber en el alto fijo del
    móvil -- aquí SÍ se deja hacer scroll, pero solo dentro de la lista: la
    cabecera y el marco general (topbar/tabbar) se quedan fijos igual que

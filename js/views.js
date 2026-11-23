@@ -1,9 +1,9 @@
 /* ============================================================
    Staff AJapp — VISTAS
-   3 pantallas (D14/D28/D31/D36): Escanear · Estadísticas · Horarios. Sin
-   login ni roster de staff (D28) — no importa quién escanea. Sin
+   3 pantallas: Escanear · Estadísticas · Horarios. Sin
+   login ni roster de staff — no importa quién escanea. Sin
    Sesiones/Admin — la sesión activa y los horarios se gestionan a mano
-   en la hoja (D15/D31). Réplica visual de ScanView.swift /
+   en la hoja. Réplica visual de ScanView.swift /
    DashboardView.swift.
    ============================================================ */
 
@@ -196,9 +196,9 @@ const Views = (() => {
   function cerrarSheet() { const s = $('#sheet-bg'); if (s) s.remove(); }
 
   /* ============================================================
-     ESTADÍSTICAS — réplica de DashboardView.swift, por polling (D22)
+     ESTADÍSTICAS — réplica de DashboardView.swift, por polling
      contra el Web App de solo lectura separado — Sheets no empuja
-     cambios en vivo (ver docs/FLOWS.md §3)
+     cambios en vivo
      ============================================================ */
   let pollTimer = null;
   let pollEnVuelo = false;
@@ -232,7 +232,7 @@ const Views = (() => {
   async function vEstadisticas() {
     pararPolling();
     // Pinta el último dato conocido al instante en vez de un "Cargando…" a
-    // pantalla vacía — Apps Script tarda varios segundos (D22, medido
+    // pantalla vacía — Apps Script tarda varios segundos (medido
     // 3-9s), y sin esto la pantalla se siente rota cada vez que se abre.
     const cache = Store.cachedStats();
     view().innerHTML = `
@@ -266,8 +266,8 @@ const Views = (() => {
   }
 
   /* ============================================================
-     HORARIOS — pestaña "Horarios" de la hoja, una fila por cosa que pasa
-     (D36). Lista por día con "Soy…" para ver solo lo propio, línea de
+     HORARIOS — pestaña "Horarios" de la hoja, una fila por cosa que pasa.
+     Lista por día con "Soy…" para ver solo lo propio, línea de
      "ahora" cuando el día elegido es hoy y aviso de coche del día. Se edita
      en la hoja, no aquí. Pinta primero la caché y actualiza en segundo
      plano (mismo patrón que Estadísticas).

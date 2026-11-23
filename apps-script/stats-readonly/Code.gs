@@ -2,7 +2,7 @@
  * Web App de SOLO LECTURA para las pantallas Estadísticas y Horarios.
  *
  * Proyecto de Apps Script SEPARADO del check-in (apps-script/Code.gs no
- * se toca — D21). No comparte deploy ni URL con él. Se crea como un
+ * se toca). No comparte deploy ni URL con él. Se crea como un
  * script standalone nuevo (no container-bound) en script.google.com,
  * que abre la misma hoja por ID para leer — nunca escribe nada.
  *
@@ -13,7 +13,7 @@
  * 3. Implementar → Nueva implementación → Aplicación web → ejecutar
  *    como "Yo", acceso "Cualquier usuario" → esa URL .../exec es la que
  *    usa la PWA para Estadísticas y Horarios (distinta de la URL de
- *    check-in). Si ya tenías este proyecto desplegado (D22), solo hace
+ *    check-in). Si ya tenías este proyecto desplegado, solo hace
  *    falta pegar la versión nueva del archivo y crear una nueva versión
  *    de la implementación existente (Implementar → Gestionar
  *    implementaciones → lápiz → Nueva versión) — la URL no cambia.
@@ -21,7 +21,7 @@
  * Ejemplo: https://script.google.com/macros/s/ID_DISTINTO/exec
  * Por defecto (sin parámetros) devuelve JSON de Estadísticas:
  *   {"session": "...", "total": 99, "registrados": 12, "tasa": 12.1}
- * Con ?tipo=horarios (D31/D36) devuelve JSON de Horarios, agrupado por
+ * Con ?tipo=horarios devuelve JSON de Horarios, agrupado por
  * día en el orden en que aparece cada día en la hoja:
  *   {"dias": [{"dia": "Lunes", "coche": "Maialen + Carolina", "eventos": [
  *     {"hora": "09:00", "tipo": "Recogida", "actividad": "Recogida de Sami",
@@ -66,7 +66,7 @@ function doGet(e) {
 }
 
 /** Lee la pestaña Horarios (A Día · B Hora · C Tipo · D Actividad ·
- * E Personas · F Sorteo · G Notas), una fila por cosa que pasa (D36).
+ * E Personas · F Sorteo · G Notas), una fila por cosa que pasa.
  * Una fila con Tipo "Coche del día" no es un evento: su Personas (o su
  * Actividad) pasa a ser el aviso del día. Una fila con solo el Día crea
  * ese día vacío. No se ordena nada aquí: la app ordena por hora. */

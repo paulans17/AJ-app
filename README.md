@@ -1,77 +1,49 @@
-# Alfil Juvenil — Registro de Asistencias (PWA)
+# AJ App · Control de asistencia por QR
 
-App para el control de asistencia del Curso de Protocolo de Alfil
-Juvenil: escaneo de QR o registro manual por número, y una pantalla de
-estadísticas en vivo. Evolución directa de un Atajo de iPhone que Pau ya
-usaba en la edición pasada, ahora como PWA para que la use todo el equipo
-a la vez desde sus móviles. Sin login — no importa quién escanea.
+PWA que usa el staff de **Alfil Juvenil** para pasar asistencia en el **Curso de Protocolo** (unos 130 alumnos por edición). Escaneas el QR de la acreditación desde el móvil y en un segundo queda registrado en Google Sheets.
 
-## Empezar por aquí (antes de tocar código)
+Empezó como un Atajo de iPhone que solo podía usar una persona. Lo pasé a PWA para que todo el equipo pudiera escanear a la vez desde su propio móvil, sin instalar nada desde la tienda de apps.
 
-1. **`docs/DECISIONS.md`** — qué se ha decidido y por qué, con fecha. Es la
-   fuente de verdad; si algo aquí contradice el código, manda la decisión
-   escrita.
-2. **`docs/ARCHITECTURE.md`** — cómo encaja todo: stack, offline,
-   seguridad, estructura del repo.
-3. **`docs/SHEET_SCHEMA.md`** — pestañas de la hoja de cálculo y el
-   endpoint real del Web App de check-in.
-4. **`docs/FLOWS.md`** — diagramas de los flujos principales.
-5. **`docs/DEPLOY_URLS.md`** — URLs reales de los dos Web Apps desplegados.
-6. **`docs/PROJECT_SETUP.md`** — checklist de infraestructura pendiente.
+🔗 **App:** https://paulans17.github.io/AJ-app/
 
-## Cómo arrancar en local
+## Qué hace
 
-Desde esta carpeta:
+- **Escanear**: lee el QR con la cámara o deja meter el número a mano. El resultado sale a pantalla completa (verde = registrado, naranja = ya estaba, rojo = error).
+- **Funciona sin conexión**: si no hay cobertura, el check-in se guarda en una cola local y se envía solo al volver la red.
+- **Estadísticas en vivo**: sesión activa, número de registrados y tasa de asistencia.
+- **Horarios del equipo**: agenda del día por colores, filtro "Soy…" para ver solo lo tuyo y una línea que marca la hora actual.
+- **Avisos push** (en marcha): script que avisa con OneSignal cuando cambia la sesión o se actualizan los horarios.
 
-```bash
-python3 -m http.server 8080        # o: npx serve
+## Cómo está hecho
+
+| Parte | Tecnología |
+|---|---|
+| Front | HTML, CSS y JavaScript vanilla, PWA con Service Worker |
+| Lector de QR | [jsQR](https://github.com/cozmo/jsQR) |
+| Backend | Google Apps Script: check-in, estadísticas y horarios (solo lectura) y notificador |
+| Base de datos | Google Sheets |
+| Hosting | GitHub Pages |
+
+No tiene servidor propio, así que no cuesta nada mantenerla: todo funciona con los planes gratuitos.
+
+```
+├── index.html, manifest.webmanifest, sw.js
+├── css/app.css
+├── js/
+│   ├── app.js       → rutas y arranque
+│   ├── views.js     → las 3 pantallas
+│   ├── scanner.js   → cámara + jsQR
+│   └── store.js     → llamadas a Apps Script y cola offline
+└── apps-script/
+    ├── Code.gs            → check-in
+    ├── stats-readonly/    → estadísticas y horarios (solo lectura)
+    └── notificador/       → avisos push
 ```
 
-y abre **http://localhost:8080**. En el móvil (misma Wi-Fi): la IP del
-portátil en vez de `localhost`.
+## Probarla en local
 
-> La cámara solo funciona en `localhost` o HTTPS (requisito de los
-> navegadores). Sin cámara, usa el botón **"Registro Manual por Número"**.
+```bash
+python3 -m http.server 8080
+```
 
-## Las 3 pantallas
-
-1. **Escanear** (siempre, es lo primero que se ve al abrir la app) —
-   escanea el QR de la acreditación o introduce el número a mano. La
-   sesión activa se lee de `Config!B2` en la hoja (se edita ahí
-   directamente, no hay pantalla para esto). Mientras se resuelve el
-   check-in se ve un overlay de carga; el resultado se muestra a pantalla
-   completa (verde/naranja/rojo) durante 2 segundos. Sin conexión, el
-   check-in se guarda en una cola local y se sincroniza solo al recuperar
-   cobertura.
-2. **Estadísticas** — sesión en curso, total registrados y tasa de
-   asistencia, actualizado por *polling* cada pocos segundos contra un
-   segundo Web App de solo lectura.
-3. **Horarios** (D31/D36) — lista del día con la hora a la izquierda, tipo
-   de actividad por colores, botones "Soy…" para ver solo lo propio, línea
-   de "ahora" y aviso de coche del día. Se editan cambiando celdas en la
-   pestaña `Horarios` de la hoja (una fila por cosa que pasa), igual que la
-   sesión activa en `Config!B2` — no hay pantalla para editarlos en la app.
-
-## Backend: Google Sheets + Apps Script, sin servidor propio
-
-- **Check-in**: `apps-script/Code.gs`, el script real de Pau, sin ninguna
-  extensión (ver `docs/DECISIONS.md` D21) — **no se toca sin permiso
-  explícito**.
-- **Estadísticas y Horarios**: `apps-script/stats-readonly/`, proyecto
-  standalone aparte, solo lectura — un único `doGet` que distingue por el
-  parámetro `?tipo=horarios` (D31).
-- El roster de asistentes (`asistentes` en la hoja) lo gestiona Pau con
-  su Excel/scripts de siempre, fuera de este repo (D20). Es la **única**
-  base de datos de la app — no hay ningún dato de ejemplo ni mock en el
-  código.
-
-## Piezas relacionadas (fuera de este repo)
-
-- `alfil-statics/` — la web pública, proyecto totalmente independiente.
-- `Staff AJapp/` — app iOS antigua en Swift, obsoleta como cliente, solo
-  referencia de diseño visual (paleta y layout de la pantalla de escaneo).
-
-## Coste
-
-0 € — PWA (sin App Store ni Google Play), Google Sheets + Apps Script
-gratuitos, sin servidor ni base de datos propia que mantener.
+Abre `http://localhost:8080`. La cámara solo funciona en `localhost` o con HTTPS. Si no tienes cámara, usa el registro manual por número.

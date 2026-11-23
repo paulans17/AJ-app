@@ -1,5 +1,5 @@
 /**
- * NOTIFICADOR de avisos push (D33). Proyecto de Apps Script TERCERO, standalone,
+ * NOTIFICADOR de avisos push. Proyecto de Apps Script TERCERO, standalone,
  * SIN despliegue como Web App (no tiene URL pública): solo se ejecuta por
  * triggers de la hoja. No toca apps-script/Code.gs (check-in) ni
  * apps-script/stats-readonly/ (Estadísticas/Horarios, solo lectura).
