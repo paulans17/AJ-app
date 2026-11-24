@@ -6,6 +6,8 @@ Empezó como un Atajo de iPhone que solo podía usar una persona. Lo pasé a PWA
 
 🔗 **App:** https://paulans17.github.io/AJ-app/
 
+![Pantallas de AJ App: escanear, estadísticas en vivo y horarios del equipo](screenshots/ajapp-pantallas.png)
+
 ## Qué hace
 
 - **Escanear**: lee el QR con la cámara o deja meter el número a mano. El resultado sale a pantalla completa (verde = registrado, naranja = ya estaba, rojo = error).
